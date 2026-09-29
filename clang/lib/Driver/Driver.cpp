@@ -5558,9 +5558,16 @@ void Driver::BuildJobs(Compilation &C) const {
                        /*TargetDeviceOffloadKind*/ Action::OFK_None);
   }
 
-  // If we have more than one job, then disable integrated-cc1 for now. Do this
-  // also when we need to report process execution statistics.
-  if (C.getJobs().size() > 1 || CCPrintProcessStats)
+  // If we have more than one job, then disable integrated-cc1 for now. Do
+  // this also when we need to report process execution statistics. On WASI
+  // hosts spawning subprocesses is not available, so keep cc1 jobs in-process;
+  // they are executed sequentially.
+#if !defined(__wasi__)
+  if (C.getJobs().size() > 1)
+    for (auto &J : C.getJobs())
+      J.InProcess = false;
+#endif
+  if (CCPrintProcessStats)
     for (auto &J : C.getJobs())
       J.InProcess = false;
 

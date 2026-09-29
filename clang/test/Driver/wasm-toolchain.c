@@ -132,11 +132,12 @@
 // EMSCRIPTEN_EH_ALLOWED_WO_ENABLE: invalid argument '-mllvm -emscripten-cxx-exceptions-allowed' only allowed with '-mllvm -enable-emscripten-cxx-exceptions'
 
 // '-fwasm-exceptions' sets +exception-handling, -multivalue, -reference-types,
-// "-exception-model=wasm", and '-mllvm -wasm-enable-eh'
+// "-exception-model=wasm", '-mllvm -wasm-enable-eh' and the standardized
+// (non-legacy) EH scheme
 // RUN: %clang -### --target=wasm32-unknown-unknown \
 // RUN:    --sysroot=/foo %s -fwasm-exceptions 2>&1 \
 // RUN:  | FileCheck -check-prefix=WASM_EXCEPTIONS %s
-// WASM_EXCEPTIONS: "-cc1" {{.*}} "-target-feature" "+exception-handling" "-target-feature" "+multivalue" "-target-feature" "+reference-types" "-exception-model=wasm" "-mllvm" "-wasm-enable-eh"
+// WASM_EXCEPTIONS: "-cc1" {{.*}} "-target-feature" "+exception-handling" "-target-feature" "+multivalue" "-target-feature" "+reference-types" "-exception-model=wasm" "-mllvm" "-wasm-enable-eh" "-mllvm" "-wasm-use-legacy-eh=false"
 
 // '-fwasm-exceptions' not allowed with
 // '-mllvm -enable-emscripten-cxx-exceptions'
@@ -212,6 +213,21 @@
 // RUN:     -mno-reference-types 2>&1 \
 // RUN:   | FileCheck -check-prefix=WASM_SJLJ_NO_REFERENCE_TYPES %s
 // WASM_SJLJ_NO_REFERENCE_TYPES: invalid argument '-wasm-enable-sjlj' not allowed with '-mno-reference-types'
+
+// '-fsjlj-exceptions' sets +exception-handling, +multivalue,
+// +reference-types, '-exception-model=wasm', '-mllvm -wasm-enable-sjlj' and
+// '-mllvm -wasm-use-legacy-eh=false'
+// RUN: %clang -### --target=wasm32-unknown-unknown \
+// RUN:    --sysroot=/foo %s -fsjlj-exceptions 2>&1 \
+// RUN:  | FileCheck -check-prefix=FSJLJ_EXCEPTIONS %s
+// FSJLJ_EXCEPTIONS: "-cc1" {{.*}} "-target-feature" "+exception-handling" "-target-feature" "+multivalue" "-target-feature" "+reference-types" "-exception-model=wasm" "-mllvm" "-wasm-enable-sjlj" "-mllvm" "-wasm-use-legacy-eh=false"
+
+// '-fsjlj-exceptions' not allowed with '-mllvm -enable-emscripten-sjlj'
+// RUN: not %clang -### --target=wasm32-unknown-unknown \
+// RUN:     --sysroot=/foo %s -fsjlj-exceptions \
+// RUN:     -mllvm -enable-emscripten-sjlj 2>&1 \
+// RUN:   | FileCheck -check-prefix=FSJLJ_EXCEPTIONS_EMSCRIPTEN_SJLJ %s
+// FSJLJ_EXCEPTIONS_EMSCRIPTEN_SJLJ: invalid argument '-fsjlj-exceptions' not allowed with '-enable-emscripten-sjlj'
 
 // '-mllvm -wasm-use-legacy-eh' not allowed with
 // '-mllvm -enable-emscripten-cxx-exceptions'
@@ -309,3 +325,10 @@
 // RUN: %clang -### --target=wasm32-wasip3 -fuse-ld=lld %s --sysroot /foo 2>&1 \
 // RUN:   | FileCheck -check-prefix=LINK_WASIP3_COOP %s
 // LINK_WASIP3_COOP: wasm-ld{{.*}}" {{.*}} "--cooperative-threading"
+
+// '-nolibc' omits the C library from the link but keeps startup files and
+// the compiler runtime.
+// RUN: %clang -### --target=wasm32-wasip1 -fuse-ld=lld %s --sysroot=/foo -nolibc 2>&1 \
+// RUN:   | FileCheck -check-prefix=LINK_NOLIBC %s
+// LINK_NOLIBC: "-cc1" {{.*}} "-o" "[[temp:[^"]*]]"
+// LINK_NOLIBC: wasm-ld{{.*}}" {{.*}} "crt1.o" "[[temp]]" "{{.*[/\\]}}libclang_rt.builtins.a" "-o" "a.out"

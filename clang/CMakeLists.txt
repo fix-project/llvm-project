@@ -531,6 +531,9 @@ option(CLANG_ENABLE_HLSL "Include HLSL build products" Off)
 # While HLSL support is experimental this should stay hidden.
 mark_as_advanced(CLANG_ENABLE_HLSL)
 
+option(CLANG_ENABLE_INPROCESS_LLD
+       "Link lld into the clang driver and execute it in-process" OFF)
+
 add_subdirectory(utils/TableGen)
 
 # Export CLANG_TABLEGEN_EXE for use by flang docs.

@@ -120,3 +120,25 @@ add_clang_library(clangDriver
   clangOptions
   ${system_libs}
   )
+
+if(CLANG_ENABLE_INPROCESS_LLD)
+  if(NOT "lld" IN_LIST LLVM_ENABLE_PROJECTS)
+    message(FATAL_ERROR
+      "CLANG_ENABLE_INPROCESS_LLD requires lld in LLVM_ENABLE_PROJECTS")
+  endif()
+  foreach(tgt obj.clangDriver clangDriver)
+    if(TARGET ${tgt})
+      target_compile_definitions(${tgt} PRIVATE CLANG_FEATURE_INPROCESS_LLD)
+      target_include_directories(${tgt} PRIVATE
+        ${LLVM_MAIN_SRC_DIR}/../lld/include)
+    endif()
+  endforeach()
+  target_link_libraries(clangDriver PRIVATE
+    lldCommon
+    lldCOFF
+    lldELF
+    lldMachO
+    lldMinGW
+    lldWasm
+    )
+endif()

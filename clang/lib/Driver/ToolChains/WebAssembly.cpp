@@ -196,7 +196,8 @@ void wasm::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     if (WantsPthread(ToolChain.getTriple(), Args))
       CmdArgs.push_back("-lpthread");
 
-    CmdArgs.push_back("-lc");
+    if (!Args.hasArg(options::OPT_nolibc))
+      CmdArgs.push_back("-lc");
     AddRunTimeLibs(ToolChain, ToolChain.getDriver(), CmdArgs, Args);
   }
 
@@ -454,6 +455,22 @@ void WebAssembly::addClangTargetOptions(const ArgList &DriverArgs,
     // Backend needs -wasm-enable-eh to enable Wasm EH
     CC1Args.push_back("-mllvm");
     CC1Args.push_back("-wasm-enable-eh");
+    // Use the standardized Wasm EH scheme (try_table) rather than the
+    // legacy one; standalone WASI runtimes only implement the
+    // standardized proposal.
+    CC1Args.push_back("-mllvm");
+    CC1Args.push_back("-wasm-use-legacy-eh=false");
+  }
+
+  if (DriverArgs.getLastArg(options::OPT_fsjlj_exceptions)) {
+    BanIncompatibleOptionsForWasmEHSjLj("-fsjlj-exceptions");
+    EnableFeaturesForWasmEHSjLj();
+    // Backend needs -wasm-enable-sjlj to enable Wasm SjLj
+    CC1Args.push_back("-mllvm");
+    CC1Args.push_back("-wasm-enable-sjlj");
+    // Use the modern Wasm EH scheme (try_table) rather than the legacy one.
+    CC1Args.push_back("-mllvm");
+    CC1Args.push_back("-wasm-use-legacy-eh=false");
   }
 
   for (const Arg *A : DriverArgs.filtered(options::OPT_mllvm)) {
@@ -577,6 +594,13 @@ void WebAssembly::AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
     if (Args.hasArg(options::OPT_fexperimental_library))
       CmdArgs.push_back("-lc++experimental");
     CmdArgs.push_back("-lc++abi");
+    // libc++abi resolves the Itanium ABI entry points through the libunwind
+    // API, which the WASI sysroot ships as libunwind.a. Link it whenever
+    // exception handling or EH-based setjmp/longjmp is requested so that a
+    // plain `clang++ -fwasm-exceptions` link succeeds.
+    if (Args.hasArg(options::OPT_fwasm_exceptions) ||
+        Args.hasArg(options::OPT_fsjlj_exceptions))
+      CmdArgs.push_back("-lunwind");
     break;
   case ToolChain::CST_Libstdcxx:
     CmdArgs.push_back("-lstdc++");

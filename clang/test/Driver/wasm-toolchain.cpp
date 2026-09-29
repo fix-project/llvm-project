@@ -142,7 +142,17 @@
 // RUN: %clangxx -### --target=wasm32-wasi --sysroot=/foo --stdlib=libc++ %s 2>&1 \
 // RUN:   | FileCheck -check-prefix=EH_OFF_LINK %s
 // EH_OFF_LINK: wasm-ld{{.*}}" "-L/foo/lib/wasm32-wasi/noeh" "-L/foo/lib/wasm32-wasi"
+// EH_OFF_LINK-SAME: "-lc++" "-lc++abi"
+// EH_OFF_LINK-SAME: "-lc"
+// EH_OFF_LINK-NOT: "-lunwind"
 //
 // RUN: %clangxx -### --target=wasm32-wasi -fwasm-exceptions --sysroot=/foo --stdlib=libc++ %s 2>&1 \
 // RUN:   | FileCheck -check-prefix=EH_ON_LINK %s
 // EH_ON_LINK: wasm-ld{{.*}}" "-L/foo/lib/wasm32-wasi/eh" "-L/foo/lib/wasm32-wasi"
+// EH_ON_LINK-SAME: "-lc++" "-lc++abi" "-lunwind"
+//
+// With setjmp/longjmp-based exceptions libc++abi also needs the unwinder.
+//
+// RUN: %clangxx -### --target=wasm32-wasi -fsjlj-exceptions --sysroot=/foo --stdlib=libc++ %s 2>&1 \
+// RUN:   | FileCheck -check-prefix=SJLJ_LINK %s
+// SJLJ_LINK: wasm-ld{{.*}}" "-lc++" "-lc++abi" "-lunwind"
