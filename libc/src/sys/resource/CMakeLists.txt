@@ -9,6 +9,15 @@ add_entrypoint_object(
     .${LIBC_TARGET_OS}.getrlimit
 )
 
+if (LIBC_TARGET_OS STREQUAL "wasi")
+  add_entrypoint_object(
+    getrusage
+    ALIAS
+    DEPENDS
+      .wasi.getrusage
+  )
+endif()
+
 add_entrypoint_object(
   setrlimit
   ALIAS

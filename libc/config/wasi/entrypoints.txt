@@ -564,6 +564,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.sys.random.getrandom
     libc.src.sys.resource.getrlimit
     libc.src.sys.resource.setrlimit
+    libc.src.sys.resource.getrusage
     libc.src.sys.select.select
     libc.src.sys.socket.accept
     libc.src.sys.socket.accept4
