@@ -9,31 +9,37 @@
 #include "src/sys/mman/munmap.h"
 #include "src/sys/mman/wasi/mman_emulation.h"
 
+#include "src/__support/OSUtil/wasi/path.h"
+#include "src/__support/OSUtil/wasi/wasi.h"
 #include "src/__support/common.h"
 #include "src/__support/libc_errno.h"
 
 #include <stdlib.h>
 
 namespace LIBC_NAMESPACE_DECL {
-namespace mman_wasi {
 
 LLVM_LIBC_FUNCTION(int, munmap, (void *addr, size_t size)) {
-  lock_mman();
-  Mapping *m = find_mapping(addr);
+  mman_wasi::lock_mman();
+  mman_wasi::Mapping *m = mman_wasi::find_mapping(addr);
   if (m == nullptr) {
-    unlock_mman();
+    mman_wasi::unlock_mman();
     libc_errno = EINVAL;
     return -1;
   }
   if (size != m->size) {
-    unlock_mman();
+    mman_wasi::unlock_mman();
     libc_errno = EINVAL;
     return -1;
   }
-  bool ok = flush_mapping(*m);
+  bool ok = mman_wasi::flush_mapping(*m);
+  if (m->fd >= 0) {
+    wasi::unregister_fd_path(m->fd);
+    wasi::unmark_fd_o_path(m->fd);
+    wasi::__wasi_fd_close(static_cast<wasi::__wasi_fd_t>(m->fd));
+  }
   free(m->addr);
-  release_mapping(m);
-  unlock_mman();
+  mman_wasi::release_mapping(m);
+  mman_wasi::unlock_mman();
   if (!ok) {
     libc_errno = EIO;
     return -1;
@@ -41,5 +47,4 @@ LLVM_LIBC_FUNCTION(int, munmap, (void *addr, size_t size)) {
   return 0;
 }
 
-} // namespace mman_wasi
 } // namespace LIBC_NAMESPACE_DECL

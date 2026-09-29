@@ -1,0 +1,729 @@
+# Build and publish the WASI sysroot and toolchains.
+name: WASI toolchain
+
+on:
+  pull_request: {}
+  # Branch filtering cannot refer to the configured default branch, so the
+  # prepare job filters out other branch pushes instead.
+  push: {}
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  WASMTIME_VERSION: v49.0.1
+
+concurrency:
+  group: wasi-toolchain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    if: >-
+      github.repository == 'fix-project/llvm-project' &&
+      (github.event_name == 'pull_request' ||
+       github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'push' &&
+        (github.ref_name == github.event.repository.default_branch ||
+         (startsWith(github.ref, 'refs/tags/fixorg-') &&
+          !endsWith(github.ref, '-current')))))
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release-tag: ${{ steps.version.outputs.release-tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Determine version
+        id: version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          source_version=$(llvm/utils/release/get-llvm-version.sh)
+          version_base=$(llvm/utils/release/get-llvm-version.sh --major).$(llvm/utils/release/get-llvm-version.sh --minor).$(llvm/utils/release/get-llvm-version.sh --patch)
+          release_tag=
+          prerelease=false
+
+          if [[ "$EVENT_NAME" == push && "$REF_TYPE" == tag ]]; then
+            if [[ ! "$REF_NAME" =~ ^fixorg-([0-9]+\.[0-9]+\.[0-9]+)(-[A-Za-z0-9]+)?$ ]]; then
+              echo "Tag must match fixorg-X.Y.Z or fixorg-X.Y.Z-W" >&2
+              exit 1
+            fi
+            version=${BASH_REMATCH[1]}${BASH_REMATCH[2]}
+            if [[ "${BASH_REMATCH[1]}" != "$version_base" ]]; then
+              echo "Tag version ${BASH_REMATCH[1]} does not match source version $version_base" >&2
+              exit 1
+            fi
+            release_tag=$REF_NAME
+            [[ "$version" == "$version_base" ]] || prerelease=true
+          elif [[ "$EVENT_NAME" == push && "$REF_NAME" == "$DEFAULT_BRANCH" ]]; then
+            version="$source_version-current"
+            release_tag="fixorg-${version_base}-current"
+            prerelease=true
+          elif [[ "$EVENT_NAME" == pull_request ]]; then
+            version="$source_version-pr${PR_NUMBER}"
+          else
+            version="$source_version-manual"
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release-tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+
+  test-wasi-libc:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare, build-sysroot]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      SYSROOT: /opt/wasi-sysroot
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup compiler cache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: wasi-sysroot-${{ runner.os }}
+          max-size: 2G
+          variant: sccache
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zstd
+          sudo mkdir -p "$SYSROOT"
+          sudo chown -R "$(id -un)" "$SYSROOT"
+          archive="wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
+          curl --fail --location --retry 3 --retry-all-errors --silent --show-error \
+            "https://github.com/bytecodealliance/wasmtime/releases/download/$WASMTIME_VERSION/$archive" \
+            -o "$RUNNER_TEMP/$archive"
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+          wasmtime_bin="$RUNNER_TEMP/wasmtime-${WASMTIME_VERSION}-x86_64-linux/wasmtime"
+          "$wasmtime_bin" --version
+          echo "WASMTIME_BIN=$wasmtime_bin" >> "$GITHUB_ENV"
+
+      - name: Download sysroot
+        uses: actions/download-artifact@v4
+        with:
+          name: wasi-sysroot-${{ needs.prepare.outputs.version }}
+
+      - name: Extract sysroot
+        run: tar -I zstd -C "$SYSROOT" -xf wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst
+
+      - name: Configure WASI libc tests
+        run: |
+          # Keep the emulator as one path-valued CMake variable. The libc
+          # lit configuration treats CMAKE_CROSSCOMPILING_EMULATOR as a path,
+          # so passing its command and arguments as a semicolon list breaks
+          # configure_lit_site_cfg's PATHS handling.
+          cat > "$RUNNER_TEMP/wasmtime-wrapper" <<'EOF'
+          #!/bin/sh
+          exec "$WASMTIME_BIN" run --dir . --dir /tmp -- "$@"
+          EOF
+          chmod +x "$RUNNER_TEMP/wasmtime-wrapper"
+
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DLLVM_ENABLE_PROJECTS="clang;lld" \
+            -DLLVM_TARGETS_TO_BUILD=WebAssembly \
+            -DLLVM_INCLUDE_TESTS=ON \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_ENABLE_PLUGINS=OFF \
+            -DLLVM_ENABLE_RUNTIMES="libc;libunwind;libcxxabi;libcxx" \
+            -DLLVM_RUNTIME_TARGETS=wasm32-wasip1 \
+            -DLLVM_BUILTIN_TARGETS=wasm32-wasip1 \
+            -DRUNTIMES_wasm32-wasip1_RUNTIMES_USE_LIBC=llvm-libc \
+            -DRUNTIMES_wasm32-wasip1_LLVM_LIBC_FULL_BUILD=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBC_WASM_ENABLE_SJLJ=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBC_ENABLE_UNITTESTS=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBC_TEST_SKIP_DEATH_TESTS=ON \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_CROSSCOMPILING_EMULATOR="$RUNNER_TEMP/wasmtime-wrapper" \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_SYSROOT="$SYSROOT" \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_EXE_LINKER_FLAGS=-Wl,--allow-multiple-definition \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_C_FLAGS=-fwasm-exceptions \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_CXX_FLAGS=-fwasm-exceptions \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DRUNTIMES_wasm32-wasip1_LIBCXX_HAS_PTHREAD_API=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXXABI_HAS_PTHREAD_API=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBUNWIND_USE_COMPILER_RT=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXXABI_USE_COMPILER_RT=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXX_USE_COMPILER_RT=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXX_STATICALLY_LINK_ABI_IN_STATIC_LIBRARY=ON
+
+      - name: Build WASI linker
+        run: cmake --build build --target lld --parallel
+
+      - name: Run WASI libc tests
+        run: cmake --build build --target check-libc --parallel
+
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
+
+  build-sysroot:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      SYSROOT: /opt/wasi-sysroot
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup compiler cache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: wasi-sysroot-${{ runner.os }}
+          max-size: 2G
+          variant: sccache
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zstd
+          sudo mkdir -p "$SYSROOT"
+          sudo chown -R "$(id -un)" "$SYSROOT"
+
+      - name: Configure sysroot
+        run: |
+          # WASI C++ runtimes use Wasm exceptions and libc's single-threaded
+          # pthread API; preview 1 does not support shared libraries.
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_INSTALL_PREFIX="$SYSROOT" \
+            -DLLVM_ENABLE_PROJECTS=clang \
+            -DLLVM_TARGETS_TO_BUILD=WebAssembly \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_ENABLE_PLUGINS=OFF \
+            -DLLVM_ENABLE_RUNTIMES="libc;libunwind;libcxxabi;libcxx" \
+            -DLLVM_RUNTIME_TARGETS=wasm32-wasip1 \
+            -DLLVM_BUILTIN_TARGETS=wasm32-wasip1 \
+            -DRUNTIMES_wasm32-wasip1_RUNTIMES_USE_LIBC=llvm-libc \
+            -DRUNTIMES_wasm32-wasip1_LLVM_LIBC_FULL_BUILD=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBC_WASM_ENABLE_SJLJ=ON \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_C_FLAGS=-fwasm-exceptions \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_CXX_FLAGS=-fwasm-exceptions \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DRUNTIMES_wasm32-wasip1_CMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DRUNTIMES_wasm32-wasip1_LIBCXX_HAS_PTHREAD_API=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXXABI_HAS_PTHREAD_API=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBUNWIND_USE_COMPILER_RT=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXXABI_USE_COMPILER_RT=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXX_USE_COMPILER_RT=ON \
+            -DRUNTIMES_wasm32-wasip1_LIBCXX_STATICALLY_LINK_ABI_IN_STATIC_LIBRARY=ON
+
+      - name: Build and install sysroot
+        run: cmake --build build --target install-runtimes install-builtins --parallel
+
+      - name: Package sysroot
+        run: tar -I zstd -C "$SYSROOT" -cf "$GITHUB_WORKSPACE/wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst" .
+
+      - name: Upload sysroot
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasi-sysroot-${{ needs.prepare.outputs.version }}
+          path: wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst
+          if-no-files-found: error
+
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
+
+  build-cross-toolchain:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare, test-wasi-libc]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      PREFIX: /opt/wasm32-wasip1-llvm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup compiler cache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: wasi-llvm-cross-${{ runner.os }}
+          max-size: 2G
+          variant: sccache
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zstd
+          sudo mkdir -p "$PREFIX"
+          sudo chown -R "$(id -un)" "$PREFIX"
+
+      - name: Configure host toolchain
+        run: |
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+            -DLLVM_ENABLE_PROJECTS="clang;lld" \
+            -DLLVM_APPEND_VC_REV=OFF \
+            -DLLVM_TARGETS_TO_BUILD=WebAssembly \
+            -DLLVM_DEFAULT_TARGET_TRIPLE=wasm32-unknown-wasip1 \
+            -DLLVM_ENABLE_LIBXML2=OFF \
+            -DCLANG_ENABLE_LIBXML2=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_ENABLE_PLUGINS=OFF \
+            -DLLVM_BUILTIN_TARGETS=wasm32-wasip1
+
+      - name: Build and install host toolchain
+        run: cmake --build build --target install install-builtins --parallel
+
+      - name: Add target-prefixed compiler links
+        run: |
+          ln -s clang "$PREFIX/bin/wasm32-wasip1-clang"
+          ln -s clang++ "$PREFIX/bin/wasm32-wasip1-clang++"
+          printf '%s\n' '-fwasm-exceptions' > "$PREFIX/bin/clang++.cfg"
+
+      - name: Package host toolchain
+        run: tar -I zstd -C / -cf wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}.tar.zst opt/wasm32-wasip1-llvm
+
+      - name: Upload host toolchain
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}
+          path: wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}.tar.zst
+          if-no-files-found: error
+
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
+
+  build-wasi-llvm:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare, build-sysroot]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      SYSROOT: /opt/wasi-sysroot
+      PREFIX: /usr
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_COMPILERCHECK: content
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Restore compiler cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ccache
+          key: wasi-llvm-clang23-ccache-${{ runner.os }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            wasi-llvm-clang23-ccache-${{ runner.os }}-${{ github.sha }}-
+            wasi-llvm-clang23-ccache-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key -o "$RUNNER_TEMP/llvm-snapshot.gpg.key"
+          export GNUPGHOME="$RUNNER_TEMP/llvm-gnupg"
+          mkdir -m 700 "$GNUPGHOME"
+          fingerprint="$(gpg --show-keys --with-colons "$RUNNER_TEMP/llvm-snapshot.gpg.key" | awk -F: '$1 == "fpr" { print $10; exit }')"
+          test "$fingerprint" = 6084F3CF814B57C1CF12EFD515CF4D18AF4F7421
+          gpg --batch --yes --dearmor -o "$RUNNER_TEMP/llvm-snapshot.gpg" "$RUNNER_TEMP/llvm-snapshot.gpg.key"
+          sudo install -m 644 "$RUNNER_TEMP/llvm-snapshot.gpg" /usr/share/keyrings/llvm-snapshot.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] https://apt.llvm.org/noble/ llvm-toolchain-noble-23 main' | sudo tee /etc/apt/sources.list.d/llvm23.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y ccache clang-23 lld-23 zstd
+          sudo mkdir -p "$SYSROOT"
+          sudo chown -R "$(id -un)" "$SYSROOT"
+
+      - name: Download sysroot
+        uses: actions/download-artifact@v4
+        with:
+          name: wasi-sysroot-${{ needs.prepare.outputs.version }}
+
+      - name: Extract build inputs
+        run: |
+          tar -I zstd -C "$SYSROOT" -xf wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst
+          builtins="$SYSROOT/lib/clang/$(llvm/utils/release/get-llvm-version.sh --major)/lib/wasm32-unknown-wasip1/libclang_rt.builtins.a"
+          test -f "$builtins"
+          # Keep Clang 23's own builtin headers while supplying the WASI
+          # compiler-rt library built alongside this sysroot.
+          resource_dir="$RUNNER_TEMP/clang-23-resource"
+          mkdir -p "$resource_dir/lib/wasm32-unknown-wasip1"
+          ln -s "$(clang-23 -print-resource-dir)/include" "$resource_dir/include"
+          cp "$builtins" "$resource_dir/lib/wasm32-unknown-wasip1/"
+          ln -s wasm32-unknown-wasip1 "$resource_dir/lib/wasm32-unknown-wasi"
+          echo "WASI_RESOURCE_DIR=$resource_dir" >> "$GITHUB_ENV"
+
+      - name: Configure WASI LLVM
+        run: |
+          # Cross-compile with the runner's pinned Clang and the generated
+          # sysroot. LLVM's normal cross-build logic builds the host TableGen
+          # tools as needed. WASI has no threads or process spawning, and the
+          # libc does not yet provide all POSIX APIs LLVM's unit-test support
+          # requires. WASI
+          # also cannot build shared-library examples or plugins, and the
+          # vendored Google Benchmark has no cycle timer for Wasm. Disable
+          # unit tests, examples, plugins, benchmarks, and LLVM threads. Link
+          # LLD into Clang for in-process execution.
+          WASM_LD="$(command -v wasm-ld-23)"
+          test -x "$WASM_LD"
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang-23 \
+            -DCMAKE_CXX_COMPILER=clang++-23 \
+            -DLLVM_CCACHE_BUILD=ON \
+            -DCMAKE_SYSTEM_NAME=WASI \
+            -DCMAKE_SYSROOT="$SYSROOT" \
+            -DCMAKE_C_COMPILER_TARGET=wasm32-unknown-wasip1 \
+            -DCMAKE_CXX_COMPILER_TARGET=wasm32-unknown-wasip1 \
+            -DCMAKE_C_FLAGS="-resource-dir=$WASI_RESOURCE_DIR" \
+            -DCMAKE_CXX_FLAGS="-resource-dir=$WASI_RESOURCE_DIR -fwasm-exceptions" \
+            -DCMAKE_CXX_STANDARD_LIBRARIES=-lunwind \
+            -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=$WASM_LD -Wl,-z,stack-size=8388608" \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+            -DLLVM_HOST_TRIPLE=wasm32-unknown-wasip1 \
+            -DLLVM_ENABLE_PROJECTS="clang;lld" \
+            -DLLVM_ENABLE_LIBCXX=ON \
+            -DLLVM_TARGETS_TO_BUILD=all \
+            -DLLVM_ENABLE_THREADS=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_ENABLE_PLUGINS=OFF \
+            -DDEFAULT_SYSROOT=/usr \
+            -DCLANG_RESOURCE_DIR=/usr/lib/clang/$(llvm/utils/release/get-llvm-version.sh --major) \
+            -DCLANG_CONFIG_FILE_SYSTEM_DIR=/usr/bin \
+            -DCLANG_ENABLE_INPROCESS_LLD=ON
+
+      - name: Build and install WASI LLVM
+        env:
+          WASI_ROOT: ${{ runner.temp }}/wasip1-root
+        run: |
+          mkdir -p "$WASI_ROOT"
+          DESTDIR="$WASI_ROOT" cmake --build build --target install --parallel
+
+      - name: Package WASI LLVM
+        env:
+          WASI_ROOT: ${{ runner.temp }}/wasip1-root
+        run: |
+          # The rootfs is directly runnable after extraction; the sysroot's
+          # headers and libraries live alongside the compiler under /usr.
+          tar -I zstd -C "$WASI_ROOT$PREFIX" -xf wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst
+          printf '%s\n' '-fwasm-exceptions' > "$WASI_ROOT$PREFIX/bin/clang++.cfg"
+          mkdir -p "$WASI_ROOT/tmp"
+          tar -I zstd -C "$WASI_ROOT" -cf llvm-wasip1-rootfs-${{ needs.prepare.outputs.version }}.tar.zst usr tmp
+
+      - name: Upload WASI LLVM
+        uses: actions/upload-artifact@v4
+        with:
+          name: llvm-wasip1-rootfs-${{ needs.prepare.outputs.version }}
+          path: llvm-wasip1-rootfs-${{ needs.prepare.outputs.version }}.tar.zst
+          if-no-files-found: error
+
+      - name: Print compiler cache statistics
+        if: always()
+        run: ccache --show-stats
+
+      - name: Save compiler cache
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ccache
+          key: wasi-llvm-clang23-ccache-${{ runner.os }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+  build-sdk:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare, build-sysroot, build-cross-toolchain]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y zstd
+
+      - name: Download sysroot
+        uses: actions/download-artifact@v4
+        with:
+          name: wasi-sysroot-${{ needs.prepare.outputs.version }}
+
+      - name: Download host toolchain
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}
+
+      - name: Assemble relocatable SDK
+        run: |
+          sdk_root="$RUNNER_TEMP/wasm32-wasip1-llvm-sdk"
+          mkdir -p "$sdk_root/share/wasi-sysroot"
+          tar -I zstd -C "$sdk_root" --strip-components=2 -xf wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}.tar.zst
+          tar -I zstd -C "$sdk_root/share/wasi-sysroot" -xf wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst
+          printf '%s\n' '--sysroot=<CFGDIR>/../share/wasi-sysroot' > "$sdk_root/bin/clang.cfg"
+          printf '%s\n' '--sysroot=<CFGDIR>/../share/wasi-sysroot' '-fwasm-exceptions' > "$sdk_root/bin/clang++.cfg"
+
+      - name: Package SDK
+        run: tar -I zstd -C "$RUNNER_TEMP" -cf wasm32-wasip1-llvm-sdk-${{ needs.prepare.outputs.version }}.tar.zst wasm32-wasip1-llvm-sdk
+
+      - name: Upload SDK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm32-wasip1-llvm-sdk-${{ needs.prepare.outputs.version }}
+          path: wasm32-wasip1-llvm-sdk-${{ needs.prepare.outputs.version }}.tar.zst
+          if-no-files-found: error
+
+  smoke-test-toolchain:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare, build-sysroot, build-cross-toolchain, build-sdk]
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
+    env:
+      SYSROOT: /opt/wasi-sysroot
+      HOST_PREFIX: /opt/wasm32-wasip1-llvm
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zstd
+          sudo mkdir -p "$SYSROOT" "$HOST_PREFIX"
+          sudo chown -R "$(id -un)" "$SYSROOT" "$HOST_PREFIX"
+          archive="wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
+          curl --fail --location --retry 3 --retry-all-errors --silent --show-error \
+            "https://github.com/bytecodealliance/wasmtime/releases/download/$WASMTIME_VERSION/$archive" \
+            -o "$RUNNER_TEMP/$archive"
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+          wasmtime_bin="$RUNNER_TEMP/wasmtime-${WASMTIME_VERSION}-x86_64-linux/wasmtime"
+          "$wasmtime_bin" --version
+          echo "WASMTIME_BIN=$wasmtime_bin" >> "$GITHUB_ENV"
+
+      - name: Download sysroot
+        uses: actions/download-artifact@v4
+        with:
+          name: wasi-sysroot-${{ needs.prepare.outputs.version }}
+
+      - name: Download host toolchain
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}
+
+      - name: Download SDK
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm32-wasip1-llvm-sdk-${{ needs.prepare.outputs.version }}
+
+      - name: Extract release artifacts
+        run: |
+          tar -I zstd -C "$SYSROOT" -xf wasi-sysroot-${{ needs.prepare.outputs.version }}.tar.zst
+          tar -I zstd -C / -xf wasm32-wasip1-llvm-${{ needs.prepare.outputs.version }}.tar.zst
+          tar -I zstd -C "$RUNNER_TEMP" -xf wasm32-wasip1-llvm-sdk-${{ needs.prepare.outputs.version }}.tar.zst
+
+      - name: Check packaged host dependencies
+        run: |
+          for root in "$HOST_PREFIX" "$RUNNER_TEMP/wasm32-wasip1-llvm-sdk"; do
+            while IFS= read -r -d '' tool; do
+              dynamic=$(readelf -d "$tool" 2>/dev/null) || continue
+              [[ "$dynamic" == *'(NEEDED)'* ]] || continue
+              if ! ldd "$tool" > "$RUNNER_TEMP/tool-deps.txt" 2>&1 ||
+                 grep -q 'not found' "$RUNNER_TEMP/tool-deps.txt"; then
+                echo "Cannot load $tool:" >&2
+                cat "$RUNNER_TEMP/tool-deps.txt" >&2
+                exit 1
+              fi
+            done < <(find "$root/bin" "$root/lib" "$root/libexec" -type f -print0)
+          done
+
+      - name: Build, link, and run C and C++ programs
+        run: |
+          [[ "$($HOST_PREFIX/bin/clang --print-target-triple)" == wasm32-unknown-wasip1 ]]
+          [[ "$($HOST_PREFIX/bin/clang++ --print-target-triple)" == wasm32-unknown-wasip1 ]]
+          "$HOST_PREFIX/bin/wasm-ld" --version
+
+          cat > hello.c <<'EOF'
+          #include <stdio.h>
+          int main(void) { puts("hello, world"); return 0; }
+          EOF
+          cat > hello.cpp <<'EOF'
+          #include <iostream>
+          int main() { std::cout << "hello, world" << std::endl; }
+          EOF
+
+          run_hello() {
+            local output
+            output=$("$WASMTIME_BIN" run "$1")
+            [[ "$output" == 'hello, world' ]]
+          }
+
+          "$HOST_PREFIX/bin/clang" --sysroot="$SYSROOT" hello.c -o hello-c.wasm
+          "$HOST_PREFIX/bin/clang++" --sysroot="$SYSROOT" hello.cpp -o hello-cxx.wasm
+          run_hello hello-c.wasm
+          run_hello hello-cxx.wasm
+
+          sdk_bin="$RUNNER_TEMP/wasm32-wasip1-llvm-sdk/bin"
+          "$sdk_bin/clang" hello.c -o hello-sdk-plain-c.wasm
+          "$sdk_bin/clang++" hello.cpp -o hello-sdk-plain-cxx.wasm
+          [[ "$("$sdk_bin/wasm32-wasip1-clang" --print-target-triple)" == wasm32-unknown-wasip1 ]]
+          "$sdk_bin/wasm32-wasip1-clang" hello.c -o hello-sdk-c.wasm
+          "$sdk_bin/wasm32-wasip1-clang++" hello.cpp -o hello-sdk-cxx.wasm
+          run_hello hello-sdk-plain-c.wasm
+          run_hello hello-sdk-plain-cxx.wasm
+          run_hello hello-sdk-c.wasm
+          run_hello hello-sdk-cxx.wasm
+
+          cat > jump.c <<'EOF'
+          #include <setjmp.h>
+          #include <stdio.h>
+          static jmp_buf point;
+          int main(void) {
+            int value = setjmp(point);
+            if (value == 0) longjmp(point, 17);
+            printf("setjmp=%d\n", value);
+            return value == 17 ? 0 : 1;
+          }
+          EOF
+          "$sdk_bin/clang" -mllvm -wasm-enable-sjlj \
+            -mllvm -wasm-use-legacy-eh=false -mexception-handling \
+            -mmultivalue -mreference-types jump.c -o jump.wasm
+          [[ "$("$WASMTIME_BIN" run jump.wasm)" == 'setjmp=17' ]]
+
+  smoke-test-wasi-llvm:
+    if: github.repository == 'fix-project/llvm-project'
+    needs: [prepare, build-wasi-llvm]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install Wasmtime and zstd
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zstd
+          archive="wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
+          curl --fail --location --retry 3 --retry-all-errors --silent --show-error \
+            "https://github.com/bytecodealliance/wasmtime/releases/download/$WASMTIME_VERSION/$archive" \
+            -o "$RUNNER_TEMP/$archive"
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+          echo "WASMTIME_BIN=$RUNNER_TEMP/wasmtime-${WASMTIME_VERSION}-x86_64-linux/wasmtime" >> "$GITHUB_ENV"
+
+      - name: Download rootfs
+        uses: actions/download-artifact@v4
+        with:
+          name: llvm-wasip1-rootfs-${{ needs.prepare.outputs.version }}
+
+      - name: Build, link, and run C and C++ with the packaged rootfs
+        env:
+          ROOTFS: ${{ runner.temp }}/wasip1-rootfs-smoke
+        run: |
+          mkdir -p "$ROOTFS/home"
+          tar -I zstd -C "$ROOTFS" -xf llvm-wasip1-rootfs-${{ needs.prepare.outputs.version }}.tar.zst
+          cd "$ROOTFS"
+          test -f usr/include/wasm32-wasip1/stdio.h
+          test -d tmp
+
+          cat > home/hello.c <<'EOF'
+          #include <stdio.h>
+          int main(void) { puts("hello, world"); return 0; }
+          EOF
+          cat > home/hello.cpp <<'EOF'
+          #include <iostream>
+          int main() { std::cout << "hello, world" << std::endl; }
+          EOF
+
+          "$WASMTIME_BIN" --dir . usr/bin/clang home/hello.c -o home/hello-c.wasm
+          "$WASMTIME_BIN" --dir . usr/bin/clang++ home/hello.cpp -o home/hello-cxx.wasm
+          [[ "$("$WASMTIME_BIN" home/hello-c.wasm)" == 'hello, world' ]]
+          [[ "$("$WASMTIME_BIN" home/hello-cxx.wasm)" == 'hello, world' ]]
+
+  publish-release:
+    if: >-
+      github.repository == 'fix-project/llvm-project' &&
+      (github.event_name == 'push' &&
+       (github.ref_name == github.event.repository.default_branch ||
+        (startsWith(github.ref, 'refs/tags/fixorg-') &&
+         !endsWith(github.ref, '-current'))))
+    needs: [prepare, build-wasi-llvm, smoke-test-toolchain, smoke-test-wasi-llvm]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download toolchain artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-${{ needs.prepare.outputs.version }}'
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release-tag }}
+          PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+          TARGET_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          ROLLING: ${{ github.event_name == 'push' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
+        run: |
+          assets=(release-assets/*.tar.zst)
+          notes="WASI sysroot and toolchains for LLVM $VERSION (commit $TARGET_SHA)."
+          args=("$RELEASE_TAG" "${assets[@]}" --target "$TARGET_SHA" --title "$VERSION" --notes "$notes")
+          if [[ "$PRERELEASE" == true ]]; then
+            args+=(--prerelease)
+          fi
+
+          if [[ "$ROLLING" == true ]]; then
+            current_head=$(gh api "repos/$REPOSITORY/git/ref/heads/$DEFAULT_BRANCH" --jq '.object.sha')
+            if [[ "$current_head" != "$TARGET_SHA" ]]; then
+              echo "Skipping stale prerelease build for $TARGET_SHA; $DEFAULT_BRANCH is at $current_head"
+              exit 0
+            fi
+
+            if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+              old_assets=$(gh release view "$RELEASE_TAG" --repo "$REPOSITORY" --json assets --jq '.assets[].name')
+              gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber --repo "$REPOSITORY"
+              while IFS= read -r asset; do
+                if [[ -n "$asset" && ! -f "release-assets/$asset" ]]; then
+                  gh release delete-asset "$RELEASE_TAG" "$asset" --yes --repo "$REPOSITORY"
+                fi
+              done <<< "$old_assets"
+              gh release edit "$RELEASE_TAG" --repo "$REPOSITORY" --target "$TARGET_SHA" \
+                --title "$VERSION" --notes "$notes" --prerelease
+              gh api -X PATCH "repos/$REPOSITORY/git/refs/tags/$RELEASE_TAG" \
+                -f sha="$TARGET_SHA" -F force=true >/dev/null
+              exit 0
+            fi
+
+            # A tag may remain after a failed first publication.
+            if gh api "repos/$REPOSITORY/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+              gh api -X PATCH "repos/$REPOSITORY/git/refs/tags/$RELEASE_TAG" \
+                -f sha="$TARGET_SHA" -F force=true >/dev/null
+            fi
+          fi
+
+          gh release create --repo "$REPOSITORY" "${args[@]}"

@@ -42,12 +42,26 @@ bool default_terminates(int signum) {
   }
 }
 
+// WASI preview1 omits Linux SIGSTKFLT and numbers subsequent signals one
+// lower. The first fifteen signal numbers are shared with POSIX/Linux.
+__wasi_signal_t to_wasi_signal(int signum) {
+  if (signum >= SIGHUP && signum <= SIGTERM)
+    return static_cast<__wasi_signal_t>(signum);
+  if (signum == SIGSTKFLT)
+    return 0;
+  if (signum > SIGSTKFLT && signum < NSIG)
+    return static_cast<__wasi_signal_t>(signum - 1);
+  return 0;
+}
+
 void deliver_self(int signum) {
   SignalState &state = signal_state();
   if (signum != SIGKILL && signum != SIGSTOP) {
     if (state.actions[signum].sa_flags & SA_SIGINFO) {
       auto sa = state.actions[signum].sa_sigaction;
-      if (sa != nullptr && reinterpret_cast<intptr_t>(sa) != 1) {
+      if (sa != nullptr &&
+          reinterpret_cast<intptr_t>(sa) !=
+              reinterpret_cast<intptr_t>(SIG_IGN)) {
         siginfo_t info = {};
         state.actions[signum].sa_sigaction(signum, &info, nullptr);
         return;
@@ -63,8 +77,9 @@ void deliver_self(int signum) {
     }
   }
   if (default_terminates(signum)) {
-    // The WASI preview1 signal enum matches the POSIX signal numbers.
-    __wasi_proc_raise(static_cast<__wasi_signal_t>(signum));
+    __wasi_signal_t wasi_signal = to_wasi_signal(signum);
+    if (wasi_signal != 0)
+      __wasi_proc_raise(wasi_signal);
     // If the runtime does not implement proc_raise, exit with the signal
     // number (runtimes restrict exit statuses to 0..126).
     __wasi_proc_exit(static_cast<__wasi_errno_t>(signum));

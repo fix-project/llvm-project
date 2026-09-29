@@ -51,3 +51,6 @@ jobs:
             -DLLVM_INCLUDE_SPIRV_TOOLS_TESTS=ON \
             -DLLVM_ENABLE_PROJECTS=mlir
           ninja -C build check-mlir
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats

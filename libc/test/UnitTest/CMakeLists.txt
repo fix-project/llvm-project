@@ -20,6 +20,11 @@ function(add_unittest_framework_library name)
       ${TEST_LIB_HDRS}
     )
     target_include_directories(${lib} PRIVATE ${LIBC_SOURCE_DIR})
+    # Unit test sources include public libc headers. In full builds, ensure
+    # those generated headers exist before compiling the framework.
+    if(TARGET libc-headers)
+      add_dependencies(${lib} libc-headers)
+    endif()
     if(TARGET libc.src.time.clock)
       target_compile_definitions(${lib} PRIVATE TARGET_SUPPORTS_CLOCK)
     endif()

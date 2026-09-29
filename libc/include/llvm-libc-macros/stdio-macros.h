@@ -11,6 +11,10 @@
 
 #include "../llvm-libc-types/FILE.h"
 
+#if defined(__wasi__)
+#include "wasi/stdio-macros.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" FILE *stdin;
 extern "C" FILE *stdout;

@@ -47,3 +47,6 @@ jobs:
             -DLLVM_INCLUDE_SPIRV_TOOLS_TESTS=ON
 
           ninja -C build check-sycl
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats

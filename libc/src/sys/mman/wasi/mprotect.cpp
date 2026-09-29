@@ -11,7 +11,6 @@
 #include "src/__support/common.h"
 
 namespace LIBC_NAMESPACE_DECL {
-namespace mman_wasi {
 
 // The mmap emulation serves memory from the regular heap, so page protection
 // cannot be changed. Accept the request as a no-op so that callers which only
@@ -23,5 +22,4 @@ LLVM_LIBC_FUNCTION(int, mprotect, (void *addr, size_t size, int prot)) {
   return 0;
 }
 
-} // namespace mman_wasi
 } // namespace LIBC_NAMESPACE_DECL

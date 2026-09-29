@@ -10,8 +10,12 @@
 #include "src/sys/mman/wasi/mman_emulation.h"
 
 #include "src/__support/OSUtil/wasi/wasi.h"
+#include "src/__support/OSUtil/wasi/path.h"
 #include "src/__support/common.h"
 #include "src/__support/libc_errno.h"
+#include "src/fcntl/wasi/open_utils.h"
+
+#include "hdr/fcntl_macros.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -140,12 +144,12 @@ void lock_mman() {
 
 void unlock_mman() { __atomic_store_n(&g_state.lock, 0, __ATOMIC_RELEASE); }
 
-bool flush_mapping(const Mapping &m) {
+bool flush_mapping_range(const Mapping &m, size_t begin, size_t size) {
   if (!m.file_backed || !m.shared || !m.writable)
     return true;
-  const char *p = static_cast<const char *>(m.addr);
-  size_t remaining = m.size;
-  off_t offset = m.offset;
+  const char *p = static_cast<const char *>(m.addr) + begin;
+  size_t remaining = size;
+  off_t offset = m.offset + static_cast<off_t>(begin);
   while (remaining > 0) {
     wasi::__wasi_size_t chunk = static_cast<wasi::__wasi_size_t>(
         remaining > 0x40000000u ? 0x40000000u : remaining);
@@ -162,6 +166,44 @@ bool flush_mapping(const Mapping &m) {
   }
   return true;
 }
+
+bool flush_mapping(const Mapping &m) {
+  return flush_mapping_range(m, 0, m.size);
+}
+
+void close_retained_fd(int fd) {
+  wasi::unregister_fd_path(fd);
+  wasi::unmark_fd_o_path(fd);
+  wasi::__wasi_fd_close(static_cast<wasi::__wasi_fd_t>(fd));
+}
+
+// WASI preview1 cannot duplicate an fd. Reopen the recorded path while the
+// caller's fd is live, then verify that it still names the same file. Keep
+// this independent fd until the mapping is released.
+int retain_file_fd(int fd, const wasi::__wasi_filestat_t &original) {
+  if (original.st_ino == 0)
+    return -ENOTSUP;
+  char path[wasi::PATH_MAX_SIZE];
+  int flags = 0;
+  if (!wasi::fd_dup_info(fd, path, sizeof(path), &flags))
+    return -ENOTSUP;
+  flags &= ~(O_CREAT | O_EXCL | O_TRUNC | O_APPEND);
+  int retained = wasi::openat_impl(AT_FDCWD, path, flags, 0);
+  if (retained < 0)
+    return retained;
+
+  wasi::__wasi_filestat_t current;
+  wasi::__wasi_errno_t err = wasi::__wasi_fd_filestat_get(retained, &current);
+  if (err != wasi::__WASI_ERRNO_SUCCESS ||
+      current.st_dev != original.st_dev || current.st_ino != original.st_ino) {
+    close_retained_fd(retained);
+    return err == wasi::__WASI_ERRNO_SUCCESS ? -ENOTSUP
+                                            : -wasi::wasi_to_errno(err);
+  }
+  return retained;
+}
+
+} // namespace mman_wasi
 
 LLVM_LIBC_FUNCTION(void *, mmap,
                    (void *addr, size_t size, int prot, int flags, int fd,
@@ -191,11 +233,13 @@ LLVM_LIBC_FUNCTION(void *, mmap,
   size_t rounded = (size + kPageSize - 1) & ~(kPageSize - 1);
 
   bool anonymous = (flags & MAP_ANONYMOUS) != 0;
+  bool retain_fd = !anonymous && (flags & MAP_SHARED) && (prot & PROT_WRITE);
+  wasi::__wasi_filestat_t original = {};
   if (!anonymous && fd < 0) {
     libc_errno = EBADF;
     return MAP_FAILED;
   }
-  if (!anonymous && (flags & MAP_SHARED) && (prot & PROT_WRITE)) {
+  if (retain_fd) {
     wasi::__wasi_fdstat_t fdstat;
     wasi::__wasi_errno_t err = wasi::__wasi_fd_fdstat_get(fd, &fdstat);
     if (err != wasi::__WASI_ERRNO_SUCCESS) {
@@ -206,14 +250,13 @@ LLVM_LIBC_FUNCTION(void *, mmap,
       libc_errno = EACCES;
       return MAP_FAILED;
     }
-    wasi::__wasi_filestat_t st;
-    err = wasi::__wasi_fd_filestat_get(fd, &st);
+    err = wasi::__wasi_fd_filestat_get(fd, &original);
     if (err != wasi::__WASI_ERRNO_SUCCESS) {
       libc_errno = wasi::wasi_to_errno(err);
       return MAP_FAILED;
     }
-    if (static_cast<uint64_t>(offset) > st.st_size ||
-        size > st.st_size - static_cast<uint64_t>(offset)) {
+    if (static_cast<uint64_t>(offset) > original.st_size ||
+        size > original.st_size - static_cast<uint64_t>(offset)) {
       libc_errno = ENOTSUP;
       return MAP_FAILED;
     }
@@ -254,25 +297,36 @@ LLVM_LIBC_FUNCTION(void *, mmap,
     }
   }
 
-  lock_mman();
-  Mapping *m = reserve_mapping();
+  int mapping_fd = -1;
+  if (retain_fd) {
+    mapping_fd = mman_wasi::retain_file_fd(fd, original);
+    if (mapping_fd < 0) {
+      free(buf);
+      libc_errno = -mapping_fd;
+      return MAP_FAILED;
+    }
+  }
+
+  mman_wasi::lock_mman();
+  mman_wasi::Mapping *m = mman_wasi::reserve_mapping();
   if (m == nullptr) {
-    unlock_mman();
+    mman_wasi::unlock_mman();
+    if (mapping_fd >= 0)
+      mman_wasi::close_retained_fd(mapping_fd);
     free(buf);
     libc_errno = ENOMEM;
     return MAP_FAILED;
   }
   m->addr = buf;
   m->size = size;
-  m->fd = fd;
+  m->fd = mapping_fd;
   m->offset = offset;
   m->file_backed = !anonymous;
   m->shared = (flags & MAP_SHARED) != 0;
   m->writable = (prot & PROT_WRITE) != 0;
-  unlock_mman();
+  mman_wasi::unlock_mman();
 
   return buf;
 }
 
-} // namespace mman_wasi
 } // namespace LIBC_NAMESPACE_DECL

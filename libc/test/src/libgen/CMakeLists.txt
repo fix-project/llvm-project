@@ -20,7 +20,7 @@ add_libc_test(
     libc.src.libgen.dirname
 )
 
-if (NOT LLVM_USE_SANITIZER)
+if (NOT LLVM_USE_SANITIZER AND NOT LIBC_TEST_SKIP_DEATH_TESTS)
   add_libc_test(
     basename_death_test
     UNIT_TEST_ONLY

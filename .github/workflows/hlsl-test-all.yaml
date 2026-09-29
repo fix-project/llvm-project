@@ -78,6 +78,9 @@ jobs:
             ninja check-clang
             ninja check-hlsl-unit
             ninja ${{ inputs.TestTarget }}
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/macos@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         if: always() && runner.os == 'macOS'

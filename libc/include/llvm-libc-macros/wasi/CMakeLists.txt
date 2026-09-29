@@ -23,6 +23,12 @@ add_header(
 )
 
 add_header(
+  stdio_macros
+  HDR
+    stdio-macros.h
+)
+
+add_header(
   fcntl_macros
   HDR
     fcntl-macros.h

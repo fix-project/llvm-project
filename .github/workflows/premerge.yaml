@@ -106,6 +106,9 @@ jobs:
           SCCACHE_LOG=info SCCACHE_ERROR_LOG=$(pwd)/artifacts/sccache.log sccache --start-server
 
           ./.ci/monolithic-linux.sh "${projects_to_build}" "${project_check_targets}" "${runtimes_to_build}" "${runtimes_check_targets}" "${runtimes_check_targets_needs_reconfig}" "${enable_cir}"
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
       - name: Upload Artifacts
         # In some cases, Github will fail to upload the artifact. We want to
         # continue anyways as a failed artifact upload is an infra failure, not
@@ -177,6 +180,9 @@ jobs:
           # See the comments above in the Linux job for why we define each of
           # these environment variables.
           bash -c "export SCCACHE_GCS_BUCKET=$CACHE_GCS_BUCKET; export SCCACHE_GCS_RW_MODE=READ_WRITE; export SCCACHE_IDLE_TIMEOUT=0; mkdir artifacts; SCCACHE_LOG=info SCCACHE_ERROR_LOG=$(pwd)/artifacts/sccache.log sccache --start-server; .ci/monolithic-windows.sh \"$WINDOWS_PROJECTS\" \"$WINDOWS_CHECK_TARGETS\" \"$WINDOWS_RUNTIMES\" \"$WINDOWS_RUNTIMES_CHECK_TARGETS\""
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
       - name: Upload Artifacts
         # In some cases, Github will fail to upload the artifact. We want to
         # continue anyways as a failed artifact upload is an infra failure, not
@@ -248,3 +254,6 @@ jobs:
 
           # The libcxx tests fail, so we are skipping the runtime targets.
           ninja -C build ${project_check_targets}
+      - name: Print compiler cache statistics
+        if: always()
+        run: ccache --show-stats

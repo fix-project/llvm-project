@@ -116,6 +116,13 @@ jobs:
             cpp_compiler: clang++-23
             target: amdgcn-amd-amdhsa
             testing: SKIP
+          - name: wasm32-wasip1-clang
+            os: ubuntu-24.04
+            build_type: MinSizeRel
+            c_compiler: clang-23
+            cpp_compiler: clang++-23
+            target: wasm32-wasip1
+            testing: SKIP
           # TODO: add back gcc build when it is fixed
           # - c_compiler: gcc
           #   cpp_compiler: g++
@@ -177,7 +184,7 @@ jobs:
         fi
 
         case "${{ matrix.name }}" in
-          baremetal-* )
+          baremetal-* | wasm32-* )
             cmake $CMAKE_FLAGS \
               -C /__w/llvm-project/llvm-project/libc/cmake/caches/${{ matrix.target }}.cmake
             ;;
@@ -225,3 +232,7 @@ jobs:
         --build build 
         --parallel
         --target check-libc
+
+    - name: Print compiler cache statistics
+      if: always()
+      run: sccache --show-stats

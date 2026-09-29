@@ -45,3 +45,6 @@ jobs:
             -DLLVM_TARGETS_TO_BUILD="SPIRV" \
             -DLLVM_INCLUDE_SPIRV_TOOLS_TESTS=ON
           ninja -C build check-llvm-codegen-spirv
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats

@@ -77,7 +77,8 @@
 
 #define SIG_ERR __LLVM_LIBC_CAST(reinterpret_cast, void (*)(int), -1)
 #define SIG_DFL __LLVM_LIBC_CAST(reinterpret_cast, void (*)(int), 0)
-#define SIG_IGN __LLVM_LIBC_CAST(reinterpret_cast, void (*)(int), 1)
-#define SIG_HOLD __LLVM_LIBC_CAST(reinterpret_cast, void (*)(int), 2)
+// Wasm function table indexes 1 and 2 can name real handlers.
+#define SIG_IGN __LLVM_LIBC_CAST(reinterpret_cast, void (*)(int), -2)
+#define SIG_HOLD __LLVM_LIBC_CAST(reinterpret_cast, void (*)(int), -3)
 
 #endif // LLVM_LIBC_MACROS_WASI_SIGNAL_MACROS_H

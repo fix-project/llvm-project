@@ -117,6 +117,10 @@ jobs:
         --parallel 
         --target check-libc
 
+    - name: Print compiler cache statistics
+      if: always()
+      run: sccache --show-stats
+
   qemu:
     if: github.repository_owner == 'llvm'
     name: qemu - ${{ matrix.arch }} - ${{ matrix.c_compiler }}
@@ -180,3 +184,7 @@ jobs:
       - name: Run Test
         run: |
           cmake --build build --parallel --target check-libc
+
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats

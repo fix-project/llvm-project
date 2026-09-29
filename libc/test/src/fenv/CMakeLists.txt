@@ -1,5 +1,9 @@
 add_custom_target(libc_fenv_unittests)
 
+# WebAssembly does not expose mutable floating point exception flags or
+# rounding modes. Keep the no-op clearing test below, but skip tests that
+# require those hardware features.
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   rounding_mode_test
   SUITE
@@ -76,19 +80,6 @@ add_libc_unittest(
 )
 
 add_libc_unittest(
-  feclearexcept_test
-  SUITE
-    libc_fenv_unittests
-  SRCS
-    feclearexcept_test.cpp
-  DEPENDS
-    libc.src.fenv.feclearexcept
-    libc.src.__support.FPUtil.fenv_impl
-  LINK_LIBRARIES
-    LibcFPTestHelpers
-)
-
-add_libc_unittest(
   feenableexcept_test
   SUITE
     libc_fenv_unittests
@@ -101,12 +92,27 @@ add_libc_unittest(
   LINK_LIBRARIES
     LibcFPTestHelpers
 )
+endif()
+
+add_libc_unittest(
+  feclearexcept_test
+  SUITE
+    libc_fenv_unittests
+  SRCS
+    feclearexcept_test.cpp
+  DEPENDS
+    libc.src.fenv.feclearexcept
+    libc.src.__support.FPUtil.fenv_impl
+  LINK_LIBRARIES
+    LibcFPTestHelpers
+)
 
 if (NOT (LLVM_USE_SANITIZER OR (${LIBC_TARGET_OS} STREQUAL "windows")
-         OR (${LIBC_TARGET_OS} STREQUAL "darwin")))
+         OR (${LIBC_TARGET_OS} STREQUAL "darwin") OR LIBC_TARGET_OS_IS_WASI))
   # Sanitizers don't like SIGFPE. So, we will run the
   # tests which raise SIGFPE only in non-sanitizer builds.
-  # The tests are also disabled for Windows and MacOS as they fail currently.
+  # The tests are also disabled for Windows and MacOS as they fail currently,
+  # and for WASI, which does not provide SIGFPE delivery or setjmp by default.
   # TODO: Investigate and fix the windows failures and enable them for Windows
   # and MacOS.
   add_fp_unittest(

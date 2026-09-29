@@ -39,6 +39,7 @@ void unlock_mman();
 
 // Writes the contents of a shared file-backed mapping back to its file.
 bool flush_mapping(const Mapping &m);
+bool flush_mapping_range(const Mapping &m, size_t begin, size_t size);
 
 } // namespace mman_wasi
 } // namespace LIBC_NAMESPACE_DECL

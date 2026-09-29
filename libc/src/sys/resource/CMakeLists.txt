@@ -18,6 +18,12 @@ if(LIBC_TARGET_OS STREQUAL "wasi")
         .wasi.${entrypoint}
     )
   endforeach()
+  add_entrypoint_object(
+    getrusage
+    ALIAS
+    DEPENDS
+      .wasi.getrusage
+  )
 endif()
 add_entrypoint_object(
   setrlimit

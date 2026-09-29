@@ -95,3 +95,6 @@ jobs:
           name: analyzer-results
           path: 'build/analyzer-results/*'
 
+      - name: Print compiler cache statistics
+        if: always()
+        run: sccache --show-stats
