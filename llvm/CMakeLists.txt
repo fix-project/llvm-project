@@ -1110,6 +1110,12 @@ else()
   # Only set default triple when native target is enabled.
   if (LLVM_NATIVE_TARGET)
     set(LLVM_DEFAULT_TARGET_TRIPLE_DEFAULT "${LLVM_HOST_TRIPLE}")
+  elseif(LLVM_RUNTIME_TARGETS AND NOT LLVM_RUNTIME_TARGETS STREQUAL "default"
+         AND NOT ";${LLVM_RUNTIME_TARGETS};" MATCHES ";[^;]*;[^;]*;")
+    # Cross-toolchain build without a native target: when the runtimes are
+    # built for a single target, default to that target so the freshly built
+    # tools work out of the box, mirroring the native build behavior.
+    set(LLVM_DEFAULT_TARGET_TRIPLE_DEFAULT "${LLVM_RUNTIME_TARGETS}")
   endif()
 endif()
 

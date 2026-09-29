@@ -53,6 +53,9 @@
 /* Define if dlopen() is available on this platform. */
 #cmakedefine HAVE_DLOPEN ${HAVE_DLOPEN}
 
+/* Define if dladdr() is available on this platform. */
+#cmakedefine HAVE_DLADDR ${HAVE_DLADDR}
+
 /* Define to 1 if we can register EH frames on this platform. */
 #cmakedefine HAVE_REGISTER_FRAME ${HAVE_REGISTER_FRAME}
 

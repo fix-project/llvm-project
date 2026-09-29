@@ -1,4 +1,4 @@
-if ( LLVM_INCLUDE_UTILS )
+if ( LLVM_INCLUDE_UTILS AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "WASI" )
   add_subdirectory(llvm-jitlink-executor)
 endif()
 
