@@ -548,6 +548,15 @@ add_proxy_header_library(
 )
 
 add_proxy_header_library(
+  struct_addrinfo
+  HDRS
+    struct_addrinfo.h
+  FULL_BUILD_DEPENDS
+    libc.include.llvm-libc-types.struct_addrinfo
+    libc.include.netdb
+)
+
+add_proxy_header_library(
   struct_sockaddr
   HDRS
     struct_sockaddr.h

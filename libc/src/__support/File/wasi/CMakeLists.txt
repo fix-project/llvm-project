@@ -1,0 +1,26 @@
+add_object_library(
+  file
+  SRCS
+    file.cpp
+  HDRS
+    file.h
+  DEPENDS
+    libc.src.__support.File.file
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.CPP.new
+    libc.src.__support.alloc_checker
+    libc.hdr.stdio_macros
+    libc.hdr.errno_macros
+)
+
+add_object_library(
+  wasi_dir
+  SRCS
+    dir.cpp
+  DEPENDS
+    libc.src.__support.File.dir
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.error_or
+    libc.hdr.types.struct_dirent
+    libc.hdr.errno_macros
+)

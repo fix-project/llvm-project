@@ -28,8 +28,18 @@
 
 namespace LIBC_NAMESPACE_DECL {
 
+#if defined(__wasi__)
+// On WASI, wasm-ld provides __heap_base (end of the data/stack image) and
+// __heap_end (end of the linear memory) as linker-defined symbols, but only
+// for non-PIC links. They are declared weak so that a single libc.a can also
+// be linked into shared objects, where the heap is bootstrapped at runtime
+// (see init()).
+extern "C" cpp::byte __heap_base __attribute__((weak));
+extern "C" cpp::byte __heap_end __attribute__((weak));
+#else
 extern "C" cpp::byte _end;
 extern "C" cpp::byte __llvm_libc_heap_limit;
+#endif
 
 using cpp::optional;
 using cpp::span;
@@ -38,7 +48,11 @@ LIBC_INLINE constexpr bool IsPow2(size_t x) { return x && (x & (x - 1)) == 0; }
 
 class FreeListHeap {
 public:
+#if defined(__wasi__)
+  constexpr FreeListHeap() : begin(&__heap_base), end(&__heap_end) {}
+#else
   constexpr FreeListHeap() : begin(&_end), end(&__llvm_libc_heap_limit) {}
+#endif
 
   constexpr FreeListHeap(span<cpp::byte> region)
       : begin(region.begin()), end(region.end()) {}
@@ -57,6 +71,11 @@ private:
   void init();
 
   void *allocate_impl(size_t alignment, size_t size);
+
+#if defined(__wasi__)
+  // Grow the linear memory to extend the heap by at least `size` bytes.
+  bool grow(size_t size);
+#endif
 
   span<cpp::byte> block_to_span(BlockRef block) {
     return span<cpp::byte>(block.usable_space(), block.inner_size());
@@ -82,12 +101,84 @@ private:
 
 LIBC_INLINE void FreeListHeap::init() {
   LIBC_ASSERT(!is_initialized && "duplicate initialization");
+#if defined(__wasi__)
+  if (begin == nullptr) {
+    // Shared (PIC) links do not define __heap_base/__heap_end. Bootstrap the
+    // heap by growing the linear memory, mirroring wasi-libc's sbrk: the new
+    // memory pages become the initial heap region, and grow() extends it.
+    constexpr size_t PAGE_SIZE = 0x10000;
+    constexpr long INITIAL_PAGES = 16;
+    long prev_pages = __builtin_wasm_memory_grow(0, INITIAL_PAGES);
+    if (prev_pages >= 0) {
+      begin = reinterpret_cast<cpp::byte *>(static_cast<size_t>(prev_pages) *
+                                            PAGE_SIZE);
+      end = reinterpret_cast<cpp::byte *>(static_cast<size_t>(prev_pages +
+                                                              INITIAL_PAGES) *
+                                          PAGE_SIZE);
+    }
+  }
+#endif
   auto result = BlockRef::init(region());
   BlockRef block = *result;
+#if defined(__wasi__)
+  // The heap can grow via memory.grow, so the trie must be able to track
+  // blocks larger than the initial heap. Size the range for the largest
+  // possible block instead.
+  free_store.set_range({0, size_t{1} << (sizeof(size_t) * 8 - 1)});
+#else
   free_store.set_range({0, cpp::bit_ceil(block.inner_size())});
+#endif
   free_store.insert(block);
   is_initialized = true;
 }
+
+#if defined(__wasi__)
+LIBC_INLINE bool FreeListHeap::grow(size_t size) {
+  // Grow the linear memory by at least `size` bytes (rounded up to whole
+  // wasm pages, with a minimum increment to amortize grow calls).
+  constexpr size_t PAGE_SIZE = 0x10000;
+  constexpr size_t MIN_GROW = 4 * PAGE_SIZE;
+  size_t grow_size = size > MIN_GROW ? size : MIN_GROW;
+  grow_size = ((grow_size + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
+  long prev_pages = __builtin_wasm_memory_grow(0, grow_size / PAGE_SIZE);
+  if (prev_pages < 0)
+    return false;
+
+  cpp::byte *old_end = end;
+  end = reinterpret_cast<cpp::byte *>(static_cast<size_t>(prev_pages) *
+                                          PAGE_SIZE +
+                                      grow_size);
+
+  // The sentinel last block was located at the old end of the region.
+  // Replace it with a free block covering the grown area, terminated by a
+  // new sentinel at the new end.
+  BlockRef old_last(old_end - BlockRef::HEADER_SIZE);
+  cpp::byte *new_sentinel_ptr = end - BlockRef::HEADER_SIZE;
+  size_t old_last_next = old_last.load_next();
+
+  if (old_last_next & BlockRef::PREV_FREE_MASK) {
+    // The block before the sentinel is free; merge the new area into it.
+    BlockRef prev_free = old_last.prev_free();
+    free_store.remove(prev_free);
+    size_t offset = static_cast<size_t>(new_sentinel_ptr - prev_free.header_ptr);
+    prev_free.store_next(offset | (prev_free.load_next() &
+                                   BlockRef::PREV_FREE_MASK));
+    free_store.insert(prev_free);
+  } else {
+    // Turn the old sentinel into a regular free block.
+    size_t offset =
+        static_cast<size_t>(new_sentinel_ptr - old_last.header_ptr);
+    old_last.store_next(offset);
+    free_store.insert(old_last);
+  }
+
+  // Write the new sentinel; the block before it is free.
+  BlockRef new_last(new_sentinel_ptr);
+  new_last.store_next(BlockRef::HEADER_SIZE | BlockRef::LAST_MASK |
+                      BlockRef::PREV_FREE_MASK);
+  return true;
+}
+#endif // defined(__wasi__)
 
 LIBC_INLINE void *FreeListHeap::allocate_impl(size_t alignment, size_t size) {
   if (size == 0)
@@ -101,6 +192,10 @@ LIBC_INLINE void *FreeListHeap::allocate_impl(size_t alignment, size_t size) {
     return nullptr;
 
   BlockRef block = free_store.remove_best_fit(request_size);
+#if defined(__wasi__)
+  if (!block && grow(request_size + BlockRef::HEADER_SIZE))
+    block = free_store.remove_best_fit(request_size);
+#endif
   if (!block)
     return nullptr;
 

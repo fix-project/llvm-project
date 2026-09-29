@@ -9,8 +9,10 @@
 #ifndef LLVM_LIBC_MACROS_SYS_EPOLL_MACROS_H
 #define LLVM_LIBC_MACROS_SYS_EPOLL_MACROS_H
 
-#ifdef __linux__
+#if defined(__linux__)
 #include "linux/sys-epoll-macros.h"
+#elif defined(__wasi__)
+#include "wasi/sys-epoll-macros.h"
 #endif
 
 #endif // LLVM_LIBC_MACROS_SYS_EPOLL_MACROS_H

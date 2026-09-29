@@ -1,0 +1,4 @@
+set(CMAKE_SYSTEM_PROCESSOR wasm32 CACHE STRING "")
+set(RUNTIMES_TARGET_TRIPLE "wasm32-wasip1" CACHE STRING "")
+
+include(${CMAKE_CURRENT_LIST_DIR}/baremetal_common.cmake)

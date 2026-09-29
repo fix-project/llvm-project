@@ -9,7 +9,9 @@
 #ifndef LLVM_LIBC_SRC___SUPPORT_STRINGUTIL_PLATFORM_SIGNALS_H
 #define LLVM_LIBC_SRC___SUPPORT_STRINGUTIL_PLATFORM_SIGNALS_H
 
-#if defined(__linux__) || defined(__Fuchsia__)
+#if defined(__linux__) || defined(__Fuchsia__) || defined(__wasi__)
+// WASI uses the same signal numbers and names as Linux (minus real-time
+// signals), so reuse the Linux table.
 #include "tables/linux_platform_signals.h"
 #else
 #include "tables/minimal_platform_signals.h"

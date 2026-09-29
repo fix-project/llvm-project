@@ -196,6 +196,12 @@ add_macro_header(
 )
 
 add_macro_header(
+  setjmp_macros
+  HDR
+    setjmp-macros.h
+)
+
+add_macro_header(
   signal_macros
   HDR
     signal-macros.h
@@ -418,6 +424,12 @@ add_macro_header(
     pthread-macros.h
   DEPENDS
     .null_macro
+)
+
+add_macro_header(
+  threads_macros
+  HDR
+    threads-macros.h
 )
 
 add_macro_header(

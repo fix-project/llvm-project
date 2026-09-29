@@ -1,6 +1,11 @@
 header: setjmp.h
 standards:
   - stdc
+macros:
+  - macro_name: sigsetjmp
+    macro_header: setjmp-macros.h
+  - macro_name: siglongjmp
+    macro_header: setjmp-macros.h
 types:
   - type_name: jmp_buf
 functions:

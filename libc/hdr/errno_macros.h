@@ -17,6 +17,9 @@
 #include "include/llvm-libc-macros/error-number-macros.h"
 #elif defined(__APPLE__)
 #include <sys/errno.h>
+#elif defined(__wasi__)
+#include "include/llvm-libc-macros/generic-error-number-macros.h"
+#include "include/llvm-libc-macros/wasi/error-number-macros.h"
 #else // __APPLE__
 #include "include/llvm-libc-macros/generic-error-number-macros.h"
 #endif

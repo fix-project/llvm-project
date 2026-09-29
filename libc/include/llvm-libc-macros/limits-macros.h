@@ -247,7 +247,7 @@
 #define PTHREAD_DESTRUCTOR_ITERATIONS _POSIX_THREAD_DESTRUCTOR_ITERATIONS
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__wasi__)
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -257,7 +257,7 @@
 #define NAME_MAX 255
 #endif // NAME_MAX
 
-#endif // __linux__
+#endif // defined(__linux__) || defined(__wasi__)
 
 #ifndef _POSIX_ARG_MAX
 #define _POSIX_ARG_MAX 4096

@@ -197,6 +197,10 @@ functions:
     arguments:
       - type: pthread_cond_t *__restrict
       - type: pthread_mutex_t *__restrict
+  - name: pthread_cancel
+    return_type: int
+    arguments:
+      - type: pthread_t
   - name: pthread_create
     return_type: int
     arguments:

@@ -8,6 +8,7 @@ The currently continuously tested architectures are:
 - nvptx
 - riscv32
 - riscv64
+- wasm32
 - x86_64
 
 i386 support is [in the works](https://github.com/llvm/llvm-project/issues/93709).

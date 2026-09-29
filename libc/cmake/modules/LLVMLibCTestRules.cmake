@@ -992,6 +992,12 @@ endfunction(add_libc_hermetic)
 
 # A convenience function to add both a unit test as well as a hermetic test.
 function(add_libc_test test_name)
+  # Save the global test-mode settings. The cmake_parse_arguments call below
+  # defines function-local variables of the same names, which would otherwise
+  # shadow the global LIBC_TEST_HERMETIC_TEST_ONLY/LIBC_TEST_UNIT_TEST_ONLY
+  # cache variables.
+  set(global_hermetic_test_only ${LIBC_TEST_HERMETIC_TEST_ONLY})
+  set(global_unit_test_only ${LIBC_TEST_UNIT_TEST_ONLY})
   cmake_parse_arguments(
     "LIBC_TEST"
     "UNIT_TEST_ONLY;HERMETIC_TEST_ONLY" # Optional arguments
@@ -999,10 +1005,12 @@ function(add_libc_test test_name)
     "" # Multi-value arguments
     ${ARGN}
   )
-  if(LIBC_ENABLE_UNITTESTS AND NOT LIBC_TEST_HERMETIC_TEST_ONLY)
+  if(LIBC_ENABLE_UNITTESTS AND NOT global_hermetic_test_only
+     AND NOT LIBC_TEST_HERMETIC_TEST_ONLY)
     add_libc_unittest(${test_name}.__unit__ ${LIBC_TEST_UNPARSED_ARGUMENTS})
   endif()
-  if(LIBC_ENABLE_HERMETIC_TESTS AND NOT LIBC_TEST_UNIT_TEST_ONLY)
+  if(LIBC_ENABLE_HERMETIC_TESTS AND NOT global_unit_test_only
+     AND NOT LIBC_TEST_UNIT_TEST_ONLY)
     add_libc_hermetic(
       ${test_name}.__hermetic__
       LINK_LIBRARIES
@@ -1014,7 +1022,7 @@ function(add_libc_test test_name)
       # Tests like the file tests perform file operations on disk file. If we
       # don't chain up the unit test and hermetic test, then those tests will
       # step on each other's files.
-      if(NOT LIBC_TEST_HERMETIC_ONLY)
+      if(NOT LIBC_TEST_HERMETIC_TEST_ONLY)
         add_dependencies(${fq_test_name}.__hermetic__ ${fq_test_name}.__unit__)
       endif()
     endif()
