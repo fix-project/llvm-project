@@ -1,0 +1,123 @@
+add_custom_target(libc_wasi_unittests)
+
+add_libc_unittest(
+  wasi_mmap_test
+  SUITE
+    libc_wasi_unittests
+  SRCS
+    wasi_mmap_test.cpp
+  DEPENDS
+    libc.src.fcntl.open
+    libc.src.sys.mman.mmap
+    libc.src.sys.mman.msync
+    libc.src.sys.mman.munmap
+    libc.src.sys.stat.fstat
+    libc.src.unistd.close
+    libc.src.unistd.unlink
+    libc.src.unistd.write
+)
+
+add_libc_unittest(
+  wasi_path_test
+  SUITE
+    libc_wasi_unittests
+  SRCS
+    wasi_path_test.cpp
+  DEPENDS
+    libc.src.dirent.closedir
+    libc.src.dirent.opendir
+    libc.src.dirent.readdir
+    libc.src.fcntl.open
+    libc.src.stdlib.realpath
+    libc.src.sys.stat.mkdir
+    libc.src.sys.stat.stat
+    libc.src.unistd.close
+    libc.src.unistd.rmdir
+    libc.src.unistd.symlink
+    libc.src.unistd.unlink
+)
+
+add_libc_unittest(
+  wasi_poll_test
+  SUITE
+    libc_wasi_unittests
+  SRCS
+    wasi_poll_test.cpp
+  DEPENDS
+    libc.include.poll
+    libc.src.poll.poll
+)
+
+add_libc_unittest(
+  wasi_fadvise_test
+  SUITE
+    libc_wasi_unittests
+  SRCS
+    wasi_fadvise_test.cpp
+  DEPENDS
+    libc.hdr.errno_macros
+    libc.hdr.fcntl_macros
+    libc.src.fcntl.openat
+    libc.src.fcntl.posix_fadvise
+    libc.src.fcntl.posix_fallocate
+    libc.src.unistd.close
+    libc.src.unistd.unlink
+)
+
+add_libc_unittest(
+  wasi_stub_test
+  SUITE
+    libc_wasi_unittests
+  SRCS
+    wasi_stub_test.cpp
+  DEPENDS
+    libc.include.pthread
+    libc.include.signal
+    libc.include.sys_mman
+    libc.include.unistd
+    libc.src.pthread.pthread_create
+    libc.src.signal.kill
+    libc.src.signal.raise
+    libc.src.signal.sigaction
+    libc.src.sys.mman.mmap
+    libc.src.sys.mman.munmap
+    libc.src.unistd.fork
+    libc.src.unistd.geteuid
+    libc.src.unistd.getpid
+    libc.src.unistd.getppid
+    libc.src.unistd.getuid
+)
+
+add_libc_unittest(
+  wasi_compat_test
+  SUITE
+    libc_wasi_unittests
+  SRCS
+    wasi_compat_test.cpp
+  DEPENDS
+    libc.include.arpa_inet
+    libc.include.ftw
+    libc.include.fcntl
+    libc.include.netdb
+    libc.include.pthread
+    libc.include.stdio
+    libc.src.arpa.inet.htonl
+    libc.src.arpa.inet.inet_ntoa
+    libc.src.ftw.nftw
+    libc.src.netdb.gethostbyname
+    libc.src.netdb.getservbyname
+    libc.src.pthread.pthread_mutex_consistent
+    libc.src.pthread.pthread_mutex_timedlock
+    libc.src.stdio.tmpfile
+    libc.src.stdio.tmpnam
+    libc.src.sys.stat.mkfifo
+    libc.src.sys.stat.mkdir
+    libc.src.sys.stat.mknodat
+    libc.src.time.strptime
+    libc.src.unistd.execvpe
+    libc.src.unistd.getegid
+    libc.src.unistd.rmdir
+    libc.src.unistd.symlink
+    libc.src.unistd.ttyname_r
+    libc.src.unistd.unlink
+)

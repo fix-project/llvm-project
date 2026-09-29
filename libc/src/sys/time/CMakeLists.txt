@@ -10,6 +10,20 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  futimes
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.futimes
+)
+
+add_entrypoint_object(
+  lutimes
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.lutimes
+)
+
+add_entrypoint_object(
   setitimer
   ALIAS
   DEPENDS
@@ -22,3 +36,12 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.getitimer 
 )
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    settimeofday
+    ALIAS
+    DEPENDS
+      .wasi.settimeofday
+  )
+endif()

@@ -53,6 +53,12 @@ add_header(
 )
 
 add_header(
+  termios_macros
+  HDR
+    termios-macros.h
+)
+
+add_header(
   sys_epoll_macros
   HDR
     sys-epoll-macros.h

@@ -130,6 +130,10 @@ public:
   // errno to ENOMEM).
   int set(cpp::string_view name, cpp::string_view value, bool overwrite);
 
+  // Install the caller's name=value string without copying it. The caller
+  // retains ownership and subsequent changes to the string remain visible.
+  int put(cpp::string_view name, char *entry);
+
   // Remove a variable by name. Frees the string if we own it, then
   // compacts the array. Returns 0 on success (including if the variable
   // was not found), -1 on allocation failure during array transition.

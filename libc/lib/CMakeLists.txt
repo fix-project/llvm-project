@@ -73,8 +73,17 @@ endforeach()
 # Add empty archive libraries for compatibility with systems expecting certain
 # bits of libc to be located in separate files (e.g. libpthread).
 set(added_empty_archives "")
-if(LLVM_LIBC_FULL_BUILD AND ${LIBC_TARGET_OS} STREQUAL "linux")
-  list(APPEND libc_empty_archive_names pthread)
+if(LLVM_LIBC_FULL_BUILD)
+  if(${LIBC_TARGET_OS} STREQUAL "linux")
+    list(APPEND libc_empty_archive_names pthread)
+  elseif(${LIBC_TARGET_OS} STREQUAL "wasi")
+    # These wasi-libc compatibility libraries provide symbols that are already
+    # implemented by llvm-libc. Existing WASI builds may still link them.
+    list(APPEND libc_empty_archive_names
+      wasi-emulated-signal
+      wasi-emulated-getpid
+      wasi-emulated-process-clocks)
+  endif()
   foreach(archive ${libc_empty_archive_names})
     set(empty_archive_path ${LIBC_LIBRARY_DIR}/lib${archive}.a)
     add_custom_command(

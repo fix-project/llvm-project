@@ -73,3 +73,15 @@ add_entrypoint_object(
   DEPENDS
     libc.hdr.types.locale_t
 )
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    nl_langinfo
+    SRCS
+      wasi/nl_langinfo.cpp
+    HDRS
+      nl_langinfo.h
+    DEPENDS
+      libc.include.langinfo
+      libc.src.__support.common
+  )
+endif()

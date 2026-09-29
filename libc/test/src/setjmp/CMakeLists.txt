@@ -5,32 +5,36 @@ if(LLVM_USE_SANITIZER)
   return()
 endif()
 
-add_libc_unittest(
-  setjmp_test
-  SUITE
-    libc_setjmp_unittests
-  SRCS
-    setjmp_test.cpp
-  CXX_STANDARD
-    20
-  DEPENDS
-    libc.src.setjmp.longjmp
-    libc.src.setjmp.setjmp
-)
-
-add_libc_unittest(
-  sigsetjmp_test
-  SUITE
-    libc_setjmp_unittests
-  SRCS
-    sigsetjmp_test.cpp
-  CXX_STANDARD
-    20
-  DEPENDS
-    libc.src.setjmp.sigsetjmp
-    libc.src.setjmp.siglongjmp
-    libc.src.signal.sigprocmask
-    libc.src.string.memset
-    libc.src.string.memcmp
-    libc.hdr.types.sigset_t
-)
+# On WebAssembly, setjmp/longjmp are lowered by the -mllvm -wasm-enable-sjlj
+# backend pass, which is not applied to the libc's own test builds; the
+# entrypoints are trap stubs there, so neither test can run.
+if(NOT LIBC_TARGET_ARCHITECTURE_IS_WASM32)
+  add_libc_unittest(
+    setjmp_test
+    SUITE
+      libc_setjmp_unittests
+    SRCS
+      setjmp_test.cpp
+    CXX_STANDARD
+      20
+    DEPENDS
+      libc.src.setjmp.longjmp
+      libc.src.setjmp.setjmp
+  )
+  add_libc_unittest(
+    sigsetjmp_test
+    SUITE
+      libc_setjmp_unittests
+    SRCS
+      sigsetjmp_test.cpp
+    CXX_STANDARD
+      20
+    DEPENDS
+      libc.src.setjmp.sigsetjmp
+      libc.src.setjmp.siglongjmp
+      libc.src.signal.sigprocmask
+      libc.src.string.memset
+      libc.src.string.memcmp
+      libc.hdr.types.sigset_t
+  )
+endif()

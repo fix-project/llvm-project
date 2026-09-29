@@ -8,6 +8,34 @@ macros:
     macro_header: pthread-macros.h
   - macro_name: "PTHREAD_CREATE_DETACHED"
     macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_PRIO_NONE"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_PRIO_INHERIT"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_PRIO_PROTECT"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_INHERIT_SCHED"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_EXPLICIT_SCHED"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_SCOPE_SYSTEM"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_SCOPE_PROCESS"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_CANCEL_ENABLE"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_CANCEL_DISABLE"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_CANCEL_DEFERRED"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_CANCEL_ASYNCHRONOUS"
+    macro_header: pthread-macros.h
+  - macro_name: "PTHREAD_CANCELED"
+    macro_header: pthread-macros.h
+  - macro_name: "pthread_cleanup_push"
+    macro_header: pthread-macros.h
+  - macro_name: "pthread_cleanup_pop"
+    macro_header: pthread-macros.h
   - macro_name: "PTHREAD_MUTEX_NORMAL"
     macro_header: pthread-macros.h
   - macro_name: "PTHREAD_MUTEX_ERRORCHECK"
@@ -465,3 +493,14 @@ functions:
     arguments:
       - type: const pthread_t *__restrict
       - type: pthread_id_np_t *__restrict
+  - name: pthread_mutex_consistent
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: pthread_mutex_t *
+  - name: pthread_mutex_timedlock
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: pthread_mutex_t *
+      - type: const struct timespec *

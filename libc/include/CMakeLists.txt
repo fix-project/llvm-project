@@ -17,6 +17,60 @@ add_header(
     __llvm-libc-common.h
 )
 
+add_header(
+  sys_sysmacros
+  HDR
+    sys/sysmacros.h
+)
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_header(
+    sys_file
+    HDR
+      sys/file.h
+    DEPENDS
+      .llvm_libc_common_h
+  )
+
+  add_header(
+    iconv
+    HDR
+      iconv.h
+    DEPENDS
+      .llvm_libc_common_h
+      .llvm-libc-types.size_t
+  )
+
+  add_header(
+    mntent
+    HDR
+      mntent.h
+    DEPENDS
+      .llvm_libc_common_h
+      .llvm-libc-types.FILE
+  )
+endif()
+
+add_header(
+  paths
+  HDR
+    paths.h
+)
+
+add_header(
+  alloca
+  HDR
+    alloca.h
+)
+
+add_header(
+  syslog
+  HDR
+    syslog.h
+  DEPENDS
+    .llvm_libc_common_h
+)
+
 # TODO: Can we simplify this macro expansion?
 # https://github.com/llvm/llvm-project/issues/117254
 macro(add_header_macro TARGET_NAME YAML_FILE GEN_HDR DEPENDS)
@@ -43,6 +97,7 @@ add_header_macro(
   ../libc/include/dirent.yaml
   dirent.h
   DEPENDS
+    .llvm-libc-macros.dirent_macros
     .llvm_libc_common_h
     .llvm-libc-types.ino_t
     .llvm-libc-types.DIR
@@ -55,6 +110,7 @@ add_header_macro(
   fcntl.h
   DEPENDS
     .llvm-libc-macros.fcntl_macros
+    .llvm-libc-types.struct_flock
     .llvm-libc-types.mode_t
     .llvm-libc-types.struct_flock
     .llvm-libc-types.struct_flock64
@@ -62,6 +118,38 @@ add_header_macro(
     .llvm-libc-types.pid_t
     .llvm-libc-types.off_t
     .llvm_libc_common_h
+)
+
+add_header_macro(
+  fnmatch
+  ../libc/include/fnmatch.yaml
+  fnmatch.h
+  DEPENDS
+    .llvm_libc_common_h
+    .llvm-libc-macros.fnmatch_macros
+)
+
+add_header_macro(
+  grp
+  ../libc/include/grp.yaml
+  grp.h
+  DEPENDS
+    .llvm_libc_common_h
+    .llvm-libc-types.size_t
+    .llvm-libc-types.gid_t
+    .llvm-libc-types.struct_group
+)
+
+add_header_macro(
+  pwd
+  ../libc/include/pwd.yaml
+  pwd.h
+  DEPENDS
+    .llvm_libc_common_h
+    .llvm-libc-types.size_t
+    .llvm-libc-types.uid_t
+    .llvm-libc-types.gid_t
+    .llvm-libc-types.struct_passwd
 )
 
 add_header_macro(
@@ -311,6 +399,15 @@ add_header_macro(
     .llvm-libc-types.regmatch_t
     .llvm-libc-types.regoff_t
     .llvm-libc-types.size_t
+)
+
+add_header_macro(
+  utime
+  ../libc/include/utime.yaml
+  utime.h
+  DEPENDS
+    .llvm_libc_common_h
+    .llvm-libc-types.struct_utimbuf
 )
 
 add_header_macro(
@@ -816,6 +913,23 @@ add_header(
     .sys_socket
 )
 
+add_header(
+  ftw
+  HDR
+    ftw.h
+  DEPENDS
+    .llvm_libc_common_h
+    .sys_stat
+)
+
+add_header(
+  langinfo
+  HDR
+    langinfo.h
+  DEPENDS
+    .llvm_libc_common_h
+)
+
 add_header_macro(
   sys_statvfs
   ../libc/include/sys/statvfs.yaml
@@ -841,6 +955,16 @@ add_header_macro(
     .llvm-libc-macros.sys_time_macros
     .llvm-libc-types.struct_itimerval
     .llvm-libc-types.struct_timeval
+)
+
+add_header_macro(
+  sys_times
+  ../libc/include/sys/times.yaml
+  sys/times.h
+  DEPENDS
+    .llvm_libc_common_h
+    .llvm-libc-types.clock_t
+    .llvm-libc-types.struct_tms
 )
 
 add_header_macro(

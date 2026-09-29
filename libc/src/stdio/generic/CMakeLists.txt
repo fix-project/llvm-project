@@ -330,6 +330,19 @@ add_generic_entrypoint_object(
 )
 
 add_generic_entrypoint_object(
+  putchar_unlocked
+  SRCS
+    putchar_unlocked.cpp
+  HDRS
+    ../putchar_unlocked.h
+  DEPENDS
+    libc.src.errno.errno
+    libc.hdr.types.FILE
+    libc.src.__support.File.file
+    libc.src.__support.File.platform_file
+)
+
+add_generic_entrypoint_object(
   fgetc
   SRCS
     fgetc.cpp
@@ -340,6 +353,48 @@ add_generic_entrypoint_object(
     libc.hdr.types.FILE
     libc.src.__support.File.file
     libc.src.__support.File.platform_file
+)
+
+add_generic_entrypoint_object(
+  getdelim
+  SRCS
+    getdelim.cpp
+  HDRS
+    ../getdelim.h
+  DEPENDS
+    libc.hdr.stdio_macros
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+    libc.src.stdio.ferror
+    libc.src.stdio.fgetc
+    libc.src.stdlib.realloc
+)
+
+add_generic_entrypoint_object(
+  getline
+  SRCS
+    getline.cpp
+  HDRS
+    ../getline.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.stdio.getdelim
+)
+
+add_generic_entrypoint_object(
+  fmemopen
+  SRCS
+    fmemopen.cpp
+  HDRS
+    ../fmemopen.h
+  DEPENDS
+    libc.hdr.stdio_macros
+    libc.hdr.types.cookie_io_functions_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+    libc.src.stdio.fopencookie
+    libc.src.stdlib.malloc
+    libc.src.stdlib.free
 )
 
 add_generic_entrypoint_object(

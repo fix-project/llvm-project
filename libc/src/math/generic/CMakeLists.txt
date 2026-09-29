@@ -308,6 +308,16 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  cosh
+  SRCS
+    cosh.cpp
+  HDRS
+    ../cosh.h
+  DEPENDS
+    libc.src.__support.math.cosh
+)
+
+add_entrypoint_object(
   cospif
   SRCS
     cospif.cpp
@@ -1178,6 +1188,17 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  erf
+  SRCS
+    erf.cpp
+  HDRS
+    ../erf.h
+  DEPENDS
+    libc.src.__support.math.erf
+    libc.src.errno.errno
+)
+
+add_entrypoint_object(
   erff
   SRCS
     erff.cpp
@@ -1206,6 +1227,17 @@ add_entrypoint_object(
     ../erfcf16.h
   DEPENDS
     libc.src.__support.math.erfcf16
+)
+
+add_entrypoint_object(
+  erfc
+  SRCS
+    erfc.cpp
+  HDRS
+    ../erfc.h
+  DEPENDS
+    libc.src.__support.math.erf
+    libc.src.__support.math.exp
 )
 
 add_entrypoint_object(
@@ -3692,6 +3724,16 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  sinh
+  SRCS
+    sinh.cpp
+  HDRS
+    ../sinh.h
+  DEPENDS
+    libc.src.__support.math.sinh
+)
+
+add_entrypoint_object(
   sinhf
   SRCS
     sinhf.cpp
@@ -3709,6 +3751,16 @@ add_entrypoint_object(
     ../sinhf16.h
   DEPENDS
     libc.src.__support.math.sinhf16
+)
+
+add_entrypoint_object(
+  tanh
+  SRCS
+    tanh.cpp
+  HDRS
+    ../tanh.h
+  DEPENDS
+    libc.src.__support.math.tanh
 )
 
 add_entrypoint_object(
@@ -3742,6 +3794,18 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  acosh
+  SRCS
+    acosh.cpp
+  HDRS
+    ../acosh.h
+  DEPENDS
+    libc.src.__support.math.log
+    libc.src.__support.math.log1p
+    libc.src.__support.math.sqrt
+)
+
+add_entrypoint_object(
   acoshf16
   SRCS
     acoshf16.cpp
@@ -3770,6 +3834,18 @@ add_entrypoint_object(
     ../asinhf.h
   DEPENDS
     libc.src.__support.math.asinhf
+)
+
+add_entrypoint_object(
+  asinh
+  SRCS
+    asinh.cpp
+  HDRS
+    ../asinh.h
+  DEPENDS
+    libc.src.__support.math.log
+    libc.src.__support.math.log1p
+    libc.src.__support.math.sqrt
 )
 
 add_entrypoint_object(
@@ -3821,6 +3897,16 @@ add_entrypoint_object(
     ../atanhf.h
   DEPENDS
     libc.src.__support.math.atanhf
+)
+
+add_entrypoint_object(
+  atanh
+  SRCS
+    atanh.cpp
+  HDRS
+    ../atanh.h
+  DEPENDS
+    libc.src.__support.math.log1p
 )
 
 add_entrypoint_object(

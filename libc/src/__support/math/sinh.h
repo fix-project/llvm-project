@@ -83,7 +83,7 @@ LIBC_INLINE double sinh(double x) {
   }
 
   // 22 <= |x| <= asinh(DBL_MAX): sinh(|x|) = 0.5 * exp(|x|)
-  const double res = math::exp(ax - 1.0) * 0x1.5b0e'dec46332p+0; // e/2
+  const double res = math::exp(ax - 1.0) * 0x1.5bf0'a8b145769p+0; // e/2
   return negative ? -res : res;
 }
 

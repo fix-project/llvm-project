@@ -1,0 +1,27 @@
+add_entrypoint_object(
+  readv
+  SRCS
+    readv.cpp
+  HDRS
+    ../readv.h
+  DEPENDS
+    libc.hdr.types.ssize_t
+    libc.hdr.types.struct_iovec
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  writev
+  SRCS
+    writev.cpp
+  HDRS
+    ../writev.h
+  DEPENDS
+    libc.hdr.types.ssize_t
+    libc.hdr.types.struct_iovec
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

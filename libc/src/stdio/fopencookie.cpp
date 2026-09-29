@@ -44,16 +44,22 @@ FileIOResult CookieFile::cookie_write(File *f, const void *data, size_t size) {
   auto cookie_file = reinterpret_cast<CookieFile *>(f);
   if (cookie_file->ops.write == nullptr)
     return 0;
-  return static_cast<size_t>(cookie_file->ops.write(
-      cookie_file->cookie, reinterpret_cast<const char *>(data), size));
+  ssize_t written = cookie_file->ops.write(
+      cookie_file->cookie, reinterpret_cast<const char *>(data), size);
+  if (written < 0)
+    return {0, libc_errno != 0 ? libc_errno : EIO};
+  return static_cast<size_t>(written);
 }
 
 FileIOResult CookieFile::cookie_read(File *f, void *data, size_t size) {
   auto cookie_file = reinterpret_cast<CookieFile *>(f);
   if (cookie_file->ops.read == nullptr)
     return 0;
-  return static_cast<size_t>(cookie_file->ops.read(
-      cookie_file->cookie, reinterpret_cast<char *>(data), size));
+  ssize_t read = cookie_file->ops.read(cookie_file->cookie,
+                                       reinterpret_cast<char *>(data), size);
+  if (read < 0)
+    return {0, libc_errno != 0 ? libc_errno : EIO};
+  return static_cast<size_t>(read);
 }
 
 ErrorOr<off_t> CookieFile::cookie_seek(File *f, off_t offset, int whence) {
@@ -65,14 +71,14 @@ ErrorOr<off_t> CookieFile::cookie_seek(File *f, off_t offset, int whence) {
   int result = cookie_file->ops.seek(cookie_file->cookie, &offset64, whence);
   if (result == 0)
     return offset64;
-  return -1;
+  return Error(libc_errno != 0 ? libc_errno : EINVAL);
 }
 
 int CookieFile::cookie_close(File *f) {
   auto cookie_file = reinterpret_cast<CookieFile *>(f);
-  if (cookie_file->ops.close == nullptr)
-    return 0;
-  int retval = cookie_file->ops.close(cookie_file->cookie);
+  int retval = cookie_file->ops.close == nullptr
+                   ? 0
+                   : cookie_file->ops.close(cookie_file->cookie);
   if (retval != 0)
     return retval;
   delete cookie_file;
@@ -84,18 +90,27 @@ int CookieFile::cookie_close(File *f) {
 LLVM_LIBC_FUNCTION(::FILE *, fopencookie,
                    (void *cookie, const char *mode,
                     cookie_io_functions_t ops)) {
+  if (File::mode_flags(mode) == 0) {
+    libc_errno = EINVAL;
+    return nullptr;
+  }
   uint8_t *buffer;
   {
     AllocChecker ac;
     buffer = new (ac) uint8_t[File::DEFAULT_BUFFER_SIZE];
-    if (!ac)
+    if (!ac) {
+      libc_errno = ENOMEM;
       return nullptr;
+    }
   }
   AllocChecker ac;
   auto *file = new (ac) CookieFile(
       cookie, ops, buffer, File::DEFAULT_BUFFER_SIZE, File::mode_flags(mode));
-  if (!ac)
+  if (!ac) {
+    delete[] buffer;
+    libc_errno = ENOMEM;
     return nullptr;
+  }
   return reinterpret_cast<::FILE *>(file);
 }
 

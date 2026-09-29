@@ -11,6 +11,10 @@
 
 // The following values match the WASI libc ABI (asm-generic/musl values).
 
+#ifndef EWOULDBLOCK
+#define EWOULDBLOCK EAGAIN
+#endif // EWOULDBLOCK
+
 #ifndef EDEADLK
 #define EDEADLK 35
 #endif // EDEADLK
@@ -126,6 +130,10 @@
 #ifndef ENOTCONN
 #define ENOTCONN 107
 #endif // ENOTCONN
+
+#ifndef ESHUTDOWN
+#define ESHUTDOWN 108
+#endif // ESHUTDOWN
 
 #ifndef ETIMEDOUT
 #define ETIMEDOUT 110

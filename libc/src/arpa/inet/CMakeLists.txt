@@ -96,3 +96,16 @@ add_entrypoint_object(
     libc.include.arpa_inet
     libc.src.__support.common
 )
+add_entrypoint_object(
+  inet_ntoa
+  SRCS
+    inet_ntoa.cpp
+  HDRS
+    inet_ntoa.h
+  DEPENDS
+    libc.include.arpa_inet
+    libc.hdr.types.struct_in_addr
+    libc.src.__support.common
+    libc.src.__support.CPP.span
+    libc.src.__support.net.address
+)

@@ -1,0 +1,11 @@
+add_entrypoint_object(
+  getrandom
+  SRCS
+    getrandom.cpp
+  HDRS
+    ../getrandom.h
+  DEPENDS
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

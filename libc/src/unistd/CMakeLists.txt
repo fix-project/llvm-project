@@ -48,6 +48,25 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  lchown
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.lchown
+)
+
+add_entrypoint_object(
+  sleep
+  SRCS
+    sleep.cpp
+  HDRS
+    sleep.h
+  DEPENDS
+    libc.hdr.types.struct_timespec
+    libc.src.__support.common
+    libc.src.time.nanosleep
+)
+
+add_entrypoint_object(
   close
   ALIAS
   DEPENDS
@@ -97,6 +116,27 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  fchownat
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.fchownat
+)
+
+add_entrypoint_object(
+  chroot
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.chroot
+)
+
+add_entrypoint_object(
+  getgroups
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.getgroups
+)
+
+add_entrypoint_object(
   fork
   ALIAS
   DEPENDS
@@ -118,6 +158,41 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  execlp
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.execlp
+)
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    execl
+    ALIAS
+    DEPENDS
+      .wasi.execl
+  )
+  add_entrypoint_object(
+    getpgrp
+    ALIAS
+    DEPENDS
+      .wasi.getpgrp
+  )
+  add_entrypoint_object(
+    sethostname
+    ALIAS
+    DEPENDS
+      .wasi.sethostname
+  )
+endif()
+
+add_entrypoint_object(
+  execvp
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.execvp
+)
+
+add_entrypoint_object(
   execve
   ALIAS
   DEPENDS
@@ -130,6 +205,17 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.fsync
 )
+
+if(LIBC_TARGET_OS_IS_WASI)
+  foreach(entrypoint fdatasync sync nice)
+    add_entrypoint_object(
+      ${entrypoint}
+      ALIAS
+      DEPENDS
+        .wasi.${entrypoint}
+    )
+  endforeach()
+endif()
 
 add_entrypoint_object(
   ftruncate
@@ -151,6 +237,17 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.gethostname
 )
+
+if(LIBC_TARGET_OS_IS_WASI)
+  foreach(entrypoint confstr getlogin getlogin_r)
+    add_entrypoint_object(
+      ${entrypoint}
+      ALIAS
+      DEPENDS
+        .wasi.${entrypoint}
+    )
+  endforeach()
+endif()
 
 add_entrypoint_object(
   getpagesize
@@ -419,12 +516,9 @@ add_entrypoint_external(
 
 add_entrypoint_object(
   gettid
-  SRCS
-    gettid.cpp
-  HDRS
-    gettid.h
+  ALIAS
   DEPENDS
-    libc.src.__support.threads.identifier
+    .${LIBC_TARGET_OS}.gettid
 )
 
 add_entrypoint_object(
@@ -433,3 +527,84 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.getentropy
 )
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    getegid
+    ALIAS
+    DEPENDS
+      .wasi.getegid
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    execvpe
+    ALIAS
+    DEPENDS
+      .wasi.execvpe
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    ttyname
+    ALIAS
+    DEPENDS
+      .wasi.ttyname
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    ttyname_r
+    ALIAS
+    DEPENDS
+      .wasi.ttyname_r
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    vfork
+    ALIAS
+    DEPENDS
+      .wasi.vfork
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    setuid
+    ALIAS
+    DEPENDS
+      .wasi.setuid
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    setgid
+    ALIAS
+    DEPENDS
+      .wasi.setgid
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    setegid
+    ALIAS
+    DEPENDS
+      .wasi.setegid
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    seteuid
+    ALIAS
+    DEPENDS
+      .wasi.seteuid
+  )
+endif()

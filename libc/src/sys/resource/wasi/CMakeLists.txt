@@ -1,0 +1,39 @@
+add_entrypoint_object(
+  getrlimit
+  SRCS
+    getrlimit.cpp
+  HDRS
+    ../getrlimit.h
+  DEPENDS
+    libc.include.sys_resource
+    libc.hdr.sys_resource_macros
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+foreach(entrypoint getpriority setpriority)
+  add_entrypoint_object(
+    ${entrypoint}
+    SRCS
+      ${entrypoint}.cpp
+    HDRS
+      ../${entrypoint}.h
+    DEPENDS
+      libc.src.__support.common
+      libc.src.__support.libc_errno
+  )
+endforeach()
+
+add_entrypoint_object(
+  setrlimit
+  SRCS
+    setrlimit.cpp
+  HDRS
+    ../setrlimit.h
+  DEPENDS
+    .getrlimit
+    libc.include.sys_resource
+    libc.hdr.sys_resource_macros
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

@@ -1,5 +1,6 @@
 add_custom_target(libc_signal_unittests)
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   raise_test
   SUITE
@@ -10,7 +11,9 @@ add_libc_unittest(
     libc.include.signal
     libc.src.signal.raise
 )
+endif()
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   kill_test
   SUITE
@@ -24,7 +27,9 @@ add_libc_unittest(
     libc.src.__support.OSUtil.osutil
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   sigaction_test
   SUITE
@@ -38,7 +43,9 @@ add_libc_unittest(
     libc.src.signal.sigaction
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   sigprocmask_test
   SUITE
@@ -54,7 +61,9 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   pthread_sigmask_test
   SUITE
@@ -69,6 +78,7 @@ add_libc_unittest(
     libc.src.signal.sigemptyset
     libc.test.UnitTest.ErrnoCheckingTest
 )
+endif()
 
 add_libc_unittest(
   sigaddset_test
@@ -83,6 +93,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoSetterMatcher
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   signal_test
   SUITE
@@ -96,6 +107,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
 add_libc_unittest(
   sigfillset_test
@@ -128,6 +140,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoSetterMatcher
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   sigaltstack_test
   SUITE
@@ -144,3 +157,4 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()

@@ -14,6 +14,8 @@ macros:
     macro_header: unistd-macros.h
   - macro_name: STDERR_FILENO
     macro_header: unistd-macros.h
+  - macro_name: _CS_PATH
+    macro_header: unistd-macros.h
   - macro_name: _SC_ARG_MAX
     macro_header: unistd-macros.h
   - macro_name: _SC_PAGESIZE
@@ -55,6 +57,14 @@ objects:
   - object_name: optopt
     object_type: int
 functions:
+  - name: confstr
+    standards:
+      - posix
+    return_type: size_t
+    arguments:
+      - type: int
+      - type: char *
+      - type: size_t
   - name: __llvm_libc_syscall
     standards:
       - posix
@@ -100,6 +110,18 @@ functions:
       - type: const char *
       - type: uid_t
       - type: gid_t
+  - name: lchown
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: uid_t
+      - type: gid_t
+  - name: sleep
+    standards:
+      - posix
+    return_type: unsigned int
+    arguments:
+      - type: unsigned int
   - name: close
     standards:
       - posix
@@ -128,6 +150,29 @@ functions:
       - type: int
       - type: int
   - name: execv
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: __exec_argv_t
+  - name: execl
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: const char *
+      - type: '...'
+  - name: execlp
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: const char *
+      - type: '...'
+  - name: execvp
     standards:
       - posix
     return_type: int
@@ -165,6 +210,23 @@ functions:
       - type: int
       - type: uid_t
       - type: gid_t
+  - name: fchownat
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: int
+      - type: const char *
+      - type: uid_t
+      - type: gid_t
+      - type: int
+  - name: chroot
+    standards:
+      - bsd
+      - gnu
+    return_type: int
+    arguments:
+      - type: const char *
   - name: fpathconf
     standards:
       - posix
@@ -181,6 +243,23 @@ functions:
   - name: fsync
     standards:
       - posix
+    return_type: int
+    arguments:
+      - type: int
+  - name: fdatasync
+    guard: __wasi__
+    standards: [posix]
+    return_type: int
+    arguments:
+      - type: int
+  - name: sync
+    guard: __wasi__
+    standards: [posix]
+    return_type: void
+    arguments: []
+  - name: nice
+    guard: __wasi__
+    standards: [posix]
     return_type: int
     arguments:
       - type: int
@@ -205,6 +284,13 @@ functions:
     arguments:
       - type: void *
       - type: size_t
+  - name: getgroups
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: int
+      - type: gid_t *
   - name: geteuid
     standards:
       - posix
@@ -218,12 +304,39 @@ functions:
     arguments:
       - type: char *
       - type: size_t
+  - name: sethostname
+    guard: __wasi__
+    standards:
+      - bsd
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: size_t
+  - name: getpgrp
+    standards:
+      - posix
+    return_type: pid_t
+    arguments:
+      - type: void
   - name: getpagesize
     standards:
       - bsd
     return_type: int
     arguments:
       - type: void
+  - name: getlogin
+    standards:
+      - posix
+    return_type: char *
+    arguments:
+      - type: void
+  - name: getlogin_r
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: char *
+      - type: size_t
   - name: getopt
     standards:
       - posix
@@ -436,3 +549,55 @@ functions:
       - type: size_t
     guard: null
     attributes: []
+  - name: getegid
+    guard: __wasi__
+    standards: [posix]
+    return_type: gid_t
+    arguments: []
+  - name: execvpe
+    guard: __wasi__
+    standards: [gnu]
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: char *const[]
+      - type: char *const[]
+  - name: ttyname
+    guard: __wasi__
+    standards: [posix]
+    return_type: char *
+    arguments:
+      - type: int
+  - name: ttyname_r
+    guard: __wasi__
+    standards: [posix]
+    return_type: int
+    arguments:
+      - type: int
+      - type: char *
+      - type: size_t
+  - name: vfork
+    guard: __wasi__
+    return_type: pid_t
+    arguments:
+      - type: void
+  - name: setuid
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: uid_t
+  - name: setgid
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: gid_t
+  - name: setegid
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: gid_t
+  - name: seteuid
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: uid_t

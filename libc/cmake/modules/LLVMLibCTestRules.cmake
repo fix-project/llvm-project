@@ -780,6 +780,12 @@ function(add_libc_hermetic test_name)
       libc.src.strings.bzero
   )
 
+  if(LIBC_TARGET_OS_IS_WASI)
+    list(APPEND fq_deps_list
+        libc.startup.wasi.__main_void
+        libc.startup.wasi.__main_argc_argv)
+  endif()
+
   if(libc.src.compiler.__stack_chk_fail IN_LIST TARGET_LLVMLIBC_ENTRYPOINTS)
     # __stack_chk_fail should always be included if supported to allow building
     # libc with the stack protector enabled.

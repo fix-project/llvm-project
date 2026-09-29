@@ -16,6 +16,11 @@ types:
 enums: []
 objects: []
 functions:
+  - name: gettimeofday
+    return_type: int
+    arguments:
+      - type: struct timeval *
+      - type: void *
   - name: utimes
     return_type: int
     arguments:
@@ -46,3 +51,9 @@ functions:
     arguments:
       - type: int
       - type: struct itimerval *
+  - name: settimeofday
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: const struct timeval *
+      - type: const void *

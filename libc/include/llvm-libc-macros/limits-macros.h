@@ -235,8 +235,20 @@
 #define _POSIX_NAME_MAX 14
 #endif
 
+#ifndef _POSIX_HOST_NAME_MAX
+#define _POSIX_HOST_NAME_MAX 255
+#endif
+
 #ifndef _POSIX_PATH_MAX
 #define _POSIX_PATH_MAX 256
+#endif
+
+#ifndef CHARCLASS_NAME_MAX
+#define CHARCLASS_NAME_MAX 14
+#endif
+
+#ifndef RE_DUP_MAX
+#define RE_DUP_MAX 255
 #endif
 
 #ifndef _POSIX_THREAD_DESTRUCTOR_ITERATIONS
@@ -258,6 +270,15 @@
 #endif // NAME_MAX
 
 #endif // defined(__linux__) || defined(__wasi__)
+
+#if defined(__wasi__)
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+#endif
+#ifndef NZERO
+#define NZERO 20
+#endif
+#endif // defined(__wasi__)
 
 #ifndef _POSIX_ARG_MAX
 #define _POSIX_ARG_MAX 4096

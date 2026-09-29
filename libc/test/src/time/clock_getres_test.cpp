@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "hdr/time_macros.h"
+#include "src/__support/macros/properties/os.h"
 #include "src/time/clock_getres.h"
 #include "test/UnitTest/ErrnoSetterMatcher.h"
 #include "test/UnitTest/Test.h"
@@ -38,6 +39,9 @@ TEST(LlvmLibcClockGetRes, Monotonic) {
   EXPECT_GE(tp.tv_nsec, static_cast<decltype(tp.tv_nsec)>(0));
 }
 
+// WASI runtimes are not required to expose per-process/thread CPU clocks;
+// wasmtime rejects them with EINVAL, so the resolution cannot be queried.
+#ifndef LIBC_TARGET_OS_IS_WASI
 TEST(LlvmLibcClockGetRes, ProcessCpuTime) {
   timespec tp;
   ASSERT_THAT(LIBC_NAMESPACE::clock_getres(CLOCK_PROCESS_CPUTIME_ID, &tp),
@@ -53,3 +57,4 @@ TEST(LlvmLibcClockGetRes, ThreadCpuTime) {
   EXPECT_GE(tp.tv_sec, static_cast<decltype(tp.tv_sec)>(0));
   EXPECT_GE(tp.tv_nsec, static_cast<decltype(tp.tv_nsec)>(0));
 }
+#endif // LIBC_TARGET_OS_IS_WASI

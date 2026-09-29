@@ -13,6 +13,21 @@ types:
 enums: []
 objects: []
 functions:
+  - name: cfmakeraw
+    standards:
+      - bsd
+      - gnu
+    return_type: void
+    arguments:
+      - type: struct termios *
+  - name: cfsetspeed
+    standards:
+      - bsd
+      - gnu
+    return_type: int
+    arguments:
+      - type: struct termios *
+      - type: speed_t
   - name: cfgetispeed
     standards:
       - posix

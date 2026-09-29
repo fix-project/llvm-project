@@ -16,6 +16,8 @@
 #if defined(LIBC_HASHTABLE_USE_GETRANDOM)
 #include "hdr/errno_macros.h"
 #include "src/__support/OSUtil/linux/syscall_wrappers/getrandom.h"
+#elif defined(LIBC_HASHTABLE_USE_WASI_RANDOM)
+#include "src/__support/OSUtil/wasi/wasi.h"
 #endif
 
 namespace LIBC_NAMESPACE_DECL {
@@ -47,6 +49,11 @@ LIBC_INLINE uint64_t next_random_seed() {
       count -= len.value();
       buffer += len.value();
     }
+#elif defined(LIBC_HASHTABLE_USE_WASI_RANDOM)
+    // WASI random_get fills the entire buffer or reports an error. If it
+    // fails, the address-based seed still lets the table operate correctly.
+    (void)wasi::__wasi_random_get(reinterpret_cast<uint8_t *>(entropy),
+                                  sizeof(entropy));
 #endif
     state.update(&entropy, sizeof(entropy));
   }

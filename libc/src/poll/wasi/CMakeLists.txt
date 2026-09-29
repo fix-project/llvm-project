@@ -1,0 +1,14 @@
+add_entrypoint_object(
+  poll
+  SRCS
+    poll.cpp
+  HDRS
+    ../poll.h
+  DEPENDS
+    libc.include.poll
+    libc.hdr.func.malloc
+    libc.hdr.func.free
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

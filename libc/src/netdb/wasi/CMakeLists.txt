@@ -1,0 +1,136 @@
+add_entrypoint_object(
+  getaddrinfo
+  SRCS
+    getaddrinfo.cpp
+  HDRS
+    ../getaddrinfo.h
+    ../eai_codes.h
+  DEPENDS
+    libc.include.netdb
+    libc.hdr.types.struct_addrinfo
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  freeaddrinfo
+  SRCS
+    freeaddrinfo.cpp
+  HDRS
+    ../freeaddrinfo.h
+  DEPENDS
+    libc.include.netdb
+    libc.hdr.types.struct_addrinfo
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  getnameinfo
+  SRCS
+    getnameinfo.cpp
+  HDRS
+    ../getnameinfo.h
+    ../eai_codes.h
+  DEPENDS
+    libc.include.netdb
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  gethostbyname
+  SRCS
+    gethostbyname.cpp
+  HDRS
+    ../gethostbyname.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  gethostbyaddr
+  SRCS
+    gethostbyaddr.cpp
+  HDRS
+    ../gethostbyaddr.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  getservent
+  SRCS
+    getservent.cpp
+  HDRS
+    ../getservent.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  getservbyname
+  SRCS
+    getservbyname.cpp
+  HDRS
+    ../getservbyname.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  getservbyport
+  SRCS
+    getservbyport.cpp
+  HDRS
+    ../getservbyport.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  getprotobyname
+  SRCS
+    getprotobyname.cpp
+  HDRS
+    ../getprotobyname.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  setservent
+  SRCS
+    setservent.cpp
+  HDRS
+    ../setservent.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  endservent
+  SRCS
+    endservent.cpp
+  HDRS
+    ../endservent.h
+  DEPENDS
+    libc.include.netdb
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

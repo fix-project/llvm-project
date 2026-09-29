@@ -76,8 +76,8 @@ bool is_root_preopen(const char *name, size_t len) {
   return false;
 }
 
-bool mount_child_of(const Preopen &po, const char *directory, char *name,
-                    size_t name_size) {
+bool mount_child_span(const Preopen &po, const char *directory,
+                      const char *&child, size_t &child_len) {
   const char *p = po.name;
   size_t len = po.name_len;
   if (len >= 2 && p[0] == '.' && p[1] == '/') {
@@ -88,36 +88,25 @@ bool mount_child_of(const Preopen &po, const char *directory, char *name,
     --len;
   if (is_root_preopen(p, len))
     return false;
-
-  char absolute[PATH_MAX_SIZE];
-  size_t n = 0;
-  if (p[0] != '/')
-    absolute[n++] = '/';
-  if (n + len >= sizeof(absolute))
-    return false;
-  for (size_t i = 0; i < len; ++i)
-    absolute[n++] = p[i];
-  absolute[n] = '\0';
-
+  size_t prefix = p[0] == '/' ? 0 : 1;
+  size_t absolute_len = prefix + len;
   size_t parent_len = str_len(directory);
-  size_t child_start = parent_len == 1 && directory[0] == '/'
-                           ? 1
-                           : parent_len + 1;
-  if (child_start >= n ||
-      (parent_len != 1 &&
-       (!mem_eq(absolute, directory, parent_len) ||
-        absolute[parent_len] != '/')))
+  size_t child_start =
+      parent_len == 1 && directory[0] == '/' ? 1 : parent_len + 1;
+  if (child_start >= absolute_len)
     return false;
-  size_t child_end = child_start;
-  while (child_end < n && absolute[child_end] != '/')
-    ++child_end;
-  size_t child_len = child_end - child_start;
-  if (child_len == 0 || child_len + 1 > name_size)
-    return false;
-  for (size_t i = 0; i < child_len; ++i)
-    name[i] = absolute[child_start + i];
-  name[child_len] = '\0';
-  return true;
+  if (parent_len != 1 || directory[0] != '/') {
+    for (size_t i = 0; i < parent_len; ++i)
+      if ((i < prefix ? '/' : p[i - prefix]) != directory[i])
+        return false;
+    if ((parent_len < prefix ? '/' : p[parent_len - prefix]) != '/')
+      return false;
+  }
+  child = p + child_start - prefix;
+  child_len = 0;
+  while (child_start + child_len < absolute_len && child[child_len] != '/')
+    ++child_len;
+  return child_len != 0;
 }
 
 } // namespace
@@ -127,43 +116,57 @@ int next_mount_child(const char *directory, int start_fd, char *name,
   Preopen po;
   for (int next = next_preopen(start_fd, po); next >= 0;
        next = next_preopen(next, po)) {
-    if (!mount_child_of(po, directory, name, name_size))
+    const char *child;
+    size_t child_len;
+    if (!mount_child_span(po, directory, child, child_len) ||
+        child_len + 1 > name_size)
       continue;
     // Nested preopens may contribute the same ancestor. Emit it once.
     Preopen earlier;
-    char candidate[PATH_MAX_SIZE];
     bool duplicate = false;
-    for (int prev = next_preopen(3, earlier);
-         prev >= 0 && earlier.fd < po.fd;
+    for (int prev = next_preopen(3, earlier); prev >= 0 && earlier.fd < po.fd;
          prev = next_preopen(prev, earlier)) {
-      if (mount_child_of(earlier, directory, candidate,
-                         sizeof(candidate)) &&
-          str_len(candidate) == str_len(name) &&
-          mem_eq(candidate, name, str_len(name))) {
+      const char *candidate;
+      size_t candidate_len;
+      if (mount_child_span(earlier, directory, candidate, candidate_len) &&
+          candidate_len == child_len && mem_eq(candidate, child, child_len)) {
         duplicate = true;
         break;
       }
     }
-    if (!duplicate)
+    if (!duplicate) {
+      for (size_t i = 0; i < child_len; ++i)
+        name[i] = child[i];
+      name[child_len] = '\0';
       return next;
+    }
   }
   return -1;
 }
 
 bool is_mount_child(const char *directory, const char *name, size_t name_len) {
-  char child[PATH_MAX_SIZE];
-  for (int next = next_mount_child(directory, 3, child, sizeof(child));
-       next >= 0;
-       next = next_mount_child(directory, next, child, sizeof(child))) {
-    if (str_len(child) == name_len && mem_eq(child, name, name_len))
+  Preopen po;
+  for (int next = next_preopen(3, po); next >= 0;
+       next = next_preopen(next, po)) {
+    const char *child;
+    size_t child_len;
+    if (mount_child_span(po, directory, child, child_len) &&
+        child_len == name_len && mem_eq(child, name, name_len))
       return true;
   }
   return false;
 }
 
 bool is_mount_directory(const char *directory) {
-  char child[PATH_MAX_SIZE];
-  return next_mount_child(directory, 3, child, sizeof(child)) >= 0;
+  Preopen po;
+  for (int next = next_preopen(3, po); next >= 0;
+       next = next_preopen(next, po)) {
+    const char *child;
+    size_t child_len;
+    if (mount_child_span(po, directory, child, child_len))
+      return true;
+  }
+  return false;
 }
 
 namespace {

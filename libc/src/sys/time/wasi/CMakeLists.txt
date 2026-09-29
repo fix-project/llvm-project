@@ -1,0 +1,79 @@
+add_entrypoint_object(
+  utimes
+  SRCS
+    utimes.cpp
+  HDRS
+    ../utimes.h
+    timeval_utils.h
+  DEPENDS
+    libc.hdr.fcntl_macros
+    libc.hdr.types.struct_timeval
+    libc.hdr.types.struct_timespec
+    libc.src.sys.stat.utimensat
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  lutimes
+  SRCS
+    lutimes.cpp
+  HDRS
+    ../lutimes.h
+    timeval_utils.h
+  DEPENDS
+    libc.hdr.fcntl_macros
+    libc.hdr.types.struct_timeval
+    libc.hdr.types.struct_timespec
+    libc.src.sys.stat.utimensat
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  futimes
+  SRCS
+    futimes.cpp
+  HDRS
+    ../futimes.h
+    timeval_utils.h
+  DEPENDS
+    libc.hdr.types.struct_timeval
+    libc.hdr.types.struct_timespec
+    libc.src.fcntl.futimens
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  getitimer
+  SRCS
+    getitimer.cpp
+  HDRS
+    ../getitimer.h
+  DEPENDS
+    libc.hdr.types.struct_itimerval
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  setitimer
+  SRCS
+    setitimer.cpp
+  HDRS
+    ../setitimer.h
+  DEPENDS
+    libc.hdr.types.struct_itimerval
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  settimeofday
+  SRCS
+    settimeofday.cpp
+  HDRS
+    ../settimeofday.h
+  DEPENDS
+    libc.include.sys_time
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

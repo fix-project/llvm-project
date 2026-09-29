@@ -73,6 +73,13 @@ functions:
     arguments:
       - type: clockid_t
       - type: struct timespec *
+  - name: clock_getres
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: clockid_t
+      - type: struct timespec *
   - name: clock_settime
     standards:
       - posix
@@ -152,3 +159,15 @@ functions:
     arguments:
       - type: struct timespec *
       - type: int
+  - name: strptime
+    guard: __wasi__
+    return_type: char *
+    arguments:
+      - type: const char *
+      - type: const char *
+      - type: struct tm *
+  - name: tzset
+    guard: __wasi__
+    return_type: void
+    arguments:
+      - type: void

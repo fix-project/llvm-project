@@ -1,0 +1,11 @@
+add_entrypoint_object(
+  posix_spawn
+  SRCS
+    posix_spawn.cpp
+  HDRS
+    ../posix_spawn.h
+  DEPENDS
+    libc.include.spawn
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

@@ -107,6 +107,16 @@ TEST_F(LlvmLibcGetoptTest, NoMatch) {
   EXPECT_EQ(test_globals::optind, 2);
 }
 
+TEST_F(LlvmLibcGetoptTest, ResetWithZero) {
+  array<char *, 3> first{"prog"_c, "-ab"_c, nullptr};
+  EXPECT_EQ(LIBC_NAMESPACE::getopt(2, first.data(), "ab"), int('a'));
+
+  test_globals::optind = 0;
+  array<char *, 3> second{"prog"_c, "-b"_c, nullptr};
+  EXPECT_EQ(LIBC_NAMESPACE::getopt(2, second.data(), "ab"), int('b'));
+  EXPECT_EQ(test_globals::optind, 2);
+}
+
 TEST_F(LlvmLibcGetoptTest, WrongMatch) {
   array<char *, 3> argv{"prog"_c, "-b"_c, nullptr};
 

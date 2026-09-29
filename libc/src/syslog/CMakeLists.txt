@@ -1,0 +1,13 @@
+add_entrypoint_object(
+  syslog
+  SRCS
+    syslog.cpp
+  HDRS
+    syslog.h
+  DEPENDS
+    libc.include.syslog
+    libc.src.stdio.stderr
+    libc.src.stdio.fputs
+    libc.src.stdio.fputc
+    libc.src.stdio.vfprintf
+)

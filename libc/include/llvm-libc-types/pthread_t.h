@@ -9,8 +9,11 @@
 #ifndef LLVM_LIBC_TYPES_PTHREAD_T_H
 #define LLVM_LIBC_TYPES_PTHREAD_T_H
 
+#ifdef __wasi__
+typedef void *pthread_t;
+#else
 #include "__thread_type.h"
-
 typedef __thread_type pthread_t;
+#endif
 
 #endif // LLVM_LIBC_TYPES_PTHREAD_T_H

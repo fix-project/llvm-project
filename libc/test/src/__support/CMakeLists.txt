@@ -57,7 +57,9 @@ endif()
 
 # TODO: FreeListHeap uses the _end symbol which conflicts with the _end symbol
 # defined by GPU start.cpp files so for now we exclude this test on GPU.
-if(LLVM_LIBC_FULL_BUILD AND NOT LIBC_TARGET_OS_IS_GPU)
+# The WASI assembler requires a size for the _end data symbol, so exclude it
+# on WASI as well.
+if(LLVM_LIBC_FULL_BUILD AND NOT LIBC_TARGET_OS_IS_GPU AND NOT LIBC_TARGET_OS_IS_WASI)
   add_libc_test(
     freelist_heap_test
     SUITE

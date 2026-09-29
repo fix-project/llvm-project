@@ -1,0 +1,12 @@
+add_entrypoint_object(
+  utime
+  SRCS
+    utime.cpp
+  HDRS
+    utime.h
+  DEPENDS
+    libc.hdr.types.struct_utimbuf
+    libc.hdr.types.struct_timeval
+    libc.src.__support.common
+    libc.src.sys.time.utimes
+)

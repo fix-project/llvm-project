@@ -1,0 +1,10 @@
+add_entrypoint_object(
+  flock
+  SRCS
+    wasi/flock.cpp
+  HDRS
+    flock.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

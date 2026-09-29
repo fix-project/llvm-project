@@ -48,3 +48,10 @@ functions:
       - type: const void *__restrict
       - type: char *__restrict
       - type: socklen_t
+  - name: inet_ntoa
+    guard: __wasi__
+    standards:
+      - posix
+    return_type: char *
+    arguments:
+      - type: struct in_addr

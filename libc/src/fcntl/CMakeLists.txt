@@ -29,3 +29,24 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.openat
 )
+
+add_entrypoint_object(
+  posix_fadvise
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.posix_fadvise
+)
+
+add_entrypoint_object(
+  posix_fallocate
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.posix_fallocate
+)
+
+add_entrypoint_object(
+  futimens
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.futimens
+)

@@ -11,4 +11,7 @@
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+// POSIX configuration-string selector for the default executable search path.
+#define _CS_PATH 0
+
 #endif // LLVM_LIBC_MACROS_UNISTD_MACROS_H

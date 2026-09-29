@@ -1,0 +1,34 @@
+add_entrypoint_object(
+  setmntent
+  SRCS
+    wasi/mntent.cpp
+  HDRS
+    mntent.h
+  DEPENDS
+    libc.include.mntent
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+    libc.src.stdio.fopencookie
+    libc.src.stdio.fopen
+    libc.src.stdio.fgets
+    libc.src.stdio.feof
+    libc.src.stdio.fclose
+    libc.src.stdio.fprintf
+    libc.src.stdio.fputc
+    libc.src.stdlib.malloc
+    libc.src.stdlib.free
+    libc.src.string.strchr
+    libc.src.string.strcmp
+    libc.src.string.strncmp
+    libc.src.string.strlen
+)
+
+foreach(entrypoint getmntent getmntent_r endmntent addmntent hasmntopt)
+  add_entrypoint_object(
+    ${entrypoint}
+    ALIAS
+    DEPENDS
+      .setmntent
+  )
+endforeach()

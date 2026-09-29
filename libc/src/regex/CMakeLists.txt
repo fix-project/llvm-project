@@ -1,32 +1,49 @@
 add_entrypoint_object(
   regcomp
   SRCS
-    regcomp.cpp
+    tre/regcomp.c
+    tre/tre-mem.c
   HDRS
     regcomp.h
+    tre/tre.h
   DEPENDS
+    libc.include.regex
+    libc.include.wchar
+    libc.include.wctype
+    libc.include.stdlib
+    libc.include.string
+    libc.include.limits
+    libc.include.stdint
+    libc.include.ctype
+    libc.include.assert
     libc.hdr.types.regex_t
     libc.hdr.regex_macros
-    libc.src.__support.common
-    libc.src.__support.CPP.new
-    libc.src.__support.CPP.string_view
-    libc.src.__support.alloc_checker
-    libc.src.string.memory_utils.inline_memcpy
+  COMPILE_OPTIONS
+    -Wno-implicit-fallthrough
+    -Wno-covered-switch-default
 )
 
 add_entrypoint_object(
   regexec
   SRCS
-    regexec.cpp
+    tre/regexec.c
   HDRS
     regexec.h
+    tre/tre.h
   DEPENDS
+    libc.include.regex
+    libc.include.wchar
+    libc.include.wctype
+    libc.include.stdlib
+    libc.include.string
+    libc.include.limits
+    libc.include.stdint
     libc.hdr.types.regex_t
     libc.hdr.types.regmatch_t
     libc.hdr.types.size_t
     libc.hdr.regex_macros
-    libc.src.__support.common
-    libc.src.string.memory_utils.inline_strstr
+  COMPILE_OPTIONS
+    -Wno-sign-compare
 )
 
 add_entrypoint_object(
@@ -46,12 +63,9 @@ add_entrypoint_object(
 
 add_entrypoint_object(
   regfree
-  SRCS
-    regfree.cpp
-  HDRS
-    regfree.h
+  ALIAS
   DEPENDS
-    libc.hdr.types.regex_t
-    libc.src.__support.common
-    libc.src.__support.CPP.new
+    .regcomp
 )
+
+install(FILES tre/LICENSE.TRE DESTINATION share/licenses/llvm-libc)

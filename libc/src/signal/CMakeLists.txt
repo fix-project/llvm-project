@@ -78,3 +78,12 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.sigdelset
 )
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    sigsuspend
+    ALIAS
+    DEPENDS
+      .wasi.sigsuspend
+  )
+endif()

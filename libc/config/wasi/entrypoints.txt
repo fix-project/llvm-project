@@ -1,9 +1,12 @@
 set(TARGET_LIBC_ENTRYPOINTS
+    libc.startup.wasi.__main_void
+    libc.startup.wasi.__main_argc_argv
     libc.src.arpa.inet.htonl
     libc.src.arpa.inet.htons
     libc.src.arpa.inet.inet_addr
     libc.src.arpa.inet.inet_aton
     libc.src.arpa.inet.inet_ntop
+    libc.src.arpa.inet.inet_ntoa
     libc.src.arpa.inet.ntohl
     libc.src.arpa.inet.ntohs
     libc.src.assert.__assert_fail
@@ -29,6 +32,11 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.complex.crealf128
     libc.src.complex.creall
     libc.src.ctype.isalnum
+    libc.src.ftw.ftw
+    libc.src.ftw.nftw
+    libc.src.iconv.iconv
+    libc.src.iconv.iconv_open
+    libc.src.iconv.iconv_close
     libc.src.ctype.isalnum_l
     libc.src.ctype.isalpha
     libc.src.ctype.isalpha_l
@@ -103,6 +111,42 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.inttypes.imaxdiv
     libc.src.inttypes.strtoimax
     libc.src.inttypes.strtoumax
+    libc.src.grp.getgrgid
+    libc.src.grp.getgrgid_r
+    libc.src.grp.getgrnam
+    libc.src.grp.getgrnam_r
+    libc.src.grp.endgrent
+    libc.src.grp.setgrent
+    libc.src.grp.getgrent
+    libc.src.grp.initgroups
+    libc.src.grp.getgrouplist
+    libc.src.pwd.getpwuid
+    libc.src.pwd.getpwuid_r
+    libc.src.pwd.getpwnam
+    libc.src.pwd.getpwnam_r
+    libc.src.pwd.getpwent
+    libc.src.pwd.setpwent
+    libc.src.pwd.endpwent
+    libc.src.regex.regcomp
+    libc.src.regex.regerror
+    libc.src.regex.regexec
+    libc.src.regex.regfree
+    libc.src.search.hcreate
+    libc.src.search.hcreate_r
+    libc.src.search.hdestroy
+    libc.src.search.hdestroy_r
+    libc.src.search.hsearch
+    libc.src.search.hsearch_r
+    libc.src.search.insque
+    libc.src.search.lfind
+    libc.src.search.lsearch
+    libc.src.search.remque
+    libc.src.search.tdelete
+    libc.src.search.tdestroy
+    libc.src.search.tfind
+    libc.src.search.tsearch
+    libc.src.search.twalk
+    libc.src.search.twalk_r
     libc.src.inttypes.wcstoimax
     libc.src.inttypes.wcstoumax
     libc.src.libgen.basename
@@ -110,13 +154,30 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.locale.duplocale
     libc.src.locale.freelocale
     libc.src.locale.localeconv
+    libc.src.locale.nl_langinfo
     libc.src.locale.newlocale
     libc.src.locale.setlocale
     libc.src.locale.uselocale
+    libc.src.netdb.endservent
+    libc.src.netdb.setservent
+    libc.src.netdb.getprotobyname
+    libc.src.netdb.getservbyport
+    libc.src.netdb.getservbyname
+    libc.src.netdb.getservent
+    libc.src.netdb.gethostbyaddr
+    libc.src.netdb.gethostbyname
     libc.src.netdb.freeaddrinfo
+    libc.src.mntent.setmntent
+    libc.src.mntent.getmntent
+    libc.src.mntent.getmntent_r
+    libc.src.mntent.endmntent
+    libc.src.mntent.addmntent
+    libc.src.mntent.hasmntopt
     libc.src.netdb.getaddrinfo
+    libc.src.netdb.gai_strerror
     libc.src.netdb.getnameinfo
     libc.src.poll.poll
+    libc.src.pthread.pthread_mutex_consistent
     libc.src.pthread.pthread_atfork
     libc.src.pthread.pthread_attr_destroy
     libc.src.pthread.pthread_attr_getdetachstate
@@ -162,6 +223,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.pthread.pthread_mutex_init
     libc.src.pthread.pthread_mutex_lock
     libc.src.pthread.pthread_mutex_trylock
+    libc.src.pthread.pthread_mutex_timedlock
     libc.src.pthread.pthread_mutex_unlock
     libc.src.pthread.pthread_mutexattr_destroy
     libc.src.pthread.pthread_mutexattr_getpshared
@@ -208,6 +270,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.sched.sched_setparam
     libc.src.sched.sched_setscheduler
     libc.src.sched.sched_yield
+    libc.src.signal.sigsuspend
     libc.src.signal.kill
     libc.src.signal.pthread_sigmask
     libc.src.signal.raise
@@ -371,6 +434,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdio.clearerr
     libc.src.stdio.clearerr_unlocked
     libc.src.stdio.fclose
+    libc.src.stdio.dprintf
     libc.src.stdio.fdopen
     libc.src.stdio.feof
     libc.src.stdio.feof_unlocked
@@ -378,6 +442,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdio.ferror_unlocked
     libc.src.stdio.fflush
     libc.src.stdio.fgetc
+    libc.src.stdio.fmemopen
     libc.src.stdio.fgetc_unlocked
     libc.src.stdio.fgets
     libc.src.stdio.fileno
@@ -401,10 +466,13 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdio.getc_unlocked
     libc.src.stdio.getchar
     libc.src.stdio.getchar_unlocked
+    libc.src.stdio.pclose
     libc.src.stdio.perror
+    libc.src.stdio.popen
     libc.src.stdio.printf
     libc.src.stdio.putc
     libc.src.stdio.putchar
+    libc.src.stdio.putchar_unlocked
     libc.src.stdio.puts
     libc.src.stdio.remove
     libc.src.stdio.rename
@@ -416,17 +484,22 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdio.sprintf
     libc.src.stdio.sscanf
     libc.src.stdio.stderr
+    libc.src.stdio.tmpfile
+    libc.src.stdio.tmpnam
     libc.src.stdio.stdin
     libc.src.stdio.stdout
     libc.src.stdio.ungetc
     libc.src.stdio.vasprintf
     libc.src.stdio.vfprintf
+    libc.src.stdio.vdprintf
     libc.src.stdio.vfscanf
     libc.src.stdio.vprintf
     libc.src.stdio.vscanf
     libc.src.stdio.vsnprintf
     libc.src.stdio.vsprintf
     libc.src.stdio.vsscanf
+    libc.src.stdlib.srandom
+    libc.src.stdlib.random
     libc.src.stdlib._Exit
     libc.src.stdlib.a64l
     libc.src.stdlib.abort
@@ -440,18 +513,23 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdlib.atoll
     libc.src.stdlib.bsearch
     libc.src.stdlib.calloc
+    libc.src.stdlib.daemon
     libc.src.stdlib.div
     libc.src.stdlib.exit
     libc.src.stdlib.free
     libc.src.stdlib.getenv
+    libc.src.stdlib.putenv
     libc.src.stdlib.l64a
     libc.src.stdlib.labs
     libc.src.stdlib.ldiv
     libc.src.stdlib.llabs
     libc.src.stdlib.lldiv
     libc.src.stdlib.malloc
+    libc.src.stdlib.mblen
+    libc.src.stdlib.mbstowcs
     libc.src.stdlib.mbtowc
     libc.src.stdlib.memalignment
+    libc.src.stdlib.mkdtemp
     libc.src.stdlib.mkstemp
     libc.src.stdlib.posix_memalign
     libc.src.stdlib.qsort
@@ -462,6 +540,9 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdlib.realpath
     libc.src.stdlib.setenv
     libc.src.stdlib.srand
+    libc.src.stdlib.strfromd
+    libc.src.stdlib.strfromf
+    libc.src.stdlib.strfroml
     libc.src.stdlib.strtod
     libc.src.stdlib.strtod_l
     libc.src.stdlib.strtof
@@ -476,7 +557,10 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.stdlib.strtoul_l
     libc.src.stdlib.strtoull
     libc.src.stdlib.strtoull_l
+    libc.src.stdlib.system
     libc.src.stdlib.unsetenv
+    libc.src.stdlib.wcstombs
+    libc.src.stdlib.wctomb
     libc.src.string.memccpy
     libc.src.string.memchr
     libc.src.string.memcmp
@@ -564,6 +648,8 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.sys.random.getrandom
     libc.src.sys.resource.getrlimit
     libc.src.sys.resource.setrlimit
+    libc.src.sys.resource.getpriority
+    libc.src.sys.resource.setpriority
     libc.src.sys.select.select
     libc.src.sys.socket.accept
     libc.src.sys.socket.accept4
@@ -587,6 +673,8 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.sys.socket.socket
     libc.src.sys.socket.socketpair
     libc.src.sys.sendfile.sendfile
+    libc.src.sys.stat.mknodat
+    libc.src.sys.stat.mkfifo
     libc.src.sys.stat.chmod
     libc.src.sys.stat.fchmod
     libc.src.sys.stat.fchmodat
@@ -594,10 +682,13 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.sys.stat.lstat
     libc.src.sys.stat.mkdir
     libc.src.sys.stat.mkdirat
+    libc.src.sys.file.flock
     libc.src.sys.stat.stat
     libc.src.sys.stat.utimensat
     libc.src.sys.statvfs.fstatvfs
     libc.src.sys.statvfs.statvfs
+    libc.src.sys.times.times
+    libc.src.sys.time.settimeofday
     libc.src.sys.time.futimes
     libc.src.sys.time.getitimer
     libc.src.sys.time.lutimes
@@ -606,13 +697,16 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.sys.uio.readv
     libc.src.sys.uio.writev
     libc.src.sys.utsname.uname
+    libc.src.syslog.syslog
     libc.src.sys.wait.wait
     libc.src.sys.wait.wait4
     libc.src.sys.wait.waitpid
     libc.src.termios.cfgetispeed
     libc.src.termios.cfgetospeed
+    libc.src.termios.cfmakeraw
     libc.src.termios.cfsetispeed
     libc.src.termios.cfsetospeed
+    libc.src.termios.cfsetspeed
     libc.src.termios.tcdrain
     libc.src.termios.tcflow
     libc.src.termios.tcflush
@@ -642,6 +736,8 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.threads.tss_delete
     libc.src.threads.tss_get
     libc.src.threads.tss_set
+    libc.src.time.tzset
+    libc.src.time.strptime
     libc.src.time.asctime
     libc.src.time.asctime_r
     libc.src.time.ctime
@@ -662,10 +758,20 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.time.gettimeofday
     libc.src.time.nanosleep
     libc.src.time.timespec_get
+    libc.src.unistd.seteuid
+    libc.src.unistd.setegid
+    libc.src.unistd.setgid
+    libc.src.unistd.setuid
+    libc.src.unistd.vfork
+    libc.src.unistd.ttyname_r
+    libc.src.unistd.ttyname
+    libc.src.unistd.execvpe
+    libc.src.unistd.getegid
     libc.src.unistd._exit
     libc.src.unistd.access
     libc.src.unistd.alarm
     libc.src.unistd.chdir
+    libc.src.unistd.chroot
     libc.src.unistd.chown
     libc.src.unistd.close
     libc.src.unistd.dup
@@ -673,19 +779,31 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.unistd.dup3
     libc.src.unistd.environ
     libc.src.unistd.execv
+    libc.src.unistd.execl
+    libc.src.unistd.execlp
+    libc.src.unistd.execvp
     libc.src.unistd.execve
     libc.src.unistd.faccessat
     libc.src.unistd.fchdir
     libc.src.unistd.fchown
+    libc.src.unistd.fchownat
     libc.src.unistd.fork
+    libc.src.unistd.confstr
     libc.src.unistd.fpathconf
+    libc.src.unistd.fdatasync
     libc.src.unistd.fsync
+    libc.src.unistd.sync
+    libc.src.unistd.nice
     libc.src.unistd.ftruncate
     libc.src.unistd.getcwd
     libc.src.unistd.getentropy
     libc.src.unistd.geteuid
     libc.src.unistd.getgid
+    libc.src.unistd.getgroups
     libc.src.unistd.gethostname
+    libc.src.unistd.getpgrp
+    libc.src.unistd.getlogin
+    libc.src.unistd.getlogin_r
     libc.src.unistd.getopt
     libc.src.unistd.getpagesize
     libc.src.unistd.getpid
@@ -707,6 +825,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.unistd.readlinkat
     libc.src.unistd.rmdir
     libc.src.unistd.setsid
+    libc.src.unistd.sethostname
     libc.src.unistd.swab
     libc.src.unistd.symlink
     libc.src.unistd.symlinkat
@@ -745,6 +864,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.wchar.wcslcat
     libc.src.wchar.wcslcpy
     libc.src.wchar.wcslen
+    libc.src.wchar.wcwidth
     libc.src.wchar.wcsncat
     libc.src.wchar.wcsncmp
     libc.src.wchar.wcsncpy
@@ -795,6 +915,7 @@ set(TARGET_LIBM_ENTRYPOINTS
     libc.src.math.acosf
     libc.src.math.acosf16
     libc.src.math.acoshf
+    libc.src.math.acosh
     libc.src.math.acoshf16
     libc.src.math.acospif
     libc.src.math.asin
@@ -802,6 +923,7 @@ set(TARGET_LIBM_ENTRYPOINTS
     libc.src.math.asinf
     libc.src.math.asinf16
     libc.src.math.asinhf
+    libc.src.math.asinh
     libc.src.math.asinhf16
     libc.src.math.asinpi
     libc.src.math.asinpif
@@ -813,6 +935,7 @@ set(TARGET_LIBM_ENTRYPOINTS
     libc.src.math.atanbf16
     libc.src.math.atanf
     libc.src.math.atanhf
+    libc.src.math.atanh
     libc.src.math.bf16add
     libc.src.math.bf16addf
     libc.src.math.bf16addf128
@@ -876,6 +999,7 @@ set(TARGET_LIBM_ENTRYPOINTS
     libc.src.math.dsubf128
     libc.src.math.dsubl
     libc.src.math.erf
+    libc.src.math.erfc
     libc.src.math.erff
     libc.src.math.exp
     libc.src.math.exp10

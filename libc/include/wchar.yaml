@@ -20,6 +20,12 @@ types:
 enums: []
 objects: []
 functions:
+  - name: wcwidth
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: wchar_t
   - name: wcslen
     standards:
       - stdc

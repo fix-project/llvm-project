@@ -1,4 +1,11 @@
 # This test currently uses too much memory to be made hermetic.
+# op_tests.cpp exercises the architecture specific op_* implementations of the
+# memory utilities, which are only available on a subset of architectures.
+if(NOT (LIBC_TARGET_ARCHITECTURE_IS_AARCH64 OR LIBC_TARGET_ARCHITECTURE_IS_X86_64
+        OR LIBC_TARGET_ARCHITECTURE_IS_X86 OR LIBC_TARGET_ARCHITECTURE_IS_ANY_RISCV))
+  return()
+endif()
+
 add_libc_test(
   utils_test
   SUITE

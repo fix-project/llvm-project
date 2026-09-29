@@ -1,0 +1,122 @@
+if(NOT TARGET libc.src.__support.OSUtil.osutil)
+  message(STATUS "libc.src.__support.OSUtil.osutil is not available. "
+                  "Skip libc.src.time.wasi.* targets.")
+  return()
+endif()
+
+add_entrypoint_object(
+  clock
+  SRCS
+    clock.cpp
+  HDRS
+    ../clock.h
+  DEPENDS
+    libc.hdr.time_macros
+    libc.hdr.types.clock_t
+    libc.src.__support.CPP.limits
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  clock_gettime
+  SRCS
+    clock_gettime.cpp
+  HDRS
+    ../clock_gettime.h
+  DEPENDS
+    libc.hdr.types.clockid_t
+    libc.hdr.types.struct_timespec
+    libc.src.__support.time.clock_gettime
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  clock_getres
+  SRCS
+    clock_getres.cpp
+  HDRS
+    ../clock_getres.h
+  DEPENDS
+    libc.hdr.types.clockid_t
+    libc.hdr.types.struct_timespec
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  clock_settime
+  SRCS
+    clock_settime.cpp
+  HDRS
+    ../clock_settime.h
+  DEPENDS
+    libc.hdr.types.clockid_t
+    libc.hdr.types.struct_timespec
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  nanosleep
+  SRCS
+    nanosleep.cpp
+  HDRS
+    ../nanosleep.h
+  DEPENDS
+    libc.hdr.types.struct_timespec
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  gettimeofday
+  SRCS
+    gettimeofday.cpp
+  HDRS
+    ../gettimeofday.h
+  DEPENDS
+    libc.hdr.time_macros
+    libc.hdr.types.suseconds_t
+    libc.src.__support.time.clock_gettime
+    libc.src.__support.time.units
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  timespec_get
+  SRCS
+    timespec_get.cpp
+  HDRS
+    ../timespec_get.h
+  DEPENDS
+    libc.hdr.time_macros
+    libc.hdr.types.struct_timespec
+    libc.src.__support.time.clock_gettime
+    libc.src.__support.libc_errno
+)
+add_entrypoint_object(
+  strptime
+  SRCS
+    strptime.cpp
+  HDRS
+    ../strptime.h
+  DEPENDS
+    libc.include.time
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  tzset
+  SRCS
+    tzset.cpp
+  HDRS
+    ../tzset.h
+  DEPENDS
+    libc.include.time
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

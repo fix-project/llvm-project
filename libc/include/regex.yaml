@@ -16,6 +16,8 @@ macros:
     macro_header: regex-macros.h
   - macro_name: REG_NOMATCH
     macro_header: regex-macros.h
+  - macro_name: REG_OK
+    macro_header: regex-macros.h
   - macro_name: REG_BADPAT
     macro_header: regex-macros.h
   - macro_name: REG_ECOLLATE

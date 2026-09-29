@@ -25,6 +25,7 @@
 #define REG_NOTEOL 2
 
 // Error codes
+#define REG_OK 0
 #define REG_NOMATCH 1
 #define REG_BADPAT 2
 #define REG_ECOLLATE 3

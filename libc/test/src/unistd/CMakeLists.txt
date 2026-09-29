@@ -2,6 +2,9 @@ add_custom_target(libc_unistd_unittests)
 
 add_subdirectory(testdata)
 
+# alarm() requires asynchronous signal delivery, which WASI preopens cannot
+# provide, so the test is not built for WASI.
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   alarm_test
   SUITE
@@ -16,7 +19,9 @@ add_libc_unittest(
     libc.src.time.nanosleep
     libc.src.unistd.alarm
 )
+endif()
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   access_test
   SUITE
@@ -33,6 +38,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
 add_libc_unittest(
   chdir_test
@@ -51,6 +57,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoSetterMatcher
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   chown_test
   SUITE
@@ -70,6 +77,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
 add_libc_unittest(
   dup_test
@@ -128,6 +136,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoSetterMatcher
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   faccessat_test
   SUITE
@@ -144,6 +153,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
 add_libc_unittest(
   fchdir_test
@@ -161,6 +171,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoSetterMatcher
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   fchown_test
   SUITE
@@ -180,6 +191,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
 add_libc_unittest(
   ftruncate_test
@@ -291,6 +303,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoSetterMatcher
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   pipe_test
   SUITE
@@ -305,7 +318,9 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_unittest(
   pipe2_test
   SUITE
@@ -320,6 +335,7 @@ add_libc_unittest(
     libc.test.UnitTest.ErrnoCheckingTest
     libc.test.UnitTest.ErrnoSetterMatcher
 )
+endif()
 
 add_libc_unittest(
   rmdir_test

@@ -9,6 +9,16 @@ add_entrypoint_object(
     .${LIBC_TARGET_OS}.getrlimit
 )
 
+if(LIBC_TARGET_OS STREQUAL "wasi")
+  foreach(entrypoint getpriority setpriority)
+    add_entrypoint_object(
+      ${entrypoint}
+      ALIAS
+      DEPENDS
+        .wasi.${entrypoint}
+    )
+  endforeach()
+endif()
 add_entrypoint_object(
   setrlimit
   ALIAS

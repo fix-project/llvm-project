@@ -1,0 +1,15 @@
+add_entrypoint_object(
+  select
+  SRCS
+    select.cpp
+  HDRS
+    ../select.h
+  DEPENDS
+    libc.include.sys_select
+    libc.include.poll
+    libc.hdr.func.malloc
+    libc.hdr.func.free
+    libc.src.poll.poll
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

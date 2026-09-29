@@ -55,6 +55,12 @@ add_macro_header(
 )
 
 add_macro_header(
+  dirent_macros
+  HDR
+    dirent-macros.h
+)
+
+add_macro_header(
   error_number_macros
   HDR
     error-number-macros.h
@@ -76,6 +82,12 @@ add_macro_header(
   fcntl_macros
   HDR
     fcntl-macros.h
+)
+
+add_macro_header(
+  fnmatch_macros
+  HDR
+    fnmatch-macros.h
 )
 
 add_macro_header(

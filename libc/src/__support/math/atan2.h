@@ -169,6 +169,10 @@ LIBC_INLINE double atan2(double y, double x) {
   // We have the following bound for normalized n and d:
   //   2^(-exp_diff - 1) < n/d < 2^(-exp_diff + 1).
   if (LIBC_UNLIKELY(exp_diff > 54)) {
+    // Preserve the sign when the angle underflows to zero.  FMA with a zero
+    // constant term may otherwise produce +0 for a negative angle.
+    if (!x_sign && !recip && num / den == 0.0)
+      return y_sign ? -0.0 : 0.0;
     return fputil::multiply_add(final_sign, const_term.hi,
                                 final_sign * (const_term.lo + num / den));
   }

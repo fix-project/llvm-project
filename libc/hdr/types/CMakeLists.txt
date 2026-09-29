@@ -10,6 +10,15 @@ add_proxy_header_library(
 )
 
 add_proxy_header_library(
+  dev_t
+  HDRS
+    dev_t.h
+  FULL_BUILD_DEPENDS
+    libc.include.llvm-libc-types.dev_t
+    libc.include.sys_types
+)
+
+add_proxy_header_library(
   char32_t
   HDRS
     char32_t.h
@@ -280,6 +289,15 @@ add_proxy_header_library(
   FULL_BUILD_DEPENDS
     libc.include.llvm-libc-types.struct_timeval
     libc.include.sys_time
+)
+
+add_proxy_header_library(
+  struct_utimbuf
+  HDRS
+    struct_utimbuf.h
+  FULL_BUILD_DEPENDS
+    libc.include.llvm-libc-types.struct_utimbuf
+    libc.include.utime
 )
 
 add_proxy_header_library(

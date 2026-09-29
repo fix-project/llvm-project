@@ -1,0 +1,12 @@
+add_entrypoint_object(
+  times
+  SRCS
+    times.cpp
+  HDRS
+    ../times.h
+  DEPENDS
+    libc.include.sys_times
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

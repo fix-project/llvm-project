@@ -2,6 +2,29 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${LIBC_TARGET_OS})
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${LIBC_TARGET_OS})
 endif()
 
+if(LIBC_TARGET_OS STREQUAL "wasi")
+  add_entrypoint_object(
+    cfmakeraw
+    SRCS
+      cfmakeraw.cpp
+    HDRS
+      cfmakeraw.h
+    DEPENDS
+      libc.include.termios
+  )
+
+  add_entrypoint_object(
+    cfsetspeed
+    SRCS
+      cfsetspeed.cpp
+    HDRS
+      cfsetspeed.h
+    DEPENDS
+      .cfsetispeed
+      .cfsetospeed
+  )
+endif()
+
 add_entrypoint_object(
   cfgetispeed
   ALIAS

@@ -59,8 +59,47 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  fstatat
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.fstatat
+)
+
+add_entrypoint_object(
+  umask
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.umask
+)
+
+add_entrypoint_object(
+  mknod
+  ALIAS
+  DEPENDS
+    .${LIBC_TARGET_OS}.mknod
+)
+
+add_entrypoint_object(
   utimensat
   ALIAS
   DEPENDS
     .${LIBC_TARGET_OS}.utimensat
 )
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    mkfifo
+    ALIAS
+    DEPENDS
+      .wasi.mkfifo
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    mknodat
+    ALIAS
+    DEPENDS
+      .wasi.mknodat
+  )
+endif()

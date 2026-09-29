@@ -98,6 +98,15 @@ struct OptstringParser {
 
 int getopt_r(int argc, char *const argv[], const char *optstring,
              GetoptContext &ctx) {
+  // Several libcs accept optind = 0 as a request to restart parsing. It is
+  // also how BusyBox resets getopt before dispatching another applet.
+  if (ctx.optind == 0) {
+    ctx.optind.get() = 1;
+    ctx.optpos.get() = 0;
+    ctx.optarg.get() = nullptr;
+    ctx.optopt.get() = 0;
+  }
+
   auto failure = [&ctx](int ret = -1) {
     ctx.optpos.get() = 0;
     return ret;

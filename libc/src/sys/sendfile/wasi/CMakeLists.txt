@@ -1,0 +1,13 @@
+add_entrypoint_object(
+  sendfile
+  SRCS
+    sendfile.cpp
+  HDRS
+    ../sendfile.h
+  DEPENDS
+    libc.include.unistd
+    libc.src.__support.common
+    libc.src.unistd.pread
+    libc.src.unistd.read
+    libc.src.unistd.write
+)

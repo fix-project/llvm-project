@@ -90,7 +90,7 @@ LIBC_INLINE double erf(double x) {
 
   // |x| < 2^-28: erf(x) ~= 2/sqrt(pi) * x
   if (LIBC_UNLIKELY(x_abs < 0x3e30'0000'0000'0000ULL))
-    return x * 0x1.20dd67c1fda7ep+0; // 2/sqrt(pi)
+    return x * 0x1.20dd750429b6dp+0; // 2/sqrt(pi)
 
   // nan
   if (LIBC_UNLIKELY(x_abs > 0x7ff0'0000'0000'0000ULL)) {

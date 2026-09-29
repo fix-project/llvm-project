@@ -277,3 +277,21 @@ add_entrypoint_object(
     .${LIBC_TARGET_OS}.clock_settime
 )
 
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    strptime
+    ALIAS
+    DEPENDS
+      .wasi.strptime
+  )
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    tzset
+    ALIAS
+    DEPENDS
+      .wasi.tzset
+  )
+endif()

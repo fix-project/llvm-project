@@ -11,6 +11,12 @@
 
 #include "../../llvm-libc-types/rlim_t.h"
 
+#define PRIO_PROCESS 0
+#define PRIO_PGRP 1
+#define PRIO_USER 2
+#define PRIO_MIN (-20)
+#define PRIO_MAX 19
+
 #define RLIMIT_CPU 0
 #define RLIMIT_FSIZE 1
 #define RLIMIT_DATA 2
@@ -27,6 +33,7 @@
 #define RLIMIT_NICE 13
 #define RLIMIT_RTPRIO 14
 #define RLIMIT_RTTIME 15
+#define RLIM_NLIMITS 16
 
 #define RLIM_INFINITY ((rlim_t) - 1)
 

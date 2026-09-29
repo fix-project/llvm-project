@@ -18,9 +18,15 @@
 
 struct timespec {
   time_t tv_sec; /* Seconds.  */
+#ifdef __wasi__
+  // POSIX specifies long for tv_nsec. WASI has no kernel timespec ABI to
+  // mirror, and portable callers may pass this member to long * functions.
+  long tv_nsec;
+#else
   /* Nanoseconds. Forced to 64-bit to match __kernel_timespec layout (C23
    * compliant). */
   __INT64_TYPE__ tv_nsec;
+#endif
 };
 #endif // __APPLE__
 

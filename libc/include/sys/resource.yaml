@@ -2,7 +2,16 @@ header: sys/resource.h
 standards:
   - posix
 macros:
+  - macro_name: PRIO_PROCESS
+    macro_header: sys-resource-macros.h
+  - macro_name: PRIO_PGRP
+    macro_header: sys-resource-macros.h
+  - macro_name: PRIO_USER
+    macro_header: sys-resource-macros.h
   - macro_name: RLIMIT_CPU
+    macro_header: sys-resource-macros.h
+  - macro_name: RLIM_NLIMITS
+    guard: __wasi__
     macro_header: sys-resource-macros.h
 types:
   - type_name: struct_rlimit
@@ -10,6 +19,19 @@ types:
 enums: []
 objects: []
 functions:
+  - name: getpriority
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: int
+      - type: int
+  - name: setpriority
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: int
+      - type: int
+      - type: int
   - name: getrlimit
     standards:
       - posix

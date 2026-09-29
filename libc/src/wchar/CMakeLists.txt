@@ -9,6 +9,17 @@ add_header_library(
 )
 
 add_entrypoint_object(
+  wcwidth
+  SRCS
+    wcwidth.cpp
+  HDRS
+    wcwidth.h
+  DEPENDS
+    libc.src.wctype.iswprint
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
   wcslen
   SRCS
     wcslen.cpp

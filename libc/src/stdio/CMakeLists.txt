@@ -233,6 +233,29 @@ add_entrypoint_object(
     libc.src.__support.CPP.limits
 )
 
+add_entrypoint_object(
+  vdprintf
+  SRCS
+    vdprintf.cpp
+  HDRS
+    vdprintf.h
+  DEPENDS
+    .vasprintf
+    libc.src.stdlib.free
+    libc.src.unistd.write
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  dprintf
+  SRCS
+    dprintf.cpp
+  HDRS
+    dprintf.h
+  DEPENDS
+    .vdprintf
+)
+
 add_subdirectory(printf_core)
 add_subdirectory(scanf_core)
 
@@ -256,6 +279,22 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.fdopen
 )
+
+if(LIBC_TARGET_OS STREQUAL "wasi")
+  add_entrypoint_object(
+    pclose
+    ALIAS
+    DEPENDS
+      .wasi.pclose
+  )
+
+  add_entrypoint_object(
+    popen
+    ALIAS
+    DEPENDS
+      .wasi.popen
+  )
+endif()
 
 # These entrypoints have multiple potential implementations.
 add_stdio_entrypoint_object(feof)
@@ -283,6 +322,7 @@ add_stdio_entrypoint_object(fwrite)
 add_stdio_entrypoint_object(fputc)
 add_stdio_entrypoint_object(putc)
 add_stdio_entrypoint_object(putchar)
+add_stdio_entrypoint_object(putchar_unlocked)
 add_stdio_entrypoint_object(printf)
 add_stdio_entrypoint_object(fprintf)
 add_stdio_entrypoint_object(fgetc)
@@ -292,6 +332,9 @@ add_stdio_entrypoint_object(getc_unlocked)
 add_stdio_entrypoint_object(getchar)
 add_stdio_entrypoint_object(getchar_unlocked)
 add_stdio_entrypoint_object(fgets)
+add_stdio_entrypoint_object(getdelim)
+add_stdio_entrypoint_object(getline)
+add_stdio_entrypoint_object(fmemopen)
 add_stdio_entrypoint_object(ungetc)
 add_stdio_entrypoint_object(scanf)
 add_stdio_entrypoint_object(fscanf)
@@ -302,3 +345,24 @@ add_stdio_entrypoint_object(vprintf)
 add_stdio_entrypoint_object(vfprintf)
 add_stdio_entrypoint_object(vscanf)
 add_stdio_entrypoint_object(vfscanf)
+if(LIBC_TARGET_OS_IS_WASI)
+  foreach(name tmpfile tmpnam)
+    add_entrypoint_object(
+      ${name}
+      SRCS
+        generic/${name}.cpp
+      HDRS
+        ${name}.h
+        generic/temp_path.h
+      DEPENDS
+        libc.include.stdio
+        libc.src.stdlib.mkstemp
+        libc.src.stdlib.getenv
+        libc.src.unistd.close
+        libc.src.unistd.unlink
+        libc.src.stdio.fdopen
+        libc.src.__support.common
+        libc.src.__support.libc_errno
+    )
+  endforeach()
+endif()

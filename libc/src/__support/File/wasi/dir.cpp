@@ -18,6 +18,8 @@
 #include "src/__support/error_or.h"
 #include "src/__support/macros/config.h"
 
+#include "include/llvm-libc-macros/dirent-macros.h"
+
 namespace LIBC_NAMESPACE_DECL {
 
 using namespace wasi;
@@ -29,6 +31,26 @@ size_t str_len(const char *s) {
   while (s[n] != '\0')
     ++n;
   return n;
+}
+
+unsigned char filetype_to_dirent_type(wasi::__wasi_filetype_t type) {
+  switch (type) {
+  case wasi::__WASI_FILETYPE_BLOCK_DEVICE:
+    return DT_BLK;
+  case wasi::__WASI_FILETYPE_CHARACTER_DEVICE:
+    return DT_CHR;
+  case wasi::__WASI_FILETYPE_DIRECTORY:
+    return DT_DIR;
+  case wasi::__WASI_FILETYPE_REGULAR_FILE:
+    return DT_REG;
+  case wasi::__WASI_FILETYPE_SOCKET_DGRAM:
+  case wasi::__WASI_FILETYPE_SOCKET_STREAM:
+    return DT_SOCK;
+  case wasi::__WASI_FILETYPE_SYMBOLIC_LINK:
+    return DT_LNK;
+  default:
+    return DT_UNKNOWN;
+  }
 }
 
 // WASI's fd_readdir takes an explicit cookie (the offset of the next entry).
@@ -84,8 +106,12 @@ ErrorOr<int> open_virtual_dir(const char *path) {
 ErrorOr<int> platform_opendir(const char *name) {
   char buf[wasi::PATH_MAX_SIZE];
   auto resolved = wasi::resolve_path(name, buf, sizeof(buf));
-  if (!resolved.has_value())
+  if (!resolved.has_value()) {
+    if (wasi::canonicalize_path(name, buf, sizeof(buf), false) == 0 &&
+        wasi::is_mount_directory(buf))
+      return open_virtual_dir(buf);
     return Error(resolved.error());
+  }
 
   __wasi_fd_t fd;
   __wasi_errno_t err = wasi::__wasi_path_open(
@@ -134,7 +160,9 @@ ErrorOr<int> platform_opendir(const char *name) {
 constexpr size_t RAW_BUF_SIZE = 3072;
 alignas(uint64_t) uint8_t raw_dirent_buf[RAW_BUF_SIZE];
 
-LIBC_INLINE size_t align_up(size_t n) { return (n + 7) & ~static_cast<size_t>(7); }
+LIBC_INLINE size_t align_up(size_t n) {
+  return (n + 7) & ~static_cast<size_t>(7);
+}
 
 ErrorOr<size_t> platform_fetch_dirents(int fd, cpp::span<uint8_t> buffer) {
   DirCookie &entry = cookie_for_fd(fd, false);
@@ -164,9 +192,8 @@ ErrorOr<size_t> platform_fetch_dirents(int fd, cpp::span<uint8_t> buffer) {
         break;
       // A mount shadows an entry of the same name in its parent directory.
       if (entry.path[0] != '\0' &&
-          wasi::is_mount_child(entry.path,
-                               reinterpret_cast<const char *>(rec + 24),
-                               d_namlen)) {
+          wasi::is_mount_child(
+              entry.path, reinterpret_cast<const char *>(rec + 24), d_namlen)) {
         next_cookie = d_next;
         in += raw_reclen;
         continue;
@@ -177,7 +204,7 @@ ErrorOr<size_t> platform_fetch_dirents(int fd, cpp::span<uint8_t> buffer) {
       uint8_t *dst = buffer.data() + out;
       __builtin_memcpy(dst, rec, 20);
       // Clear the padding between d_type and d_name.
-      dst[20] = rec[20];
+      dst[20] = filetype_to_dirent_type(rec[20]);
       dst[21] = 0;
       dst[22] = 0;
       dst[23] = 0;
@@ -208,7 +235,7 @@ ErrorOr<size_t> platform_fetch_dirents(int fd, cpp::span<uint8_t> buffer) {
     __builtin_memset(dst, 0, reclen);
     wasi::__wasi_size_t name_len = static_cast<wasi::__wasi_size_t>(len);
     __builtin_memcpy(dst + 16, &name_len, sizeof(name_len));
-    dst[20] = wasi::__WASI_FILETYPE_DIRECTORY;
+    dst[20] = DT_DIR;
     __builtin_memcpy(dst + 24, child, len + 1);
     entry.next_mount_fd = next;
     return reclen;
@@ -230,8 +257,8 @@ int platform_closedir(int fd) {
 
 int platform_check_dir(int fd) {
   __wasi_fdstat_t fdstat;
-  __wasi_errno_t err = wasi::__wasi_fd_fdstat_get(
-      static_cast<wasi::__wasi_fd_t>(fd), &fdstat);
+  __wasi_errno_t err =
+      wasi::__wasi_fd_fdstat_get(static_cast<wasi::__wasi_fd_t>(fd), &fdstat);
   if (err != wasi::__WASI_ERRNO_SUCCESS)
     return wasi::wasi_to_errno(err);
   if (fdstat.fs_filetype != wasi::__WASI_FILETYPE_DIRECTORY)

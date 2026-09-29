@@ -21,6 +21,18 @@ using bitmask_t = uint32_t;
 using bitmask_t = uintptr_t;
 #endif
 
+// uintptr_t need not be the same typedef as uint32_t or uint64_t on ILP32
+// targets, even when it has the same width. Endian provides specializations
+// for the fixed-width integer types.
+LIBC_INLINE bitmask_t to_little_endian_word(bitmask_t value) {
+  if constexpr (sizeof(bitmask_t) == sizeof(uint32_t))
+    return static_cast<bitmask_t>(LIBC_NAMESPACE::Endian::to_little_endian(
+        static_cast<uint32_t>(value)));
+  else
+    return static_cast<bitmask_t>(LIBC_NAMESPACE::Endian::to_little_endian(
+        static_cast<uint64_t>(value)));
+}
+
 // Helper function to spread a byte across the whole word.
 // Accumutively, the procedure looks like:
 //    byte                  = 0x00000000000000ff
@@ -103,15 +115,14 @@ struct Group {
     //  - The chance of this happening is very low (< 1% chance per byte).
     static constexpr bitmask_t ONES = repeat_byte(0x01ul);
     auto cmp = data ^ repeat_byte(static_cast<bitmask_t>(byte) & 0xFFul);
-    auto result =
-        LIBC_NAMESPACE::Endian::to_little_endian((cmp - ONES) & ~cmp & MASK);
+    auto result = to_little_endian_word((cmp - ONES) & ~cmp & MASK);
     return {BitMask{result}};
   }
 
   // Find out the lanes equal to EMPTY or DELETE (highest bit set) and
   // return the bitmask with corresponding bits set.
   LIBC_INLINE BitMask mask_available() const {
-    bitmask_t le_data = LIBC_NAMESPACE::Endian::to_little_endian(data);
+    bitmask_t le_data = to_little_endian_word(data);
     return {le_data & MASK};
   }
 

@@ -9,6 +9,7 @@
 #include "hdr/time_macros.h"
 #include "hdr/types/struct_timespec.h"
 #include "src/__support/macros/properties/architectures.h"
+#include "src/__support/macros/properties/os.h"
 #include "src/time/timespec_get.h"
 #include "test/UnitTest/Test.h"
 
@@ -31,7 +32,11 @@ TEST(LlvmLibcTimespecGet, Monotonic) {
   int result;
   result = LIBC_NAMESPACE::timespec_get(&ts1, TIME_MONOTONIC);
   ASSERT_EQ(result, TIME_MONOTONIC);
+#ifndef LIBC_TARGET_OS_IS_WASI
+  // WASI monotonic clocks are relative to the start of the sandboxed
+  // instance, so the first reading can legitimately be zero.
   ASSERT_GT(ts1.tv_sec, time_t(0));
+#endif // LIBC_TARGET_OS_IS_WASI
   result = LIBC_NAMESPACE::timespec_get(&ts2, TIME_MONOTONIC);
   ASSERT_EQ(result, TIME_MONOTONIC);
   ASSERT_GE(ts2.tv_sec, ts1.tv_sec); // The monotonic time should increase.

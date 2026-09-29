@@ -1,0 +1,25 @@
+add_entrypoint_object(
+  ftw
+  SRCS
+    ftw.cpp
+  HDRS
+    ftw.h
+    walk.h
+  DEPENDS
+    libc.include.ftw
+    libc.include.dirent
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  nftw
+  SRCS
+    nftw.cpp
+  HDRS
+    nftw.h
+    walk.h
+  DEPENDS
+    libc.include.ftw
+    libc.include.dirent
+    libc.src.__support.common
+)

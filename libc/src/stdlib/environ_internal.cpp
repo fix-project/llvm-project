@@ -230,6 +230,28 @@ int EnvironmentManager::set(cpp::string_view name, cpp::string_view value,
   return 0;
 }
 
+int EnvironmentManager::put(cpp::string_view name, char *entry) {
+  cpp::optional<size_t> idx = find_var(name);
+  if (!ensure_capacity(idx ? count : count + 1))
+    return -1;
+
+  char **env_array = get_array();
+  if (idx) {
+    if (env_array[*idx] != entry) {
+      if (ownership[*idx].can_free())
+        delete[] env_array[*idx];
+      ownership[*idx].allocated_by_us = false;
+    }
+    env_array[*idx] = entry;
+  } else {
+    env_array[count] = entry;
+    ownership[count].allocated_by_us = false;
+    ++count;
+    env_array[count] = nullptr;
+  }
+  return 0;
+}
+
 int EnvironmentManager::unset(cpp::string_view name) {
   cpp::optional<size_t> idx = find_var(name);
   if (!idx)

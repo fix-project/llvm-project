@@ -16,6 +16,9 @@
 
 #ifdef __linux__
 #include "linux/net-if-macros.h"
+#elif defined(__wasi__)
+// POSIX specifies IF_NAMESIZE for if_indextoname's result buffer.
+#define IF_NAMESIZE 16
 #endif
 
 #endif // LLVM_LIBC_MACROS_NET_IF_MACROS_H

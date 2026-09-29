@@ -431,5 +431,14 @@ add_proxy_header_library(
     libc.include.regex
 )
 
+add_proxy_header_library(
+  fnmatch_macros
+  HDRS
+    fnmatch_macros.h
+  FULL_BUILD_DEPENDS
+    libc.include.llvm-libc-macros.fnmatch_macros
+    libc.include.fnmatch
+)
+
 add_subdirectory(types)
 add_subdirectory(func)

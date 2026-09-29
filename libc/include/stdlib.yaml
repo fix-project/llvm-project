@@ -27,6 +27,14 @@ types:
 enums: []
 objects: []
 functions:
+  - name: daemon
+    guard: __wasi__
+    standards:
+      - bsd
+    return_type: int
+    arguments:
+      - type: int
+      - type: int
   - name: _Exit
     standards:
       - stdc
@@ -116,6 +124,12 @@ functions:
     return_type: char *
     arguments:
       - type: const char *
+  - name: putenv
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: char *
   - name: labs
     standards:
       - stdc
@@ -175,6 +189,12 @@ functions:
     standards:
       - posix
     return_type: int
+    arguments:
+      - type: char *
+  - name: mkdtemp
+    guard: __wasi__
+    standards: [posix]
+    return_type: char *
     arguments:
       - type: char *
   - name: posix_memalign
@@ -404,3 +424,13 @@ functions:
       - type: char *__restrict
       - type: const wchar_t *__restrict
       - type: size_t
+  - name: random
+    guard: __wasi__
+    return_type: long
+    arguments:
+      - type: void
+  - name: srandom
+    guard: __wasi__
+    return_type: void
+    arguments:
+      - type: unsigned int

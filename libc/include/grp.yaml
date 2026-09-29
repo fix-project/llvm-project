@@ -1,0 +1,77 @@
+header: grp.h
+standards:
+  - posix
+macros: []
+types:
+  - type_name: gid_t
+  - type_name: size_t
+  - type_name: struct_group
+enums: []
+objects: []
+functions:
+  - name: getgrgid
+    standards:
+      - posix
+    return_type: struct group *
+    arguments:
+      - type: gid_t
+  - name: getgrnam
+    standards:
+      - posix
+    return_type: struct group *
+    arguments:
+      - type: const char *
+  - name: getgrgid_r
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: gid_t
+      - type: struct group *
+      - type: char *
+      - type: size_t
+      - type: struct group **
+  - name: getgrnam_r
+    standards:
+      - posix
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: struct group *
+      - type: char *
+      - type: size_t
+      - type: struct group **
+  - name: endgrent
+    standards:
+      - posix
+    return_type: void
+    arguments: []
+  - name: setgrent
+    standards:
+      - bsd
+      - gnu
+    return_type: void
+    arguments: []
+  - name: getgrent
+    standards:
+      - bsd
+      - gnu
+    return_type: struct group *
+    arguments: []
+  - name: initgroups
+    standards:
+      - bsd
+      - gnu
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: gid_t
+  - name: getgrouplist
+    guard: __wasi__
+    standards: [bsd]
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: gid_t
+      - type: gid_t *
+      - type: int *

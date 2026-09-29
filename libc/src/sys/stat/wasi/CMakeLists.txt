@@ -1,0 +1,181 @@
+add_entrypoint_object(
+  fstat
+  SRCS
+    fstat.cpp
+  HDRS
+    ../fstat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fstatat
+  SRCS
+    fstatat.cpp
+  HDRS
+    ../fstatat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.hdr.fcntl_macros
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  umask
+  SRCS
+    umask.cpp
+  HDRS
+    ../umask.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  mknod
+  SRCS
+    mknod.cpp
+  HDRS
+    ../mknod.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.hdr.types.dev_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  lstat
+  SRCS
+    lstat.cpp
+  HDRS
+    ../lstat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mkdir
+  SRCS
+    mkdir.cpp
+  HDRS
+    ../mkdir.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  stat
+  SRCS
+    stat.cpp
+  HDRS
+    ../stat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+add_entrypoint_object(
+  mkdirat
+  SRCS
+    mkdirat.cpp
+  HDRS
+    ../mkdirat.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.hdr.types.mode_t
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  utimensat
+  SRCS
+    utimensat.cpp
+  HDRS
+    ../utimensat.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.hdr.fcntl_macros
+    libc.hdr.sys_stat_macros
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  chmod
+  SRCS
+    chmod.cpp
+  HDRS
+    ../chmod.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fchmod
+  SRCS
+    fchmod.cpp
+  HDRS
+    ../fchmod.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fchmodat
+  SRCS
+    fchmodat.cpp
+  HDRS
+    ../fchmodat.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mkfifo
+  SRCS
+    mkfifo.cpp
+  HDRS
+    ../mkfifo.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mknodat
+  SRCS
+    mknodat.cpp
+  HDRS
+    ../mknodat.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

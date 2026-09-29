@@ -96,6 +96,7 @@ add_libc_test(
     libc.include.llvm-libc-macros.stdckdint_macros
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_libc_test(
   sched_test
   UNIT_TEST_ONLY
@@ -106,6 +107,7 @@ add_libc_test(
   DEPENDS
     libc.include.sched
 )
+endif()
 
 add_libc_test(
   issubnormal_test

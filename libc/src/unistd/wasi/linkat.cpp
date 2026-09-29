@@ -1,0 +1,24 @@
+//===-- WASI implementation of linkat -------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#include "src/unistd/linkat.h"
+
+#include "link_utils.h"
+
+#include "src/__support/common.h"
+#include "src/__support/macros/config.h"
+
+namespace LIBC_NAMESPACE_DECL {
+
+LLVM_LIBC_FUNCTION(int, linkat,
+                   (int olddirfd, const char *oldpath, int newdirfd,
+                    const char *newpath, int flags)) {
+  return wasi::linkat_impl(olddirfd, oldpath, newdirfd, newpath, flags);
+}
+
+} // namespace LIBC_NAMESPACE_DECL

@@ -105,6 +105,15 @@ template <WriteMode write_mode> class PaddingWriter {
   char sign_char = 0;
   size_t min_width = 0;
 
+  LIBC_INLINE size_t padding_amount(size_t total_digits) const {
+    // Subtract only when the width exceeds the output length. In particular,
+    // large precisions may produce more digits than fit in an int.
+    size_t amount = min_width > total_digits ? min_width - total_digits : 0;
+    if (sign_char > 0 && amount > 0)
+      --amount;
+    return amount;
+  }
+
 public:
   LIBC_INLINE PaddingWriter() {}
   LIBC_INLINE PaddingWriter(const FormatSection &to_conv, char init_sign_char)
@@ -117,22 +126,21 @@ public:
                                      size_t total_digits) {
     // The pattern is (spaces) (sign) (zeroes), but only one of spaces and
     // zeroes can be written, and only if the padding amount is positive.
-    int padding_amount =
-        static_cast<int>(min_width - total_digits - (sign_char > 0 ? 1 : 0));
-    if (left_justified || padding_amount < 0) {
+    size_t amount = padding_amount(total_digits);
+    if (left_justified || amount == 0) {
       if (sign_char > 0) {
         RET_IF_RESULT_NEGATIVE(writer->write(sign_char));
       }
       return 0;
     }
     if (!leading_zeroes) {
-      RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_amount));
+      RET_IF_RESULT_NEGATIVE(writer->write(' ', amount));
     }
     if (sign_char > 0) {
       RET_IF_RESULT_NEGATIVE(writer->write(sign_char));
     }
     if (leading_zeroes) {
-      RET_IF_RESULT_NEGATIVE(writer->write('0', padding_amount));
+      RET_IF_RESULT_NEGATIVE(writer->write('0', amount));
     }
     return 0;
   }
@@ -141,10 +149,9 @@ public:
                                       size_t total_digits) {
     // If and only if the conversion is left justified, there may be trailing
     // spaces.
-    int padding_amount =
-        static_cast<int>(min_width - total_digits - (sign_char > 0 ? 1 : 0));
-    if (left_justified && padding_amount > 0) {
-      RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_amount));
+    size_t amount = padding_amount(total_digits);
+    if (left_justified && amount > 0) {
+      RET_IF_RESULT_NEGATIVE(writer->write(' ', amount));
     }
     return 0;
   }

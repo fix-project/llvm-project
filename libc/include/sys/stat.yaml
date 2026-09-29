@@ -42,6 +42,13 @@ functions:
     arguments:
       - type: int
       - type: struct stat *
+  - name: fstatat
+    return_type: int
+    arguments:
+      - type: int
+      - type: const char *
+      - type: struct stat *
+      - type: int
   - name: lstat
     return_type: int
     arguments:
@@ -58,6 +65,12 @@ functions:
       - type: int
       - type: const char *
       - type: mode_t
+  - name: mknod
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: mode_t
+      - type: dev_t
   - name: stat
     return_type: int
     arguments:
@@ -70,3 +83,21 @@ functions:
       - type: const char *
       - type: const struct timespec *
       - type: int
+  - name: umask
+    return_type: mode_t
+    arguments:
+      - type: mode_t
+  - name: mkfifo
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: const char *
+      - type: mode_t
+  - name: mknodat
+    guard: __wasi__
+    return_type: int
+    arguments:
+      - type: int
+      - type: const char *
+      - type: mode_t
+      - type: dev_t

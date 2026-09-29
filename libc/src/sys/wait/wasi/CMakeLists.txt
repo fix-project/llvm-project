@@ -1,0 +1,32 @@
+add_entrypoint_object(
+  wait
+  SRCS
+    wait.cpp
+  HDRS
+    ../wait.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  waitpid
+  SRCS
+    waitpid.cpp
+  HDRS
+    ../waitpid.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  wait4
+  SRCS
+    wait4.cpp
+  HDRS
+    ../wait4.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
