@@ -30,12 +30,18 @@ if (RUNTIMES_USE_LIBC STREQUAL "system")
 # Link against the in-tree LLVM libc
 elseif (RUNTIMES_USE_LIBC STREQUAL "llvm-libc")
   add_library(runtimes-libc-headers INTERFACE)
-  target_link_libraries(runtimes-libc-headers INTERFACE libc-headers)
-  check_cxx_compiler_flag(-nostdlibinc CXX_SUPPORTS_NOSTDLIBINC_FLAG)
-  if(CXX_SUPPORTS_NOSTDLIBINC_FLAG)
-    target_compile_options(runtimes-libc-headers INTERFACE "-nostdlibinc")
-    if(LIBC_KERNEL_HEADERS)
-      target_compile_options(runtimes-libc-headers INTERFACE "-idirafter${LIBC_KERNEL_HEADERS}")
+  # In a standalone runtimes build the C library is not part of the build,
+  # so there is no libc-headers target.  The headers then come from the
+  # sysroot (CMAKE_SYSROOT) instead, and -nostdlibinc must not be used
+  # since it would remove the sysroot directories from the search path.
+  if (TARGET libc-headers)
+    target_link_libraries(runtimes-libc-headers INTERFACE libc-headers)
+    check_cxx_compiler_flag(-nostdlibinc CXX_SUPPORTS_NOSTDLIBINC_FLAG)
+    if(CXX_SUPPORTS_NOSTDLIBINC_FLAG)
+      target_compile_options(runtimes-libc-headers INTERFACE "-nostdlibinc")
+      if(LIBC_KERNEL_HEADERS)
+        target_compile_options(runtimes-libc-headers INTERFACE "-idirafter${LIBC_KERNEL_HEADERS}")
+      endif()
     endif()
   endif()
 

@@ -59,7 +59,13 @@ include(CMakeDependentOption)
 include(HandleCompilerRT)
 
 # Basic options ---------------------------------------------------------------
-option(LIBCXX_ENABLE_SHARED "Build libc++ as a shared library." ON)
+get_property(LIBCXX_SUPPORTS_SHARED_LIBS GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
+if(LIBCXX_SUPPORTS_SHARED_LIBS)
+  set(LIBCXX_ENABLE_SHARED_DEFAULT ON)
+else()
+  set(LIBCXX_ENABLE_SHARED_DEFAULT OFF)
+endif()
+option(LIBCXX_ENABLE_SHARED "Build libc++ as a shared library." ${LIBCXX_ENABLE_SHARED_DEFAULT})
 option(LIBCXX_ENABLE_STATIC "Build libc++ as a static library." ON)
 option(LIBCXX_ENABLE_EXCEPTIONS "Enable exceptions in the built library." ON)
 option(LIBCXX_ENABLE_RTTI
@@ -471,7 +477,16 @@ set(LIBCXX_STATIC_OUTPUT_NAME "c++" CACHE STRING "Output name for the static lib
 
 # TODO: Use common runtimes infrastructure for output and install paths
 if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR AND NOT APPLE)
-  set(LIBCXX_TARGET_SUBDIR ${LLVM_DEFAULT_TARGET_TRIPLE})
+  # Use the same per-target directory as the rest of the runtimes tree
+  # (get_toolchain_library_subdir), which is also what the Clang driver
+  # searches.  LLVM_DEFAULT_TARGET_TRIPLE is normalized via
+  # -print-target-triple and can differ (e.g. wasm32-unknown-wasip1 vs.
+  # the multilib spelling wasm32-wasip1).
+  if(DEFINED LLVM_TARGET_TRIPLE)
+    set(LIBCXX_TARGET_SUBDIR ${LLVM_TARGET_TRIPLE})
+  else()
+    set(LIBCXX_TARGET_SUBDIR ${LLVM_DEFAULT_TARGET_TRIPLE})
+  endif()
   if(LIBCXX_LIBDIR_SUBDIR)
     string(APPEND LIBCXX_TARGET_SUBDIR /${LIBCXX_LIBDIR_SUBDIR})
   endif()

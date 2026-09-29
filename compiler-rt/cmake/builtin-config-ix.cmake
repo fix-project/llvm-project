@@ -297,8 +297,11 @@ else()
   endforeach()
 endif()
 
+# WebAssembly targets provide their own crt startup files (e.g. wasi-libc /
+# libc), and OS_NAME may still report the host OS in per-target runtime
+# sub-builds, so exclude wasm explicitly here.
 if(OS_NAME MATCHES "Linux|SerenityOS" AND NOT LLVM_USE_SANITIZER AND NOT
-   COMPILER_RT_GPU_BUILD)
+   COMPILER_RT_GPU_BUILD AND NOT COMPILER_RT_DEFAULT_TARGET_ARCH MATCHES "^wasm")
   set(COMPILER_RT_HAS_CRT TRUE)
 else()
   set(COMPILER_RT_HAS_CRT FALSE)

@@ -27,6 +27,28 @@ include(${LLVM_COMMON_CMAKE_UTILS}/Modules/CMakePolicy.cmake
 
 include(${LLVM_COMMON_CMAKE_UTILS}/Modules/LLVMVersion.cmake)
 
+# Bare-metal and WASI runtime builds may not yet have a C library for
+# configure-time link tests. Set up the cross-compilation environment for
+# these targets unless the caller supplied CMAKE_SYSTEM_NAME explicitly.
+if(CMAKE_C_COMPILER_TARGET AND NOT CMAKE_SYSTEM_NAME)
+  string(REPLACE "-" ";" _runtimes_triple_parts "${CMAKE_C_COMPILER_TARGET}")
+  list(LENGTH _runtimes_triple_parts _runtimes_triple_len)
+  if(_runtimes_triple_len GREATER_EQUAL 2)
+    if(_runtimes_triple_len GREATER_EQUAL 3)
+      list(GET _runtimes_triple_parts 2 _runtimes_triple_os)
+    else()
+      list(GET _runtimes_triple_parts 1 _runtimes_triple_os)
+    endif()
+    string(TOLOWER "${_runtimes_triple_os}" _runtimes_triple_os)
+    if(_runtimes_triple_os MATCHES "^(none|elf|eabi|unknown|wasi|wasip[0-9]+)$")
+      list(GET _runtimes_triple_parts 0 _runtimes_triple_cpu)
+      set(CMAKE_SYSTEM_NAME "Generic")
+      set(CMAKE_SYSTEM_PROCESSOR "${_runtimes_triple_cpu}")
+      set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+    endif()
+  endif()
+endif()
+
 project(Runtimes C CXX ASM)
 set(LLVM_SUBPROJECT_TITLE "Runtimes")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

@@ -274,7 +274,11 @@ option(COMPILER_RT_EXCLUDE_LIBC_PROVIDED_ARM_AEABI_BUILTINS
   "Skip the standard C library provided arm aeabi builtins from compiler-rt)"
   Off)
 
-if(NOT FUCHSIA AND NOT COMPILER_RT_BAREMETAL_BUILD AND NOT COMPILER_RT_GPU_BUILD)
+# WebAssembly does not need emutls (TLS is lowered natively by LLVM), has no
+# executeable-stack support, and eprintf.c relies on host libc headers that may
+# not be available when cross-compiling to wasm.
+if(NOT FUCHSIA AND NOT COMPILER_RT_BAREMETAL_BUILD AND NOT COMPILER_RT_GPU_BUILD
+   AND NOT COMPILER_RT_DEFAULT_TARGET_ARCH MATCHES "^wasm")
   set(GENERIC_SOURCES
     ${GENERIC_SOURCES}
     emutls.c

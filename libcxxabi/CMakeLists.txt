@@ -132,7 +132,13 @@ usual symlinks pointing to that.")
 # the libc++abi that is being built. The problem with testing a static libc++abi
 # is that libc++ will prefer a dynamic libc++abi from the system over a static
 # libc++abi from the output directory.
-option(LIBCXXABI_ENABLE_SHARED "Build libc++abi as a shared library." ON)
+get_property(LIBCXXABI_SUPPORTS_SHARED_LIBS GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
+if(LIBCXXABI_SUPPORTS_SHARED_LIBS)
+  set(LIBCXXABI_ENABLE_SHARED_DEFAULT ON)
+else()
+  set(LIBCXXABI_ENABLE_SHARED_DEFAULT OFF)
+endif()
+option(LIBCXXABI_ENABLE_SHARED "Build libc++abi as a shared library." ${LIBCXXABI_ENABLE_SHARED_DEFAULT})
 option(LIBCXXABI_ENABLE_STATIC "Build libc++abi as a static library." ON)
 
 cmake_dependent_option(LIBCXXABI_INSTALL_STATIC_LIBRARY
@@ -208,7 +214,13 @@ set(LIBCXXABI_INSTALL_RUNTIME_DIR "${CMAKE_INSTALL_BINDIR}" CACHE STRING
 
 # TODO: Use common runtimes infrastructure for output and install paths
 if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR AND NOT APPLE)
-  set(LIBCXXABI_TARGET_SUBDIR ${LLVM_DEFAULT_TARGET_TRIPLE})
+  # See the comment in libcxx/CMakeLists.txt: prefer the raw target name
+  # used by the common runtimes directory mechanism and the Clang driver.
+  if(DEFINED LLVM_TARGET_TRIPLE)
+    set(LIBCXXABI_TARGET_SUBDIR ${LLVM_TARGET_TRIPLE})
+  else()
+    set(LIBCXXABI_TARGET_SUBDIR ${LLVM_DEFAULT_TARGET_TRIPLE})
+  endif()
   if(LIBCXXABI_LIBDIR_SUBDIR)
     string(APPEND LIBCXXABI_TARGET_SUBDIR /${LIBCXXABI_LIBDIR_SUBDIR})
   endif()
