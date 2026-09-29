@@ -410,6 +410,7 @@ add_entrypoint_object(
     libc.hdr.types.size_t
 )
 
+if(NOT LIBC_TARGET_OS_IS_WASI)
 add_entrypoint_object(
   mkstemp
   SRCS
@@ -426,6 +427,7 @@ add_entrypoint_object(
     libc.src.__support.macros.config
     libc.src.__support.macros.null_check
 )
+endif()
 
 add_entrypoint_object(
   mbtowc
@@ -501,7 +503,7 @@ add_entrypoint_object(
     libc.src.__support.libc_errno
 )
 
-if(NOT LIBC_TARGET_OS_IS_BAREMETAL AND NOT LIBC_TARGET_OS_IS_GPU)
+if(NOT LIBC_TARGET_OS_IS_BAREMETAL AND NOT LIBC_TARGET_OS_IS_GPU AND NOT LIBC_TARGET_OS_IS_WASI)
   if(LLVM_LIBC_INCLUDE_SCUDO)
     set(SCUDO_DEPS "")
 
@@ -607,6 +609,21 @@ add_entrypoint_object(
     .${LIBC_TARGET_OS}.realpath
 )
 
+if(LIBC_TARGET_OS_IS_WASI)
+  add_entrypoint_object(
+    mkstemp
+    ALIAS
+    DEPENDS
+      .wasi.mkstemp
+  )
+  add_entrypoint_object(
+    posix_memalign
+    ALIAS
+    DEPENDS
+      .wasi.posix_memalign
+  )
+endif()
+
 if(NOT LLVM_LIBC_FULL_BUILD)
   return()
 endif()
@@ -702,7 +719,7 @@ add_entrypoint_object(
     .${LIBC_TARGET_OS}.unsetenv
 )
 
-if(LIBC_TARGET_OS_IS_BAREMETAL OR LIBC_TARGET_OS_IS_GPU)
+if(LIBC_TARGET_OS_IS_BAREMETAL OR LIBC_TARGET_OS_IS_GPU OR LIBC_TARGET_OS_IS_WASI)
   add_entrypoint_object(
     malloc
     ALIAS

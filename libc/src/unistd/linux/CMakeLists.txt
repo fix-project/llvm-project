@@ -665,3 +665,14 @@ add_entrypoint_object(
     libc.src.__support.OSUtil.linux.syscall_wrappers.getrandom
     libc.src.errno.errno
 )
+
+add_entrypoint_object(
+  gettid
+  SRCS
+    gettid.cpp
+  HDRS
+    ../gettid.h
+  DEPENDS
+    libc.hdr.types.pid_t
+    libc.src.__support.threads.identifier
+)

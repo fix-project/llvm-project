@@ -1,4 +1,4 @@
-//===-- Implementation of sigsetjmp ---------------------------------------===//
+//===-- Internal header for posix_memalign ----------------------*- C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,13 +6,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "src/setjmp/sigsetjmp.h"
-#include "hdr/offsetof_macros.h"
-#include "src/__support/common.h"
+#ifndef LLVM_LIBC_SRC_STDLIB_POSIX_MEMALIGN_H
+#define LLVM_LIBC_SRC_STDLIB_POSIX_MEMALIGN_H
+
+#include "src/__support/macros/config.h"
+#include <stddef.h>
 
 namespace LIBC_NAMESPACE_DECL {
-[[gnu::returns_twice]] int sigsetjmp(jmp_buf sigjmp_buf,
-                                     [[maybe_unused]] int savesigs) {
-  return setjmp(sigjmp_buf);
-}
+
+int posix_memalign(void **memptr, size_t alignment, size_t size);
+
 } // namespace LIBC_NAMESPACE_DECL
+
+#endif // LLVM_LIBC_SRC_STDLIB_POSIX_MEMALIGN_H

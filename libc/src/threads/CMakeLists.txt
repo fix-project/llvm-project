@@ -84,60 +84,71 @@ add_entrypoint_object(
     libc.src.__support.threads.thread
 )
 
-add_entrypoint_object(
-  mtx_init
-  SRCS
-    mtx_init.cpp
-  HDRS
-    mtx_init.h
-  DEPENDS
-    libc.include.threads
-    libc.src.__support.threads.mutex
-)
+if(LIBC_TARGET_OS_IS_WASI)
+  foreach(name mtx_init mtx_destroy mtx_lock mtx_trylock mtx_unlock)
+    add_entrypoint_object(
+      ${name}
+      ALIAS
+      DEPENDS
+        .wasi.${name}
+    )
+  endforeach()
+else()
+  add_entrypoint_object(
+    mtx_init
+    SRCS
+      mtx_init.cpp
+    HDRS
+      mtx_init.h
+    DEPENDS
+      libc.include.threads
+      libc.src.__support.threads.mutex
+  )
 
-add_entrypoint_object(
-  mtx_destroy
-  SRCS
-    mtx_destroy.cpp
-  HDRS
-    mtx_destroy.h
-  DEPENDS
-    libc.include.threads
-    libc.src.__support.threads.mutex
-)
+  add_entrypoint_object(
+    mtx_destroy
+    SRCS
+      mtx_destroy.cpp
+    HDRS
+      mtx_destroy.h
+    DEPENDS
+      libc.include.threads
+      libc.src.__support.threads.mutex
+  )
 
-add_entrypoint_object(
-  mtx_lock
-  SRCS
-    mtx_lock.cpp
-  HDRS
-    mtx_lock.h
-  DEPENDS
-    libc.include.threads
-    libc.src.__support.threads.mutex
-)
+  add_entrypoint_object(
+    mtx_lock
+    SRCS
+      mtx_lock.cpp
+    HDRS
+      mtx_lock.h
+    DEPENDS
+      libc.include.threads
+      libc.src.__support.threads.mutex
+  )
 
-add_entrypoint_object(
-  mtx_trylock
-  SRCS
-    mtx_trylock.cpp
-  HDRS
-    mtx_trylock.h
-  DEPENDS
-    libc.include.threads
-    libc.src.__support.threads.mutex
-)
+  add_entrypoint_object(
+    mtx_trylock
+    SRCS
+      mtx_trylock.cpp
+    HDRS
+      mtx_trylock.h
+    DEPENDS
+      libc.include.threads
+      libc.src.__support.threads.mutex
+  )
 
-add_entrypoint_object(
-  mtx_unlock
-  SRCS
-    mtx_unlock.cpp
-  HDRS
-    mtx_unlock.h
-  DEPENDS
-    libc.include.threads
-    libc.src.__support.threads.mutex
-)
+  add_entrypoint_object(
+    mtx_unlock
+    SRCS
+      mtx_unlock.cpp
+    HDRS
+      mtx_unlock.h
+    DEPENDS
+      libc.include.threads
+      libc.src.__support.threads.mutex
+  )
+endif()
 
 add_entrypoint_object(
   tss_create

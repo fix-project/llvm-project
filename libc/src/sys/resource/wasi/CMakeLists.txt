@@ -1,0 +1,25 @@
+add_entrypoint_object(
+  getrlimit
+  SRCS
+    getrlimit.cpp
+  HDRS
+    ../getrlimit.h
+  DEPENDS
+    libc.include.sys_resource
+    libc.hdr.sys_resource_macros
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  setrlimit
+  SRCS
+    setrlimit.cpp
+  HDRS
+    ../setrlimit.h
+  DEPENDS
+    libc.include.sys_resource
+    libc.hdr.sys_resource_macros
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

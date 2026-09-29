@@ -1,0 +1,125 @@
+add_entrypoint_object(
+  cnd_init
+  SRCS
+    cnd_init.cpp
+  HDRS
+    ../cnd_init.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  cnd_destroy
+  SRCS
+    cnd_destroy.cpp
+  HDRS
+    ../cnd_destroy.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  cnd_wait
+  SRCS
+    cnd_wait.cpp
+  HDRS
+    ../cnd_wait.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  cnd_timedwait
+  SRCS
+    cnd_timedwait.cpp
+  HDRS
+    ../cnd_timedwait.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  cnd_signal
+  SRCS
+    cnd_signal.cpp
+  HDRS
+    ../cnd_signal.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  cnd_broadcast
+  SRCS
+    cnd_broadcast.cpp
+  HDRS
+    ../cnd_broadcast.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  mtx_init
+  SRCS
+    mtx_init.cpp
+  HDRS
+    ../mtx_init.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+    libc.src.__support.macros.null_check
+)
+
+add_entrypoint_object(
+  mtx_destroy
+  SRCS
+    mtx_destroy.cpp
+  HDRS
+    ../mtx_destroy.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  mtx_lock
+  SRCS
+    mtx_lock.cpp
+  HDRS
+    ../mtx_lock.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+    libc.src.__support.macros.null_check
+)
+
+add_entrypoint_object(
+  mtx_trylock
+  SRCS
+    mtx_trylock.cpp
+  HDRS
+    ../mtx_trylock.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+    libc.src.__support.macros.null_check
+)
+
+add_entrypoint_object(
+  mtx_unlock
+  SRCS
+    mtx_unlock.cpp
+  HDRS
+    ../mtx_unlock.h
+  DEPENDS
+    libc.include.threads
+    libc.src.__support.common
+    libc.src.__support.macros.null_check
+)

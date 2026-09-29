@@ -518,6 +518,15 @@ CString libc_make_test_file_path_func(const char *file_name);
 
 #endif // LIBC_TEST_SKIP_DEATH_TESTS
 
+#else // !ENABLE_SUBPROCESS_TESTS
+
+// Platforms without subprocess support cannot run the function in a child
+// process, so the death/exit checks are no-ops.
+#define EXPECT_DEATH(FUNC, SIG)
+#define ASSERT_DEATH(FUNC, SIG)
+#define EXPECT_EXITS(FUNC, EXIT)
+#define ASSERT_EXITS(FUNC, EXIT)
+
 #endif // ENABLE_SUBPROCESS_TESTS
 
 ////////////////////////////////////////////////////////////////////////////////

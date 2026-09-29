@@ -1,0 +1,158 @@
+add_header_library(
+  signal_utils
+  HDRS
+    signal_utils.h
+  DEPENDS
+    libc.hdr.signal_macros
+    libc.hdr.types.sigset_t
+    libc.hdr.types.stack_t
+    libc.hdr.types.struct_sigaction
+)
+
+add_object_library(
+  signal_state
+  SRCS
+    signal_state.cpp
+  DEPENDS
+    .signal_utils
+    libc.src.__support.OSUtil.wasi.wasi_util
+)
+
+add_entrypoint_object(
+  kill
+  SRCS
+    kill.cpp
+  HDRS
+    ../kill.h
+  DEPENDS
+    .signal_state
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+    libc.src.unistd.getpid
+)
+
+add_entrypoint_object(
+  raise
+  SRCS
+    raise.cpp
+  HDRS
+    ../raise.h
+  DEPENDS
+    .signal_state
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sigaction
+  SRCS
+    sigaction.cpp
+  HDRS
+    ../sigaction.h
+  DEPENDS
+    .signal_state
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sigaddset
+  SRCS
+    sigaddset.cpp
+  HDRS
+    ../sigaddset.h
+  DEPENDS
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sigaltstack
+  SRCS
+    sigaltstack.cpp
+  HDRS
+    ../sigaltstack.h
+  DEPENDS
+    .signal_state
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sigdelset
+  SRCS
+    sigdelset.cpp
+  HDRS
+    ../sigdelset.h
+  DEPENDS
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sigemptyset
+  SRCS
+    sigemptyset.cpp
+  HDRS
+    ../sigemptyset.h
+  DEPENDS
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sigfillset
+  SRCS
+    sigfillset.cpp
+  HDRS
+    ../sigfillset.h
+  DEPENDS
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  signal
+  SRCS
+    signal.cpp
+  HDRS
+    ../signal.h
+  DEPENDS
+    .sigaction
+    libc.hdr.signal_macros
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  sigprocmask
+  SRCS
+    sigprocmask.cpp
+  HDRS
+    ../sigprocmask.h
+  DEPENDS
+    .signal_state
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  pthread_sigmask
+  SRCS
+    pthread_sigmask.cpp
+  HDRS
+    ../pthread_sigmask.h
+  DEPENDS
+    .signal_state
+    .signal_utils
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

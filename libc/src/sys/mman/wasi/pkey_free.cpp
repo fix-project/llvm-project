@@ -1,0 +1,17 @@
+#include "src/sys/mman/pkey_free.h"
+
+#include "src/__support/common.h"
+#include "src/__support/libc_errno.h"
+#include "src/__support/macros/config.h"
+#include <sys/mman.h>
+
+namespace LIBC_NAMESPACE_DECL {
+
+LLVM_LIBC_FUNCTION(int, pkey_free, (int pkey)) {
+  // WASI does not provide this interface.
+  (void)pkey;
+  libc_errno = ENOSYS;
+  return -1;
+}
+
+} // namespace LIBC_NAMESPACE_DECL

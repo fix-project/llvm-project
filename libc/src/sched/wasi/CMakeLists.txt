@@ -1,0 +1,119 @@
+add_entrypoint_object(
+  sched_yield
+  SRCS
+    sched_yield.cpp
+  HDRS
+    ../sched_yield.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+add_entrypoint_object(
+  sched_getcpu
+  SRCS
+    sched_getcpu.cpp
+  HDRS
+    ../sched_getcpu.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_setparam
+  SRCS
+    sched_setparam.cpp
+  HDRS
+    ../sched_setparam.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_getparam
+  SRCS
+    sched_getparam.cpp
+  HDRS
+    ../sched_getparam.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_setscheduler
+  SRCS
+    sched_setscheduler.cpp
+  HDRS
+    ../sched_setscheduler.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_getscheduler
+  SRCS
+    sched_getscheduler.cpp
+  HDRS
+    ../sched_getscheduler.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_get_priority_max
+  SRCS
+    sched_get_priority_max.cpp
+  HDRS
+    ../sched_get_priority_max.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_get_priority_min
+  SRCS
+    sched_get_priority_min.cpp
+  HDRS
+    ../sched_get_priority_min.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_rr_get_interval
+  SRCS
+    sched_rr_get_interval.cpp
+  HDRS
+    ../sched_rr_get_interval.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_getaffinity
+  SRCS
+    sched_getaffinity.cpp
+  HDRS
+    ../sched_getaffinity.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sched_setaffinity
+  SRCS
+    sched_setaffinity.cpp
+  HDRS
+    ../sched_setaffinity.h
+  DEPENDS
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

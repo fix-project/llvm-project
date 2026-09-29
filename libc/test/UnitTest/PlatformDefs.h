@@ -9,7 +9,7 @@
 #ifndef LLVM_LIBC_TEST_UNITTEST_PLATFORMDEFS_H
 #define LLVM_LIBC_TEST_UNITTEST_PLATFORMDEFS_H
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__wasi__)
 #define ENABLE_SUBPROCESS_TESTS
 #endif
 

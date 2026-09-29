@@ -7,6 +7,12 @@ function(add_fp_unittest name)
     ${ARGN}
   )
 
+  # Skip float16 tests when the compiler does not support the _Float16 type.
+  # The logbf16/ilogbf16/llogbf16 tests are also float16-based upstream.
+  if(NOT LIBC_TYPES_HAS_FLOAT16 AND name MATCHES "(^|[^b])f16|logbf16|fminimum_numbf16")
+    return()
+  endif()
+
   if(MATH_UNITTEST_NEED_MPC)
     set(MATH_UNITTEST_NEED_MPFR TRUE)
     if(NOT LIBC_TESTS_CAN_USE_MPC)
@@ -94,6 +100,10 @@ if(${LIBC_TARGET_OS} STREQUAL "linux")
   add_subdirectory(termios)
 endif()
 
+if(${LIBC_TARGET_OS} STREQUAL "wasi")
+  add_subdirectory(sys)
+endif()
+
 if(LIBC_COMPILER_HAS_EXT_VECTOR_TYPE)
   add_subdirectory(mathvec)
 endif()
@@ -114,4 +124,8 @@ add_subdirectory(spawn)
 if(${LIBC_TARGET_OS} STREQUAL "linux")
   add_subdirectory(pthread)
   add_subdirectory(semaphore)
+endif()
+
+if(LIBC_TARGET_OS_IS_WASI)
+  add_subdirectory(wasi)
 endif()

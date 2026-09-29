@@ -1,0 +1,96 @@
+add_entrypoint_object(
+  open
+  SRCS
+    open.cpp
+  HDRS
+    ../open.h
+    open_utils.h
+  DEPENDS
+    libc.hdr.fcntl_macros
+    libc.hdr.types.mode_t
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  openat
+  SRCS
+    openat.cpp
+  HDRS
+    ../openat.h
+    open_utils.h
+  DEPENDS
+    libc.hdr.fcntl_macros
+    libc.hdr.types.mode_t
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  creat
+  SRCS
+    creat.cpp
+  HDRS
+    ../creat.h
+    open_utils.h
+  DEPENDS
+    libc.hdr.fcntl_macros
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fcntl
+  SRCS
+    fcntl.cpp
+  HDRS
+    ../fcntl.h
+  DEPENDS
+    libc.hdr.fcntl_macros
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  posix_fadvise
+  SRCS
+    posix_fadvise.cpp
+  HDRS
+    ../posix_fadvise.h
+  DEPENDS
+    libc.hdr.errno_macros
+    libc.hdr.types.off_t
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  posix_fallocate
+  SRCS
+    posix_fallocate.cpp
+  HDRS
+    ../posix_fallocate.h
+  DEPENDS
+    libc.hdr.errno_macros
+    libc.hdr.types.off_t
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  futimens
+  SRCS
+    futimens.cpp
+  HDRS
+    ../futimens.h
+  DEPENDS
+    libc.hdr.types.struct_timespec
+    libc.hdr.sys_stat_macros
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

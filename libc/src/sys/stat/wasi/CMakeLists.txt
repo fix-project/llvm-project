@@ -1,0 +1,118 @@
+add_entrypoint_object(
+  fstat
+  SRCS
+    fstat.cpp
+  HDRS
+    ../fstat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  lstat
+  SRCS
+    lstat.cpp
+  HDRS
+    ../lstat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mkdir
+  SRCS
+    mkdir.cpp
+  HDRS
+    ../mkdir.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  stat
+  SRCS
+    stat.cpp
+  HDRS
+    ../stat.h
+    filestat_utils.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+add_entrypoint_object(
+  mkdirat
+  SRCS
+    mkdirat.cpp
+  HDRS
+    ../mkdirat.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.hdr.types.mode_t
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  utimensat
+  SRCS
+    utimensat.cpp
+  HDRS
+    ../utimensat.h
+  DEPENDS
+    libc.include.sys_stat
+    libc.hdr.fcntl_macros
+    libc.hdr.sys_stat_macros
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  chmod
+  SRCS
+    chmod.cpp
+  HDRS
+    ../chmod.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fchmod
+  SRCS
+    fchmod.cpp
+  HDRS
+    ../fchmod.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fchmodat
+  SRCS
+    fchmodat.cpp
+  HDRS
+    ../fchmodat.h
+  DEPENDS
+    libc.hdr.types.mode_t
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

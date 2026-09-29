@@ -51,6 +51,7 @@ TEST(LlvmLibcStrSignalTest, KnownSignals) {
 
   // There are supposed to be 32 of these, but sometimes SIGRTMIN is shifted to
   // reserve some.
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
   const char *rt_message_array[] = {
       "Real-time signal 0",  "Real-time signal 1",  "Real-time signal 2",
       "Real-time signal 3",  "Real-time signal 4",  "Real-time signal 5",
@@ -64,6 +65,7 @@ TEST(LlvmLibcStrSignalTest, KnownSignals) {
       "Real-time signal 27", "Real-time signal 28", "Real-time signal 29",
       "Real-time signal 30", "Real-time signal 31", "Real-time signal 32",
   };
+#endif // defined(SIGRTMIN) && defined(SIGRTMAX)
 
   for (size_t i = 0; i < (sizeof(message_array) / sizeof(char *)); ++i) {
     ASSERT_EQ(static_cast<size_t>(static_cast<int>(i)), i);
@@ -71,9 +73,11 @@ TEST(LlvmLibcStrSignalTest, KnownSignals) {
                  message_array[i]);
   }
 
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
   for (int i = 0; i < SIGRTMAX - SIGRTMIN; ++i) {
     EXPECT_STREQ(LIBC_NAMESPACE::strsignal(i + SIGRTMIN), rt_message_array[i]);
   }
+#endif // defined(SIGRTMIN) && defined(SIGRTMAX)
 }
 
 TEST(LlvmLibcStrsignalTest, UnknownSignals) {

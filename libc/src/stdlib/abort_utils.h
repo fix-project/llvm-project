@@ -13,6 +13,8 @@
 
 #if defined(LIBC_TARGET_ARCH_IS_GPU)
 #include "src/stdlib/gpu/abort_utils.h"
+#elif defined(__wasi__)
+#include "src/stdlib/wasi/abort_utils.h"
 #elif defined(__linux__)
 #include "src/stdlib/linux/abort_utils.h"
 #elif defined(__ELF__)

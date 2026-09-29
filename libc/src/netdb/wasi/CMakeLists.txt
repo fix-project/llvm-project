@@ -1,0 +1,40 @@
+add_entrypoint_object(
+  getaddrinfo
+  SRCS
+    getaddrinfo.cpp
+  HDRS
+    ../getaddrinfo.h
+    ../eai_codes.h
+  DEPENDS
+    libc.include.netdb
+    libc.hdr.types.struct_addrinfo
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  freeaddrinfo
+  SRCS
+    freeaddrinfo.cpp
+  HDRS
+    ../freeaddrinfo.h
+  DEPENDS
+    libc.include.netdb
+    libc.hdr.types.struct_addrinfo
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  getnameinfo
+  SRCS
+    getnameinfo.cpp
+  HDRS
+    ../getnameinfo.h
+    ../eai_codes.h
+  DEPENDS
+    libc.include.netdb
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

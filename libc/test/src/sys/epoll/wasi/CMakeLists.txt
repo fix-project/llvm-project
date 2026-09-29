@@ -1,0 +1,23 @@
+add_custom_target(libc_sys_epoll_unittests)
+
+add_libc_unittest(
+  epoll_test
+  SUITE
+    libc_sys_epoll_unittests
+  SRCS
+    epoll_test.cpp
+  DEPENDS
+    libc.hdr.errno_macros
+    libc.include.sys_epoll
+    libc.src.errno.errno
+    libc.src.fcntl.open
+    libc.src.sys.epoll.epoll_create
+    libc.src.sys.epoll.epoll_create1
+    libc.src.sys.epoll.epoll_ctl
+    libc.src.sys.epoll.epoll_wait
+    libc.src.sys.epoll.epoll_pwait2
+    libc.src.unistd.close
+    libc.src.unistd.unlink
+    libc.test.UnitTest.ErrnoCheckingTest
+    libc.test.UnitTest.ErrnoSetterMatcher
+)

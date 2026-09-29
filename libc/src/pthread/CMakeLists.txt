@@ -1,3 +1,571 @@
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${LIBC_TARGET_OS})
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${LIBC_TARGET_OS})
+
+  add_entrypoint_object(
+    pthread_atfork
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_atfork
+  )
+
+  add_entrypoint_object(
+    pthread_attr_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_attr_getdetachstate
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_getdetachstate
+  )
+
+  add_entrypoint_object(
+    pthread_attr_getguardsize
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_getguardsize
+  )
+
+  add_entrypoint_object(
+    pthread_attr_getschedparam
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_getschedparam
+  )
+
+  add_entrypoint_object(
+    pthread_attr_getstack
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_getstack
+  )
+
+  add_entrypoint_object(
+    pthread_attr_getstacksize
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_getstacksize
+  )
+
+  add_entrypoint_object(
+    pthread_attr_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_init
+  )
+
+  add_entrypoint_object(
+    pthread_attr_setdetachstate
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_setdetachstate
+  )
+
+  add_entrypoint_object(
+    pthread_attr_setguardsize
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_setguardsize
+  )
+
+  add_entrypoint_object(
+    pthread_attr_setschedparam
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_setschedparam
+  )
+
+  add_entrypoint_object(
+    pthread_attr_setstack
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_setstack
+  )
+
+  add_entrypoint_object(
+    pthread_attr_setstacksize
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_attr_setstacksize
+  )
+
+  add_entrypoint_object(
+    pthread_barrier_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_barrier_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_barrier_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_barrier_init
+  )
+
+  add_entrypoint_object(
+    pthread_barrier_wait
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_barrier_wait
+  )
+
+  add_entrypoint_object(
+    pthread_cond_broadcast
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_broadcast
+  )
+
+  add_entrypoint_object(
+    pthread_cond_clockwait
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_clockwait
+  )
+
+  add_entrypoint_object(
+    pthread_cond_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_cond_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_init
+  )
+
+  add_entrypoint_object(
+    pthread_cond_signal
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_signal
+  )
+
+  add_entrypoint_object(
+    pthread_cond_timedwait
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_timedwait
+  )
+
+  add_entrypoint_object(
+    pthread_cond_wait
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_cond_wait
+  )
+
+  add_entrypoint_object(
+    pthread_condattr_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_condattr_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_condattr_getclock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_condattr_getclock
+  )
+
+  add_entrypoint_object(
+    pthread_condattr_getpshared
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_condattr_getpshared
+  )
+
+  add_entrypoint_object(
+    pthread_condattr_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_condattr_init
+  )
+
+  add_entrypoint_object(
+    pthread_condattr_setclock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_condattr_setclock
+  )
+
+  add_entrypoint_object(
+    pthread_condattr_setpshared
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_condattr_setpshared
+  )
+
+  add_entrypoint_object(
+    pthread_create
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_create
+  )
+
+  add_entrypoint_object(
+    pthread_detach
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_detach
+  )
+
+  add_entrypoint_object(
+    pthread_equal
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_equal
+  )
+
+  add_entrypoint_object(
+    pthread_exit
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_exit
+  )
+
+  add_entrypoint_object(
+    pthread_getname_np
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_getname_np
+  )
+
+  add_entrypoint_object(
+    pthread_getspecific
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_getspecific
+  )
+
+  add_entrypoint_object(
+    pthread_getthreadid_np
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_getthreadid_np
+  )
+
+  add_entrypoint_object(
+    pthread_getunique_np
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_getunique_np
+  )
+
+  add_entrypoint_object(
+    pthread_join
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_join
+  )
+
+  add_entrypoint_object(
+    pthread_key_create
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_key_create
+  )
+
+  add_entrypoint_object(
+    pthread_key_delete
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_key_delete
+  )
+
+  add_entrypoint_object(
+    pthread_mutex_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutex_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_mutex_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutex_init
+  )
+
+  add_entrypoint_object(
+    pthread_mutex_lock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutex_lock
+  )
+
+  add_entrypoint_object(
+    pthread_mutex_trylock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutex_trylock
+  )
+
+  add_entrypoint_object(
+    pthread_mutex_unlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutex_unlock
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_getpshared
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_getpshared
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_getrobust
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_getrobust
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_gettype
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_gettype
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_init
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_setpshared
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_setpshared
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_setrobust
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_setrobust
+  )
+
+  add_entrypoint_object(
+    pthread_mutexattr_settype
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_mutexattr_settype
+  )
+
+  add_entrypoint_object(
+    pthread_once
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_once
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_clockrdlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_clockrdlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_clockwrlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_clockwrlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_init
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_rdlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_rdlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_timedrdlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_timedrdlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_timedwrlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_timedwrlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_tryrdlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_tryrdlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_trywrlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_trywrlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_unlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_unlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlock_wrlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlock_wrlock
+  )
+
+  add_entrypoint_object(
+    pthread_rwlockattr_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlockattr_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_rwlockattr_getkind_np
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlockattr_getkind_np
+  )
+
+  add_entrypoint_object(
+    pthread_rwlockattr_getpshared
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlockattr_getpshared
+  )
+
+  add_entrypoint_object(
+    pthread_rwlockattr_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlockattr_init
+  )
+
+  add_entrypoint_object(
+    pthread_rwlockattr_setkind_np
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlockattr_setkind_np
+  )
+
+  add_entrypoint_object(
+    pthread_rwlockattr_setpshared
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_rwlockattr_setpshared
+  )
+
+  add_entrypoint_object(
+    pthread_self
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_self
+  )
+
+  add_entrypoint_object(
+    pthread_setname_np
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_setname_np
+  )
+
+  add_entrypoint_object(
+    pthread_setspecific
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_setspecific
+  )
+
+  add_entrypoint_object(
+    pthread_spin_destroy
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_spin_destroy
+  )
+
+  add_entrypoint_object(
+    pthread_spin_init
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_spin_init
+  )
+
+  add_entrypoint_object(
+    pthread_spin_lock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_spin_lock
+  )
+
+  add_entrypoint_object(
+    pthread_spin_trylock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_spin_trylock
+  )
+
+  add_entrypoint_object(
+    pthread_spin_unlock
+    ALIAS
+    DEPENDS
+      .${LIBC_TARGET_OS}.pthread_spin_unlock
+  )
+
+  if(LIBC_TARGET_OS STREQUAL "wasi")
+    add_entrypoint_object(
+      pthread_cancel
+      ALIAS
+      DEPENDS
+        .wasi.pthread_cancel
+    )
+  endif()
+
+  return()
+endif()
+
 add_entrypoint_object(
   pthread_attr_init
   SRCS

@@ -58,3 +58,12 @@ TEST_MAIN(int argc, char **argv, char **envp) {
 
   return LIBC_NAMESPACE::testing::Test::runTests(parseOptions(argc, argv));
 }
+
+#if defined(__wasi__)
+// The WASI startup code enters through __main_argc_argv, which the compiler
+// does not emit for a three-argument main. Define the shim so that the test
+// main is reachable from the entry point.
+extern "C" int __main_argc_argv(int argc, char **argv) {
+  return main(argc, argv, nullptr);
+}
+#endif

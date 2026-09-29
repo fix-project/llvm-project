@@ -1,0 +1,268 @@
+add_entrypoint_object(
+  madvise
+  SRCS
+    madvise.cpp
+  HDRS
+    ../madvise.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  memfd_create
+  SRCS
+    memfd_create.cpp
+  HDRS
+    ../memfd_create.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mincore
+  SRCS
+    mincore.cpp
+  HDRS
+    ../mincore.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mlock
+  SRCS
+    mlock.cpp
+  HDRS
+    ../mlock.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mlock2
+  SRCS
+    mlock2.cpp
+  HDRS
+    ../mlock2.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mlockall
+  SRCS
+    mlockall.cpp
+  HDRS
+    ../mlockall.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mmap
+  SRCS
+    mmap.cpp
+  HDRS
+    ../mmap.h
+    mman_emulation.h
+  DEPENDS
+    libc.include.stdlib
+    libc.include.string
+    libc.include.sys_mman
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  mprotect
+  SRCS
+    mprotect.cpp
+  HDRS
+    ../mprotect.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  mremap
+  SRCS
+    mremap.cpp
+  HDRS
+    ../mremap.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  msync
+  SRCS
+    msync.cpp
+  HDRS
+    ../msync.h
+    mman_emulation.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  munlock
+  SRCS
+    munlock.cpp
+  HDRS
+    ../munlock.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  munlockall
+  SRCS
+    munlockall.cpp
+  HDRS
+    ../munlockall.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  munmap
+  SRCS
+    munmap.cpp
+  HDRS
+    ../munmap.h
+    mman_emulation.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  pkey_alloc
+  SRCS
+    pkey_alloc.cpp
+  HDRS
+    ../pkey_alloc.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  pkey_free
+  SRCS
+    pkey_free.cpp
+  HDRS
+    ../pkey_free.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  pkey_get
+  SRCS
+    pkey_get.cpp
+  HDRS
+    ../pkey_get.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  pkey_mprotect
+  SRCS
+    pkey_mprotect.cpp
+  HDRS
+    ../pkey_mprotect.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  pkey_set
+  SRCS
+    pkey_set.cpp
+  HDRS
+    ../pkey_set.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  posix_madvise
+  SRCS
+    posix_madvise.cpp
+  HDRS
+    ../posix_madvise.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
+  remap_file_pages
+  SRCS
+    remap_file_pages.cpp
+  HDRS
+    ../remap_file_pages.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  shm_open
+  SRCS
+    shm_open.cpp
+  HDRS
+    ../shm_open.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  shm_unlink
+  SRCS
+    shm_unlink.cpp
+  HDRS
+    ../shm_unlink.h
+  DEPENDS
+    libc.include.sys_mman
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)

@@ -1,0 +1,10 @@
+add_entrypoint_object(
+  uname
+  SRCS
+    uname.cpp
+  HDRS
+    ../uname.h
+  DEPENDS
+    libc.include.sys_utsname
+    libc.src.__support.common
+)

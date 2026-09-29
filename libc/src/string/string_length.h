@@ -17,6 +17,7 @@
 #include "hdr/limits_macros.h"
 #include "hdr/stdint_proxy.h" // uintptr_t
 #include "hdr/types/size_t.h"
+#include "src/__support/CPP/limits.h" // cpp::numeric_limits
 #include "src/__support/CPP/type_traits.h" // cpp::is_same_v
 
 #if LIBC_HAS_VECTOR_TYPE

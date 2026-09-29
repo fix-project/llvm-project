@@ -419,12 +419,9 @@ add_entrypoint_external(
 
 add_entrypoint_object(
   gettid
-  SRCS
-    gettid.cpp
-  HDRS
-    gettid.h
+  ALIAS
   DEPENDS
-    libc.src.__support.threads.identifier
+    .${LIBC_TARGET_OS}.gettid
 )
 
 add_entrypoint_object(

@@ -1,0 +1,25 @@
+add_entrypoint_object(
+  statvfs
+  SRCS
+    statvfs.cpp
+  HDRS
+    ../statvfs.h
+  DEPENDS
+    libc.include.sys_statvfs
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  fstatvfs
+  SRCS
+    fstatvfs.cpp
+  HDRS
+    ../fstatvfs.h
+  DEPENDS
+    libc.include.sys_statvfs
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
