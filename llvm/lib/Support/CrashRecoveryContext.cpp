@@ -13,8 +13,11 @@
 #include "llvm/Support/Signals.h"
 #include "llvm/Support/thread.h"
 #include <cassert>
+#include <cstdlib>
 #include <mutex>
+#if !defined(__wasi__)
 #include <setjmp.h>
+#endif
 #ifdef __APPLE__
 #include <sys/resource.h>
 #endif
@@ -34,7 +37,9 @@ struct CrashRecoveryContextImpl {
   const CrashRecoveryContextImpl *Next;
 
   CrashRecoveryContext *CRC;
+#if !defined(__wasi__)
   ::jmp_buf JumpBuffer;
+#endif
   volatile unsigned Failed : 1;
   unsigned SwitchedThread : 1;
   unsigned ValidJumpBuffer : 1;
@@ -76,8 +81,10 @@ public:
     CRC->RetCode = RetCode;
 
     // Jump back to the RunSafely we were called under.
+#if !defined(__wasi__)
     if (ValidJumpBuffer)
       longjmp(JumpBuffer, 1);
+#endif
 
     // Otherwise let the caller decide of the outcome of the crash. Currently
     // this occurs when using SEH on Windows with MSVC or clang-cl.
@@ -142,6 +149,12 @@ CrashRecoveryContext *CrashRecoveryContext::GetCurrent() {
 }
 
 void CrashRecoveryContext::Enable(bool NeedsPOSIXUtilitySignalHandling) {
+#if defined(__wasi__)
+  // WASI does not deliver synchronous signals and has no setjmp/longjmp
+  // support, so crash recovery cannot be implemented.
+  (void)NeedsPOSIXUtilitySignalHandling;
+  return;
+#endif
   std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
   // FIXME: Shouldn't this be a refcount or something?
   if (gCrashRecoveryEnabled)
@@ -335,6 +348,16 @@ static void uninstallExceptionOrSignalHandlers() {
   }
 }
 
+#elif defined(__wasi__)
+
+// WASI does not deliver synchronous signals to the current thread, so there
+// is nothing to install. Crash recovery is disabled entirely (see Enable()).
+#include <signal.h>
+
+static void
+installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {}
+static void uninstallExceptionOrSignalHandlers() {}
+
 #else // !_WIN32
 
 // Generic POSIX implementation.
@@ -431,10 +454,12 @@ bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
     CrashRecoveryContextImpl *CRCI = new CrashRecoveryContextImpl(this);
     Impl = CRCI;
 
+#if !defined(__wasi__)
     CRCI->ValidJumpBuffer = true;
     if (setjmp(CRCI->JumpBuffer) != 0) {
       return false;
     }
+#endif
   }
 
   Fn();
@@ -444,7 +469,11 @@ bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
 #endif // !_MSC_VER
 
 [[noreturn]] void CrashRecoveryContext::HandleExit(int RetCode) {
-#if defined(_WIN32)
+#if defined(__wasi__)
+  // Crash recovery is unsupported on WASI; this is unreachable in practice
+  // because Enable() is a no-op there.
+  std::abort();
+#elif defined(_WIN32)
   // Since the exception code is actually of NTSTATUS type, we use the
   // Microsoft-recommended 0xE prefix, to signify that this is a user error.
   // This value is a combination of the customer field (bit 29) and severity

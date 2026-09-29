@@ -355,6 +355,7 @@ function(runtime_default_target)
                                                 LLVM_USE_LINKER
                                                 CUDA CMAKE_CUDA # For runtimes that may look for the CUDA compiler and/or SDK (libc, offload, flang-rt)
                                                 FLANG_RUNTIME # Shared between Flang and Flang-RT
+                                                LIBC_ # Forward LIBC_* configuration options (e.g. LIBC_WASM_ENABLE_SJLJ)
                                                 ${ARG_PREFIXES}
                            EXTRA_TARGETS ${extra_targets}
                                          ${test_targets}
@@ -473,11 +474,12 @@ function(runtime_register_target name)
                                       -DLLVM_RUNTIMES_TARGET=${name}
                                       ${COMMON_CMAKE_ARGS}
                                       ${${name}_extra_args}
-                           EXTRA_TARGETS ${${name}_extra_targets}
-                                         ${${name}_test_targets}
-                           USE_TOOLCHAIN
-                           FOLDER "Runtimes"
-                           ${EXTRA_ARGS} ${ARG_EXTRA_ARGS})
+                            PASSTHROUGH_PREFIXES LIBC_ # Forward LIBC_* configuration options (e.g. LIBC_WASM_ENABLE_SJLJ)
+                            EXTRA_TARGETS ${${name}_extra_targets}
+                                          ${${name}_test_targets}
+                            USE_TOOLCHAIN
+                            FOLDER "Runtimes"
+                            ${EXTRA_ARGS} ${ARG_EXTRA_ARGS})
 
   add_dependencies(runtimes runtimes-${name})
   add_dependencies(runtimes-configure runtimes-${name}-configure)

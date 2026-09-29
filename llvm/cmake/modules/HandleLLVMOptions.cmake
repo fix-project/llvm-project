@@ -252,6 +252,11 @@ elseif(FUCHSIA OR UNIX OR CYGWIN)
   else()
     set(LLVM_HAVE_LINK_VERSION_SCRIPT 1)
   endif()
+elseif(WASI OR CMAKE_SYSTEM_NAME STREQUAL "WASI")
+  # WASI provides a POSIX-like environment, so treat it as a Unix platform.
+  # wasm-ld does not support linker version scripts.
+  set(LLVM_ON_UNIX 1)
+  set(LLVM_HAVE_LINK_VERSION_SCRIPT 0)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Generic")
   set(LLVM_ON_UNIX 0)
   set(LLVM_HAVE_LINK_VERSION_SCRIPT 0)

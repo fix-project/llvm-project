@@ -31,7 +31,9 @@
 #endif
 
 #include <dirent.h>
+#if !defined(__wasi__) // WASI does not provide a password database.
 #include <pwd.h>
+#endif
 
 #ifdef __APPLE__
 #include <copyfile.h>
@@ -204,6 +206,15 @@ std::string getMainExecutable(const char *argv0, void *MainAddr) {
     char link_path[PATH_MAX];
     if (realpath(exe_path, link_path))
       return link_path;
+  }
+#elif defined(__wasi__)
+  // WASI has neither /proc nor dladdr; resolve argv[0] against the
+  // current working directory instead.
+  if (argv0 && argv0[0] != '\0') {
+    char exe_path[PATH_MAX];
+    if (realpath(argv0, exe_path))
+      return exe_path;
+    return std::string(argv0);
   }
 #elif defined(__FreeBSD__)
   // On FreeBSD if the exec path specified in ELF auxiliary vectors is
@@ -522,6 +533,9 @@ static bool is_local_impl(struct STATVFS &Vfs) {
 #elif defined(__EMSCRIPTEN__)
   // Emscripten doesn't currently support remote filesystem mounts.
   return true;
+#elif defined(__wasi__)
+  // WASI only exposes preopened directories, which are always local.
+  return true;
 #elif defined(__HAIKU__)
   // Haiku doesn't expose this information.
   return false;
@@ -702,6 +716,11 @@ static void expandTildeExpr(SmallVectorImpl<char> &Path) {
     return;
   }
 
+#if defined(__wasi__)
+  // This is a string of the form ~username/. WASI does not provide a
+  // password database; return back the original path.
+  return;
+#else
   // This is a string of the form ~username/, look up this user's entry in the
   // password database.
   std::unique_ptr<char[]> Buf;
@@ -723,6 +742,7 @@ static void expandTildeExpr(SmallVectorImpl<char> &Path) {
   Path.clear();
   Path.append(Entry->pw_dir, Entry->pw_dir + strlen(Entry->pw_dir));
   llvm::sys::path::append(Path, Storage);
+#endif
 }
 
 void expand_tilde(const Twine &path, SmallVectorImpl<char> &dest) {
@@ -803,11 +823,17 @@ std::error_code status(int FD, file_status &Result) {
 }
 
 unsigned getUmask() {
+#if defined(__wasi__)
+  // WASI does not provide umask(); files are created with fixed
+  // permissions, so behave as if the mask were empty.
+  return 0;
+#else
   // Chose arbitary new mask and reset the umask to the old mask.
   // umask(2) never fails so ignore the return of the second call.
   unsigned Mask = ::umask(0);
   (void)::umask(Mask);
   return Mask;
+#endif
 }
 
 std::error_code setPermissions(const Twine &Path, perms Permissions) {
@@ -1316,6 +1342,22 @@ Expected<size_t> readNativeFileSlice(file_t FD, MutableArrayRef<char> Buf,
   return NumRead;
 }
 
+#if defined(__wasi__)
+// WASI does not provide POSIX file locks. The WASI environment is
+// single-process, so lock requests trivially succeed.
+std::error_code tryLockFile(int FD, std::chrono::milliseconds Timeout,
+                            LockKind Kind) {
+  return std::error_code();
+}
+
+std::error_code lockFile(int FD, LockKind Kind) {
+  return std::error_code();
+}
+
+std::error_code unlockFile(int FD) {
+  return std::error_code();
+}
+#else
 std::error_code tryLockFile(int FD, std::chrono::milliseconds Timeout,
                             LockKind Kind) {
   auto Start = std::chrono::steady_clock::now();
@@ -1375,6 +1417,7 @@ std::error_code unlockFile(int FD) {
     return std::error_code();
   return errnoAsErrorCode();
 }
+#endif
 
 std::error_code closeFile(file_t &F) {
   sandbox::violationIfEnabled();
@@ -1493,6 +1536,7 @@ namespace path {
 bool home_directory(SmallVectorImpl<char> &result) {
   std::unique_ptr<char[]> Buf;
   char *RequestedDir = getenv("HOME");
+#if !defined(__wasi__) // WASI does not provide a password database.
   if (!RequestedDir) {
     long BufSize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (BufSize <= 0)
@@ -1504,6 +1548,7 @@ bool home_directory(SmallVectorImpl<char> &result) {
     if (pw && pw->pw_dir)
       RequestedDir = pw->pw_dir;
   }
+#endif
   if (!RequestedDir)
     return false;
 
