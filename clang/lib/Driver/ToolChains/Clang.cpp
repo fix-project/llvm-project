@@ -7854,7 +7854,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (A) {
     const Option &Opt = A->getOption();
     if (Opt.matches(options::OPT_fsjlj_exceptions))
-      CmdArgs.push_back("-exception-model=sjlj");
+      // On WebAssembly, SjLj is implemented on top of the Wasm exception
+      // model, and the backend requires -exception-model=wasm when
+      // -wasm-enable-sjlj is used.
+      CmdArgs.push_back(TC.getTriple().isWasm() ? "-exception-model=wasm"
+                        : "-exception-model=sjlj");
     if (Opt.matches(options::OPT_fseh_exceptions))
       CmdArgs.push_back("-exception-model=seh");
     if (Opt.matches(options::OPT_fdwarf_exceptions))

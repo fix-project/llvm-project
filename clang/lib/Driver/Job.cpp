@@ -13,6 +13,7 @@
 #include "clang/Driver/Tool.h"
 #include "clang/Driver/ToolChain.h"
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringExtras.h"
@@ -26,6 +27,14 @@
 #include "llvm/Support/PrettyStackTrace.h"
 #include "llvm/Support/Program.h"
 #include "llvm/Support/raw_ostream.h"
+#ifdef CLANG_FEATURE_INPROCESS_LLD
+#include "lld/Common/Driver.h"
+LLD_HAS_DRIVER(coff)
+LLD_HAS_DRIVER(elf)
+LLD_HAS_DRIVER(mingw)
+LLD_HAS_DRIVER(macho)
+LLD_HAS_DRIVER(wasm)
+#endif
 #include <cassert>
 #include <cstddef>
 #include <string>
@@ -322,6 +331,16 @@ void Command::PrintFileNames() const {
   }
 }
 
+#ifdef CLANG_FEATURE_INPROCESS_LLD
+static bool isInProcessLLD(StringRef Executable, StringRef DriverDir) {
+  if (llvm::sys::path::parent_path(Executable) != DriverDir)
+    return false;
+  StringRef Name = llvm::sys::path::filename(Executable);
+  return Name == "ld.lld" || Name == "wasm-ld" || Name == "ld64.lld" ||
+         Name == "lld-link" || Name == "lld";
+}
+#endif
+
 int Command::Execute(ArrayRef<std::optional<StringRef>> Redirects,
                      std::string *ErrMsg, bool *ExecutionFailed) const {
   PrintFileNames();
@@ -355,6 +374,28 @@ int Command::Execute(ArrayRef<std::optional<StringRef>> Redirects,
       return -1;
     }
   }
+
+#ifdef CLANG_FEATURE_INPROCESS_LLD
+  // On hosts without process spawning (e.g. WASI), run the bundled lld
+  // in-process when the driver tries to execute one of its flavors.
+  if (isInProcessLLD(Executable, Creator.getToolChain().getDriver().Dir)) {
+    if (!Environment.empty() || !RedirectFiles.empty() ||
+        llvm::any_of(Redirects, [](const auto &R) { return R.has_value(); })) {
+      if (ErrMsg)
+        *ErrMsg = "in-process lld does not support a custom environment or "
+                  "redirected output";
+      if (ExecutionFailed)
+        *ExecutionFailed = true;
+      return -1;
+    }
+    ArrayRef<const char *> LLDArgs(Argv.data(), Argv.size() - 1);
+    lld::Result R =
+        lld::lldMain(LLDArgs, llvm::outs(), llvm::errs(), LLD_ALL_DRIVERS);
+    if (ExecutionFailed)
+      *ExecutionFailed = false;
+    return R.retCode;
+  }
+#endif
 
   std::optional<ArrayRef<StringRef>> Env;
   std::vector<StringRef> ArgvVectorStorage;
