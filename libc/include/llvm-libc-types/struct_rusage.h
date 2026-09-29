@@ -14,9 +14,9 @@
 struct rusage {
   struct timeval ru_utime;
   struct timeval ru_stime;
-#ifdef __linux__
+#if defined(__linux__) || defined(__wasi__)
   // Following fields are linux extensions as expected by the
-  // linux syscalls.
+  // linux syscalls.  WASI exposes the same layout for compatibility.
   long ru_maxrss;   // Maximum resident set size
   long ru_ixrss;    // Integral shared memory size
   long ru_idrss;    // Integral unshared data size

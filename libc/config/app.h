@@ -17,6 +17,8 @@
 #include "linux/app.h"
 #elif defined(__UEFI__)
 #include "uefi/app.h"
+#elif defined(__wasi__)
+#include "wasi/app.h"
 #endif
 
 #endif // LLVM_LIBC_CONFIG_APP_H

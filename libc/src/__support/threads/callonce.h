@@ -18,6 +18,8 @@
 // - callonce_impl::callonce_slowpath for slow path execution
 #ifdef __linux__
 #include "src/__support/threads/linux/callonce.h"
+#elif defined(__wasm__)
+#include "src/__support/threads/wasi/callonce.h"
 #else
 #error "callonce is not supported on this platform"
 #endif

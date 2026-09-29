@@ -11,6 +11,12 @@
 
 #ifdef __linux__
 #include "linux/sys-time-macros.h"
+#elif defined(__wasi__)
+// WASI has no interval timers; these constants only satisfy the
+// getitimer/setitimer stub interfaces.
+#define ITIMER_REAL 0
+#define ITIMER_VIRTUAL 1
+#define ITIMER_PROF 2
 #endif
 
 #endif // LLVM_LIBC_MACROS_SYS_TIME_MACROS_H

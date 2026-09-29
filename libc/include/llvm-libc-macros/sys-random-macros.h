@@ -11,6 +11,8 @@
 
 #ifdef __linux__
 #include "linux/sys-random-macros.h"
+#elif defined(__wasi__)
+#include "wasi/sys-random-macros.h"
 #endif
 
 #endif // LLVM_LIBC_MACROS_SYS_RANDOM_MACROS_H

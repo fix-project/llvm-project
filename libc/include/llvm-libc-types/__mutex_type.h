@@ -16,6 +16,8 @@
 typedef struct {
 #ifdef __linux__
   __futex_word __ftxw;
+#elif defined(__wasi__)
+  unsigned int __locked;
 #else
 #error "Mutex type not defined for the target platform."
 #endif

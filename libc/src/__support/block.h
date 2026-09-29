@@ -99,6 +99,8 @@ using cpp::optional;
 /// The next offset of a block matches the previous offset of its next block.
 /// The first block in a list is denoted by having a previous offset of `0`.
 class BlockRef {
+  friend class FreeListHeap;
+
   // Masks for the contents of the next field.
   static constexpr size_t PREV_FREE_MASK = 1 << 0;
   static constexpr size_t LAST_MASK = 1 << 1;

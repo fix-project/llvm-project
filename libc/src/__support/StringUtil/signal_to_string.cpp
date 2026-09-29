@@ -44,12 +44,16 @@ constexpr MessageMapper<SIG_ARRAY_SIZE, TOTAL_STR_LEN>
 
 cpp::string_view build_signal_string(int sig_num, cpp::span<char> buffer) {
   cpp::string_view base_str;
+#ifdef SIGRTMIN
   if (sig_num >= SIGRTMIN && sig_num <= SIGRTMAX) {
     base_str = cpp::string_view("Real-time signal");
     sig_num -= SIGRTMIN;
   } else {
     base_str = cpp::string_view("Unknown signal");
   }
+#else
+  base_str = cpp::string_view("Unknown signal");
+#endif
 
   // if the buffer can't hold "Unknown signal" + ' ' + num_str, then just
   // return "Unknown signal".

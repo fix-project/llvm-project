@@ -28,6 +28,8 @@
 #include "windows/io.h"
 #elif defined(__FreeBSD__)
 #include "freebsd/io.h"
+#elif defined(__wasi__)
+#include "wasi/io.h"
 #elif defined(__ELF__)
 // TODO: Ideally we would have LIBC_TARGET_OS_IS_BAREMETAL.
 #include "baremetal/io.h"

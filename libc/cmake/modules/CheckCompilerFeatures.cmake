@@ -89,6 +89,13 @@ foreach(feature IN LISTS ALL_COMPILER_FEATURES)
     # to float16 without calls to compiler runtime functions by trying to link
     # an executable with -nostdlib.
     set(CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
+    # wasm-ld garbage collects unreferenced sections by default, which would
+    # drop the checked builtin calls and let the link succeed even if the
+    # builtins lower to libc calls. Disable GC so such references stay
+    # unresolved and the link fails as intended.
+    if(LIBC_TARGET_ARCHITECTURE_IS_WASM32 OR LIBC_TARGET_ARCHITECTURE_IS_WASM64)
+      list(APPEND link_options "-Wl,--no-gc-sections")
+    endif()
   endif()
 
   if(LIBC_TARGET_OS_IS_GPU)

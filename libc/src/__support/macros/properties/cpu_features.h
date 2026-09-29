@@ -126,4 +126,52 @@
 #define LIBC_TARGET_CPU_HAS_FAST_FLOAT16_OPS
 #endif
 
+// WebAssembly exposes its optional (mostly standardized) ISA extensions through
+// compiler-defined __wasm_*__ macros, exactly like x86/ARM expose theirs above.
+// Gate optional features on these so that code requiring an extension is only
+// built when the extension is actually enabled for the target.
+#if defined(LIBC_TARGET_ARCH_IS_WASM)
+#if defined(__wasm_atomics__)
+#define LIBC_TARGET_CPU_HAS_WASM_ATOMICS
+#endif
+#if defined(__wasm_bulk_memory__)
+#define LIBC_TARGET_CPU_HAS_WASM_BULK_MEMORY
+#endif
+#if defined(__wasm_exception_handling__)
+#define LIBC_TARGET_CPU_HAS_WASM_EXCEPTION_HANDLING
+#endif
+#if defined(__wasm_multivalue__)
+#define LIBC_TARGET_CPU_HAS_WASM_MULTIVALUE
+#endif
+#if defined(__wasm_mutable_globals__)
+#define LIBC_TARGET_CPU_HAS_WASM_MUTABLE_GLOBALS
+#endif
+#if defined(__wasm_nontrapping_fptoint__)
+#define LIBC_TARGET_CPU_HAS_WASM_NONTRAPPING_FPTOINT
+#endif
+#if defined(__wasm_reference_types__)
+#define LIBC_TARGET_CPU_HAS_WASM_REFERENCE_TYPES
+#endif
+#if defined(__wasm_sign_ext__)
+#define LIBC_TARGET_CPU_HAS_WASM_SIGN_EXT
+#endif
+#if defined(__wasm_simd128__)
+#define LIBC_TARGET_CPU_HAS_WASM_SIMD128
+#endif
+#if defined(__wasm_tail_call__)
+#define LIBC_TARGET_CPU_HAS_WASM_TAIL_CALL
+#endif
+
+// LLVM's built-in setjmp/longjmp lowering for WebAssembly is driven by the
+// backend flag -mllvm -wasm-enable-sjlj (which requires the exception-handling,
+// multivalue and reference-types features). The flag is opaque to the
+// preprocessor, so the build system surfaces it through LIBC_WASM_ENABLE_SJLJ.
+#if defined(LIBC_WASM_ENABLE_SJLJ) &&                                          \
+    defined(LIBC_TARGET_CPU_HAS_WASM_EXCEPTION_HANDLING) &&                    \
+    defined(LIBC_TARGET_CPU_HAS_WASM_MULTIVALUE) &&                            \
+    defined(LIBC_TARGET_CPU_HAS_WASM_REFERENCE_TYPES)
+#define LIBC_TARGET_CPU_HAS_WASM_SJLJ
+#endif
+#endif // LIBC_TARGET_ARCH_IS_WASM
+
 #endif // LLVM_LIBC_SRC___SUPPORT_MACROS_PROPERTIES_CPU_FEATURES_H

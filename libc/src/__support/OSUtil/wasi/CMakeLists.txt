@@ -1,0 +1,18 @@
+add_object_library(
+  wasi_util
+  SRCS
+    exit.cpp
+    path.cpp
+  HDRS
+    fd.h
+    io.h
+    path.h
+    wasi.h
+  DEPENDS
+    libc.hdr.errno_macros
+    libc.hdr.fcntl_macros
+    libc.hdr.limits_macros
+    libc.src.__support.common
+    libc.src.__support.CPP.string_view
+    libc.src.__support.error_or
+)

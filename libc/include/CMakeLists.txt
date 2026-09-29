@@ -255,6 +255,7 @@ add_header_macro(
   setjmp.h
   DEPENDS
     .llvm_libc_common_h
+    .llvm-libc-macros.setjmp_macros
     .llvm-libc-types.jmp_buf
     .llvm-libc-types.sigjmp_buf
 )
@@ -337,6 +338,7 @@ add_header_macro(
   threads.h
   DEPENDS
     .llvm_libc_common_h
+    .llvm-libc-macros.threads_macros
     .llvm-libc-types.__call_once_func_t
     .llvm-libc-types.once_flag
     .llvm-libc-types.cnd_t
@@ -800,6 +802,18 @@ add_header_macro(
     .llvm-libc-types.struct_msghdr
     .llvm-libc-types.struct_sockaddr
     .llvm-libc-types.struct_sockaddr_storage
+)
+
+add_header(
+  netdb
+  HDR
+    netdb.h
+  DEPENDS
+    .llvm_libc_common_h
+    .llvm-libc-types.socklen_t
+    .llvm-libc-types.struct_sockaddr
+    .llvm-libc-types.struct_addrinfo
+    .sys_socket
 )
 
 add_header_macro(

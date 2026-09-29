@@ -1,0 +1,21 @@
+add_header_library(
+  callonce
+  HDRS
+    ../callonce.h
+    callonce.h
+  DEPENDS
+    libc.src.__support.macros.optimization
+)
+
+add_object_library(
+  thread
+  SRCS
+    thread.cpp
+  HDRS
+    ../thread.h
+  DEPENDS
+    libc.src.__support.OSUtil.wasi.wasi_util
+    libc.src.__support.common
+    libc.hdr.errno_macros
+    libc.src.__support.threads.thread_common
+)

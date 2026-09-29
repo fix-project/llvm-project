@@ -151,6 +151,9 @@ option(LLVM_LIBC_ALL_HEADERS "Outputs all functions in header files, regardless 
 option(LLVM_LIBC_ENABLE_EXPERIMENTAL_ENTRYPOINTS
   "Enable entrypoints with known-incomplete implementations (off by default)" OFF)
 
+option(LIBC_WASM_ENABLE_SJLJ
+  "On WebAssembly targets, enable the exception-handling based setjmp/longjmp lowering via the wasm-enable-sjlj backend pass. When off, setjmp/longjmp are not provided." OFF)
+
 option(LIBC_CONFIG_PATH "The path to user provided folder that configures the build for the target system." OFF)
 
 if(LIBC_TARGET_OS_IS_LINUX)
@@ -235,8 +238,36 @@ foreach(config_path IN LISTS LIBC_CONFIG_JSON_FILE_LIST)
   load_libc_config(${config_path}/config.json ${cmd_line_conf})
 endforeach()
 
+# Clang's WebAssembly toolchain searches for sysroot libraries and headers
+# under the vendor-stripped triple (e.g. lib/wasm32-wasip1), following the
+# wasi-sdk layout. Use the same name for libc's output and install dirs so
+# the installed tree can be used directly as a --sysroot.
+if(LIBC_TARGET_TRIPLE)
+  set(LIBC_TRIPLE_INSTALL_NAME ${LIBC_TARGET_TRIPLE})
+else()
+  set(LIBC_TRIPLE_INSTALL_NAME ${LLVM_DEFAULT_TARGET_TRIPLE})
+endif()
+if(LIBC_TRIPLE_INSTALL_NAME MATCHES "^wasm(32|64)-unknown-(.+)$")
+  set(LIBC_TRIPLE_INSTALL_NAME "wasm${CMAKE_MATCH_1}-${CMAKE_MATCH_2}")
+endif()
+if(LIBC_TRIPLE_INSTALL_NAME MATCHES "^wasm(32|64)-wasi$")
+  # "wasi" is the legacy spelling of "wasip1".
+  set(LIBC_TRIPLE_INSTALL_NAME "wasm${CMAKE_MATCH_1}-wasip1")
+endif()
+
+# Clang's WebAssembly toolchain only searches <sysroot>/lib/<triple>/ for
+# WASI targets (the bare lib/ directory is reserved for bare-metal/UnknownOS
+# targets). A flat lib/ layout would therefore produce a sysroot that clang
+# cannot find any libraries in, so force the per-target runtime dir layout.
+if(LIBC_TARGET_OS_IS_WASI AND NOT LLVM_ENABLE_PER_TARGET_RUNTIME_DIR)
+  message(STATUS
+          "Forcing LLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON: required for the "
+          "WASI sysroot layout used by the clang driver.")
+  set(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR ON)
+endif()
+
 if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR)
-  set(LIBC_TARGET_SUBDIR ${LLVM_DEFAULT_TARGET_TRIPLE})
+  set(LIBC_TARGET_SUBDIR ${LIBC_TRIPLE_INSTALL_NAME})
   if(LIBC_LIBDIR_SUBDIR)
     string(APPEND LIBC_TARGET_SUBDIR /${LIBC_LIBDIR_SUBDIR})
   endif()
@@ -245,8 +276,8 @@ endif()
 
 # TODO: Use common runtimes infrastructure for output and install paths
 if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR AND (LIBC_ENABLE_USE_BY_CLANG OR LIBC_TARGET_OS_IS_GPU))
-  set(LIBC_INCLUDE_DIR ${LLVM_BINARY_DIR}/include/${LLVM_DEFAULT_TARGET_TRIPLE})
-  set(LIBC_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${LLVM_DEFAULT_TARGET_TRIPLE})
+  set(LIBC_INCLUDE_DIR ${LLVM_BINARY_DIR}/include/${LIBC_TRIPLE_INSTALL_NAME})
+  set(LIBC_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${LIBC_TRIPLE_INSTALL_NAME})
   set(LIBC_LIBRARY_DIR ${LLVM_LIBRARY_OUTPUT_INTDIR}/${LIBC_TARGET_SUBDIR})
 else()
   if(NOT LIBC_ENABLE_USE_BY_CLANG)
@@ -260,11 +291,7 @@ else()
     set(LIBC_LIBRARY_DIR ${CMAKE_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX})
   endif()
   if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR)
-    if(LIBC_TARGET_TRIPLE)
-      set(LIBC_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${LIBC_TARGET_TRIPLE})
-    else()
-      set(LIBC_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${LLVM_DEFAULT_TARGET_TRIPLE})
-    endif()
+    set(LIBC_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${LIBC_TRIPLE_INSTALL_NAME})
   else()
     set(LIBC_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
   endif()
@@ -272,7 +299,7 @@ endif()
 
 # TODO: Use common runtimes infrastructure for output and install paths
 if(LIBC_TARGET_TRIPLE)
-  set(LIBC_INSTALL_LIBRARY_DIR lib${LLVM_LIBDIR_SUFFIX}/${LIBC_TARGET_TRIPLE})
+  set(LIBC_INSTALL_LIBRARY_DIR lib${LLVM_LIBDIR_SUFFIX}/${LIBC_TRIPLE_INSTALL_NAME})
 elseif(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR)
   set(LIBC_INSTALL_LIBRARY_DIR lib${LLVM_LIBDIR_SUFFIX}/${LIBC_TARGET_SUBDIR})
 else()
@@ -413,6 +440,31 @@ if(MSVC AND NOT MSYS)
   set(libc_opt_high_flag "/O2")
 else()
   set(libc_opt_high_flag "-O3")
+endif()
+
+# WebAssembly setjmp/longjmp and C++ exception-handling support.
+#
+# WebAssembly has no native unwinder, so setjmp/longjmp (and C++ EH) are
+# provided by the backend's exception-handling based lowering. The libc itself
+# is built with the standardized exception-handling, multivalue and
+# reference-types features (so the __wasm_* runtime helpers and any C++ EH
+# compile) and overrides the runtimes-wide -fno-exceptions/-fno-rtti.
+#
+# NOTE: the -mllvm -wasm-enable-sjlj backend *pass* is intentionally NOT applied
+# to the libc. That pass rewrites *calls* to setjmp/longjmp; the libc contains
+# no such calls, and applying it to the libc's own setjmp definition trips the
+# pass's "indirect use of setjmp" check. Consumers that want setjmp/longjmp
+# rewriting must compile their own code with:
+#   -mllvm -wasm-enable-sjlj -mllvm -wasm-use-legacy-eh=false
+if(LIBC_WASM_ENABLE_SJLJ)
+  if(NOT LIBC_TARGET_ARCHITECTURE_IS_WASM32 AND NOT LIBC_TARGET_ARCHITECTURE_IS_WASM64)
+    message(FATAL_ERROR
+      "LIBC_WASM_ENABLE_SJLJ is only supported on WebAssembly targets.")
+  endif()
+  add_compile_options(
+    "-mexception-handling" "-mmultivalue" "-mreference-types"
+    "-fexceptions" "-funwind-tables" "-frtti")
+  add_compile_definitions(LIBC_WASM_ENABLE_SJLJ)
 endif()
 
 add_subdirectory(include)

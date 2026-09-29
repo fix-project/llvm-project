@@ -5,6 +5,8 @@
 #include "gpu/time-macros.h"
 #elif defined(__linux__)
 #include "linux/time-macros.h"
+#elif defined(__wasi__)
+#include "wasi/time-macros.h"
 #elif defined(__ELF__)
 #include "baremetal/time-macros.h"
 #elif defined(__APPLE__)

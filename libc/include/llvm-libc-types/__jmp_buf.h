@@ -60,6 +60,11 @@ typedef struct {
 #if __ARM_FP
   long fopaque[8]; // d8-d15
 #endif
+#elif defined(__wasm__)
+  // Opaque storage for the WebAssembly setjmp/longjmp runtime state
+  // (function-invocation id, landing-pad label and the longjmp argument).
+  // Sized to match wasi-libc's `unsigned long __jmp_buf[8]`.
+  __UINTPTR_TYPE__ opaque[8];
 #else
 #error "__jmp_buf not available for your target architecture."
 #endif

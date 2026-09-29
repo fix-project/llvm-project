@@ -1,8 +1,10 @@
 #ifndef LLVM_LIBC_MACROS_UNISTD_MACROS_H
 #define LLVM_LIBC_MACROS_UNISTD_MACROS_H
 
-#ifdef __linux__
+#if defined(__linux__)
 #include "linux/unistd-macros.h"
+#elif defined(__wasi__)
+#include "wasi/unistd-macros.h"
 #endif
 
 #define STDIN_FILENO 0

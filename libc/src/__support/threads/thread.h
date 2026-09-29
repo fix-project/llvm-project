@@ -19,7 +19,11 @@
 #include "src/__support/macros/properties/architectures.h"
 
 // TODO: fix this unguarded linux dep
+#if defined(__linux__)
 #include <linux/param.h> // for exec_pagesize.
+#elif defined(__wasm__)
+#define EXEC_PAGESIZE 0x10000 // WebAssembly memory page size.
+#endif
 
 #include <stddef.h> // For size_t
 
@@ -47,6 +51,8 @@ union ThreadReturnValue {
 constexpr unsigned int STACK_ALIGNMENT = 16;
 #elif defined(LIBC_TARGET_ARCH_IS_ARM)
 // See Section 6.2.1.2 Stack constraints at a public interface of AAPCS32.
+constexpr unsigned int STACK_ALIGNMENT = 8;
+#elif defined(LIBC_TARGET_ARCH_IS_WASM)
 constexpr unsigned int STACK_ALIGNMENT = 8;
 #endif
 // TODO: Provide stack alignment requirements for other architectures.

@@ -11,6 +11,8 @@
 
 #ifdef __linux__
 #include "linux/sys-ioctl-macros.h"
+#elif defined(__wasi__)
+#define TIOCGWINSZ 0x5413
 #endif
 
 #endif // LLVM_LIBC_MACROS_SYS_IOCTL_MACROS_H
