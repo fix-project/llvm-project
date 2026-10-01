@@ -538,6 +538,7 @@ add_header_macro(
   unistd.h
   DEPENDS
     .llvm_libc_common_h
+    .llvm-libc-types.intptr_t
     .llvm-libc-macros.file_seek_macros
     .llvm-libc-macros.unistd_macros
     .llvm-libc-types.__exec_argv_t

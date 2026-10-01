@@ -3,6 +3,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${LIBC_TARGET_OS})
 endif()
 add_header(off64_t HDR off64_t.h)
 add_header(size_t HDR size_t.h)
+add_header(intptr_t HDR intptr_t.h)
 add_header(
   rsize_t
   HDR

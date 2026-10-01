@@ -778,6 +778,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.unistd._exit
     libc.src.unistd.access
     libc.src.unistd.alarm
+    libc.src.unistd.brk
     libc.src.unistd.chdir
     libc.src.unistd.chroot
     libc.src.unistd.chown
@@ -834,6 +835,7 @@ set(TARGET_LIBC_ENTRYPOINTS
     libc.src.unistd.readlink
     libc.src.unistd.readlinkat
     libc.src.unistd.rmdir
+    libc.src.unistd.sbrk
     libc.src.unistd.setsid
     libc.src.unistd.sethostname
     libc.src.unistd.swab

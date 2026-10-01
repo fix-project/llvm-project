@@ -66,6 +66,7 @@ add_object_library(
     freelist_heap.cpp
   HDRS
     freelist_heap.h
+    wasi_brk.h
   COMPILE_OPTIONS
     ${libc_freelist_malloc_size}
   DEPENDS

@@ -26,6 +26,15 @@ add_entrypoint_object(
     .${LIBC_TARGET_OS}.alarm
 )
 
+if(LIBC_TARGET_OS STREQUAL "wasi")
+  add_entrypoint_object(
+    brk
+    ALIAS
+    DEPENDS
+      .wasi.brk
+  )
+endif()
+
 add_entrypoint_object(
   access
   ALIAS
@@ -389,6 +398,15 @@ add_entrypoint_object(
   DEPENDS
     .${LIBC_TARGET_OS}.rmdir
 )
+
+if(LIBC_TARGET_OS STREQUAL "wasi")
+  add_entrypoint_object(
+    sbrk
+    ALIAS
+    DEPENDS
+      .wasi.sbrk
+  )
+endif()
 
 add_entrypoint_object(
   setsid

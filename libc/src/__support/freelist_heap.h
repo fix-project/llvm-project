@@ -25,6 +25,9 @@
 #include "src/__support/math_extras.h"
 #include "src/string/memory_utils/inline_memcpy.h"
 #include "src/string/memory_utils/inline_memset.h"
+#if defined(__wasi__)
+#include "src/__support/wasi_brk.h"
+#endif
 
 namespace LIBC_NAMESPACE_DECL {
 
@@ -108,7 +111,7 @@ LIBC_INLINE void FreeListHeap::init() {
     // memory pages become the initial heap region, and grow() extends it.
     constexpr size_t PAGE_SIZE = 0x10000;
     constexpr long INITIAL_PAGES = 16;
-    long prev_pages = __builtin_wasm_memory_grow(0, INITIAL_PAGES);
+    long prev_pages = wasi_allocator_grow(INITIAL_PAGES);
     if (prev_pages >= 0) {
       begin = reinterpret_cast<cpp::byte *>(static_cast<size_t>(prev_pages) *
                                             PAGE_SIZE);
@@ -140,7 +143,7 @@ LIBC_INLINE bool FreeListHeap::grow(size_t size) {
   constexpr size_t MIN_GROW = 4 * PAGE_SIZE;
   size_t grow_size = size > MIN_GROW ? size : MIN_GROW;
   grow_size = ((grow_size + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
-  long prev_pages = __builtin_wasm_memory_grow(0, grow_size / PAGE_SIZE);
+  long prev_pages = wasi_allocator_grow(grow_size / PAGE_SIZE);
   if (prev_pages < 0)
     return false;
 
@@ -148,6 +151,18 @@ LIBC_INLINE bool FreeListHeap::grow(size_t size) {
   end = reinterpret_cast<cpp::byte *>(static_cast<size_t>(prev_pages) *
                                           PAGE_SIZE +
                                       grow_size);
+
+  cpp::byte *new_begin = reinterpret_cast<cpp::byte *>(
+      static_cast<size_t>(prev_pages) * PAGE_SIZE);
+  if (new_begin != old_end) {
+    // brk/sbrk reserved the intervening memory. Start an independent block
+    // chain so the allocator never puts that memory on its free list.
+    auto block = BlockRef::init({new_begin, end});
+    if (!block)
+      return false;
+    free_store.insert(*block);
+    return true;
+  }
 
   // The sentinel last block was located at the old end of the region.
   // Replace it with a free block covering the grown area, terminated by a

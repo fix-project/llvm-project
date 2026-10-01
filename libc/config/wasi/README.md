@@ -21,6 +21,11 @@ The ABI layer lives in `libc/src/__support/OSUtil/wasi/`.
 - **Memory mapping is emulated.** Anonymous mappings use the libc heap.
   File mappings copy data on creation; writable shared mappings write it
   back on `msync` or `munmap`. Memory protection cannot be enforced.
+- **`brk`/`sbrk` share linear memory with `malloc`.** Both advance the same
+  logical program break. Memory reserved through `sbrk` is excluded from the
+  allocator's free list. A later allocator growth advances the break and sets
+  a new lower bound for `brk`; shrinking the break only releases logical
+  space, because WebAssembly linear memory cannot shrink.
 - **No sockets.** The WASI preview 1 `sock_*` calls are not exposed by
   mainstream runtimes for core modules (wasmtime provides sockets only
   through the component model), so the socket entrypoints remain stubs.

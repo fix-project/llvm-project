@@ -41,6 +41,7 @@ types:
   - type_name: size_t
   - type_name: pid_t
   - type_name: off_t
+  - type_name: intptr_t
   - type_name: __getoptargv_t
   - type_name: __exec_envp_t
   - type_name: __exec_argv_t
@@ -89,6 +90,13 @@ functions:
     return_type: unsigned int
     arguments:
       - type: unsigned int
+  - name: brk
+    guard: __wasi__
+    standards:
+      - bsd
+    return_type: int
+    arguments:
+      - type: void *
   - name: access
     standards:
       - posix
@@ -483,6 +491,13 @@ functions:
     return_type: int
     arguments:
       - type: const char *
+  - name: sbrk
+    guard: __wasi__
+    standards:
+      - bsd
+    return_type: void *
+    arguments:
+      - type: intptr_t
   - name: swab
     standards:
       - posix

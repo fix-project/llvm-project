@@ -179,6 +179,14 @@ add_proxy_header_library(
 )
 
 add_proxy_header_library(
+  intptr_t
+  HDRS
+    intptr_t.h
+  FULL_BUILD_DEPENDS
+    libc.include.llvm-libc-types.intptr_t
+)
+
+add_proxy_header_library(
   struct_stat
   HDRS
     struct_stat.h

@@ -1,4 +1,29 @@
 add_entrypoint_object(
+  brk
+  SRCS
+    brk.cpp
+  HDRS
+    ../brk.h
+  DEPENDS
+    libc.src.__support.freelist_heap
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
+  sbrk
+  SRCS
+    sbrk.cpp
+  HDRS
+    ../sbrk.h
+  DEPENDS
+    libc.hdr.types.intptr_t
+    libc.src.__support.freelist_heap
+    libc.src.__support.common
+    libc.src.__support.libc_errno
+)
+
+add_entrypoint_object(
   access
   SRCS
     access.cpp
