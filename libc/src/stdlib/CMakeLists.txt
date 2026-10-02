@@ -68,6 +68,17 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  getsubopt
+  SRCS
+    getsubopt.cpp
+  HDRS
+    getsubopt.h
+  DEPENDS
+    libc.include.stdlib
+    libc.src.__support.common
+)
+
+add_entrypoint_object(
   putenv
   SRCS
     putenv.cpp

@@ -28,6 +28,7 @@ set(TARGET_PUBLIC_HEADERS
     libc.include.pthread
     libc.include.fnmatch
     libc.include.ftw
+    libc.include.getopt
     libc.include.grp
     libc.include.iconv
     libc.include.sys_file

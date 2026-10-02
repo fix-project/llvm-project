@@ -1201,6 +1201,7 @@ if(LLVM_LIBC_FULL_BUILD)
     libc.src.stdlib.atexit
     libc.src.stdlib.exit
     libc.src.stdlib.getenv
+    libc.src.stdlib.getsubopt
     libc.src.stdlib.putenv
     libc.src.stdlib.setenv
     libc.src.stdlib.unsetenv
@@ -1293,6 +1294,7 @@ if(LLVM_LIBC_FULL_BUILD)
     libc.src.unistd.execv
     libc.src.unistd.fork
     libc.src.unistd.getopt
+    libc.src.unistd.getopt_long
     libc.src.unistd.optarg
     libc.src.unistd.opterr
     libc.src.unistd.optind

@@ -26,7 +26,7 @@ namespace LIBC_NAMESPACE_DECL {
 LLVM_LIBC_VARIABLE(char *, optarg) = nullptr;
 LLVM_LIBC_VARIABLE(int, optind) = 1;
 LLVM_LIBC_VARIABLE(int, optopt) = 0;
-LLVM_LIBC_VARIABLE(int, opterr) = 0;
+LLVM_LIBC_VARIABLE(int, opterr) = 1;
 
 template <typename T> struct RefWrapper {
   RefWrapper() = delete;
@@ -195,6 +195,8 @@ static unsigned optpos;
 
 static GetoptContext ctx{&optarg, &optind, &optopt,
                          &optpos, &opterr, /*errstream=*/nullptr};
+
+unsigned &getopt_short_position() { return ctx.optpos.get(); }
 
 #ifndef LIBC_COPT_PUBLIC_PACKAGING
 // This is used exclusively in tests.

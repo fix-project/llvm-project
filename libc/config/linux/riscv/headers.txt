@@ -13,6 +13,7 @@ set(TARGET_PUBLIC_HEADERS
     libc.include.fcntl
     libc.include.features
     libc.include.fenv
+    libc.include.getopt
     libc.include.float
     libc.include.inttypes
     libc.include.libgen

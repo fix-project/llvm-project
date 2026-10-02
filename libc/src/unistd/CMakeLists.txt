@@ -502,6 +502,21 @@ add_entrypoint_object(
 )
 
 add_entrypoint_object(
+  getopt_long
+  SRCS
+    getopt_long.cpp
+  HDRS
+    getopt_long.h
+  DEPENDS
+    libc.include.getopt
+    .getopt
+    libc.src.__support.common
+    libc.src.stdio.fprintf
+    libc.src.stdio.stderr
+    libc.src.stdlib.getenv
+)
+
+add_entrypoint_object(
   swab
   SRCS
     swab.cpp

@@ -71,6 +71,14 @@ add_header(
     .llvm_libc_common_h
 )
 
+add_header(
+  getopt
+  HDR
+    getopt.h
+  DEPENDS
+    .llvm_libc_common_h
+)
+
 # TODO: Can we simplify this macro expansion?
 # https://github.com/llvm/llvm-project/issues/117254
 macro(add_header_macro TARGET_NAME YAML_FILE GEN_HDR DEPENDS)

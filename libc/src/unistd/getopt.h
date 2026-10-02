@@ -22,6 +22,7 @@ extern int opterr;
 
 namespace impl {
 void set_getopt_state(char **, int *, int *, unsigned *, int *, FILE *);
+unsigned &getopt_short_position();
 }
 
 int getopt(int argc, char *const argv[], const char *optstring);
