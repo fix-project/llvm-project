@@ -54,7 +54,13 @@ LIBC_INLINE int openat_impl(int dirfd, const char *path, int flags,
   if (!resolved.has_value())
     return -resolved.error();
 
-  auto converted = open_flags_to_wasi(flags);
+  __wasi_fdstat_t parent_stat;
+  __wasi_errno_t stat_err =
+      __wasi_fd_fdstat_get(resolved->dirfd, &parent_stat);
+  if (stat_err != __WASI_ERRNO_SUCCESS)
+    return -wasi_to_errno(stat_err);
+
+  auto converted = open_flags_to_wasi(flags, parent_stat.fs_rights_inheriting);
   if (!converted.has_value())
     return -converted.error();
   WasiOpenFlags wf = converted.value();
@@ -84,13 +90,37 @@ LIBC_INLINE int openat_impl(int dirfd, const char *path, int flags,
       return -wasi_to_errno(err);
     }
     fd = static_cast<int>(raw_fd);
+    // Intersecting with the parent's rights must not silently turn a
+    // requested read/write open into a descriptor without that access.
+    __wasi_fdstat_t opened_stat;
+    err = __wasi_fd_fdstat_get(raw_fd, &opened_stat);
+    if (err == __WASI_ERRNO_SUCCESS && !(flags & O_PATH)) {
+      const int access = flags & O_ACCMODE;
+      const bool needs_read = access == O_RDONLY || access == O_RDWR;
+      const bool needs_write = access == O_WRONLY || access == O_RDWR;
+      const __wasi_rights_t read_right =
+          opened_stat.fs_filetype == __WASI_FILETYPE_DIRECTORY
+              ? __WASI_RIGHT_FD_READDIR
+              : __WASI_RIGHT_FD_READ;
+      if ((needs_read && !(opened_stat.fs_rights_base & read_right)) ||
+          (needs_write &&
+           !(opened_stat.fs_rights_base & __WASI_RIGHT_FD_WRITE)))
+        err = __WASI_ERRNO_NOTCAPABLE;
+    }
+    if (err != __WASI_ERRNO_SUCCESS) {
+      __wasi_fd_close(raw_fd);
+      for (int i = 0; i < held_n; ++i)
+        __wasi_fd_close(static_cast<__wasi_fd_t>(held[i]));
+      return -wasi_to_errno(err);
+    }
     if (target < 0 || fd == target)
       break;
     if (held_n >= 1024) // Should not happen; fall back to what we have.
       break;
     held[held_n++] = fd;
     // The file now exists; creation flags must not be replayed.
-    converted = open_flags_to_wasi(flags & ~(O_CREAT | O_EXCL | O_TRUNC));
+    converted = open_flags_to_wasi(flags & ~(O_CREAT | O_EXCL | O_TRUNC),
+                                   parent_stat.fs_rights_inheriting);
     if (!converted.has_value())
       break;
     wf = converted.value();

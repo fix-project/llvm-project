@@ -35,9 +35,11 @@ struct WasiOpenFlags {
   __wasi_fdflags_t fdflags;
 };
 
-// Translate POSIX O_* flags into a WasiOpenFlags structure. Returns EINVAL
-// for access modes that cannot be expressed on WASI.
-LIBC_INLINE ErrorOr<WasiOpenFlags> open_flags_to_wasi(int flags) {
+// Translate POSIX O_* flags into a WasiOpenFlags structure. The rights of a
+// newly opened descriptor cannot exceed the parent directory's inheriting
+// rights. Returns EINVAL for access modes that cannot be expressed on WASI.
+LIBC_INLINE ErrorOr<WasiOpenFlags>
+open_flags_to_wasi(int flags, __wasi_rights_t parent_inheriting_rights) {
   WasiOpenFlags result = {};
 
   int accmode = flags & O_ACCMODE;
@@ -95,10 +97,15 @@ LIBC_INLINE ErrorOr<WasiOpenFlags> open_flags_to_wasi(int flags) {
       __WASI_RIGHT_PATH_READLINK | __WASI_RIGHT_PATH_UNLINK_FILE;
   // The runtime drops rights that do not apply to regular files. Directories
   // need path rights in their base set for operations relative to their fd.
-  result.rights_base |= path_rights;
+  result.rights_base =
+      (result.rights_base | path_rights) & parent_inheriting_rights;
+
+  // Inheriting rights describe what can be granted to descriptors opened
+  // through this one, independently of this descriptor's access mode. A
+  // path_open cannot create a socket, so never request socket rights.
   result.rights_inheriting =
-      result.rights_base |
-      __WASI_RIGHT_POLL_FD_READWRITE | __WASI_RIGHT_SOCK_SHUTDOWN;
+      parent_inheriting_rights &
+      ~(__WASI_RIGHT_SOCK_SHUTDOWN | __WASI_RIGHT_SOCK_ACCEPT);
 
   return result;
 }

@@ -28,7 +28,7 @@ LLVM_LIBC_FUNCTION(int, ftruncate, (int fd, off_t length)) {
     return -1;
   }
   if (fs.fs_filetype != wasi::__WASI_FILETYPE_REGULAR_FILE ||
-      (fs.fs_rights_inheriting & wasi::__WASI_RIGHT_FD_FILESTAT_SET_SIZE) ==
+      (fs.fs_rights_base & wasi::__WASI_RIGHT_FD_FILESTAT_SET_SIZE) ==
           0) {
     libc_errno = EINVAL;
     return -1;
