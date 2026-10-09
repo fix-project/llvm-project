@@ -26,6 +26,8 @@ add_entrypoint_object(
   HDRS
     ../sched_setparam.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.types.struct_sched_param
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -37,6 +39,8 @@ add_entrypoint_object(
   HDRS
     ../sched_getparam.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.types.struct_sched_param
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -48,6 +52,8 @@ add_entrypoint_object(
   HDRS
     ../sched_setscheduler.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.types.struct_sched_param
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -59,6 +65,7 @@ add_entrypoint_object(
   HDRS
     ../sched_getscheduler.h
   DEPENDS
+    libc.hdr.types.pid_t
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -92,6 +99,8 @@ add_entrypoint_object(
   HDRS
     ../sched_rr_get_interval.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.types.struct_timespec
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -103,6 +112,9 @@ add_entrypoint_object(
   HDRS
     ../sched_getaffinity.h
   DEPENDS
+    libc.hdr.types.cpu_set_t
+    libc.hdr.types.pid_t
+    libc.hdr.types.size_t
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -114,6 +126,9 @@ add_entrypoint_object(
   HDRS
     ../sched_setaffinity.h
   DEPENDS
+    libc.hdr.types.cpu_set_t
+    libc.hdr.types.pid_t
+    libc.hdr.types.size_t
     libc.src.__support.common
     libc.src.__support.libc_errno
 )

@@ -46,6 +46,7 @@ add_entrypoint_object(
   HDRS
     ../gethostbyname.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -58,6 +59,7 @@ add_entrypoint_object(
   HDRS
     ../gethostbyaddr.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -70,6 +72,7 @@ add_entrypoint_object(
   HDRS
     ../getservent.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -82,6 +85,7 @@ add_entrypoint_object(
   HDRS
     ../getservbyname.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -94,6 +98,7 @@ add_entrypoint_object(
   HDRS
     ../getservbyport.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -106,6 +111,7 @@ add_entrypoint_object(
   HDRS
     ../getprotobyname.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -118,6 +124,7 @@ add_entrypoint_object(
   HDRS
     ../setservent.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -130,6 +137,7 @@ add_entrypoint_object(
   HDRS
     ../endservent.h
   DEPENDS
+    libc.include.errno
     libc.include.netdb
     libc.src.__support.common
     libc.src.__support.libc_errno

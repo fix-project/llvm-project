@@ -5,6 +5,9 @@ add_entrypoint_object(
   HDRS
     ../sendfile.h
   DEPENDS
+    libc.hdr.stdio_macros
+    libc.hdr.types.off_t
+    libc.include.sys_sendfile
     libc.include.unistd
     libc.src.__support.common
     libc.src.unistd.pread

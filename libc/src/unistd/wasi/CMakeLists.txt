@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     ../brk.h
   DEPENDS
+    libc.hdr.errno_macros
     libc.src.__support.freelist_heap
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -17,6 +18,7 @@ add_entrypoint_object(
   HDRS
     ../sbrk.h
   DEPENDS
+    libc.hdr.errno_macros
     libc.hdr.types.intptr_t
     libc.src.__support.freelist_heap
     libc.src.__support.common
@@ -172,6 +174,8 @@ add_entrypoint_object(
   HDRS
     ../fork.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.unistd_macros
     libc.hdr.errno_macros
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -218,6 +222,7 @@ add_entrypoint_object(
   HDRS
     ../nice.h
   DEPENDS
+    libc.include.errno
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -229,6 +234,8 @@ add_entrypoint_object(
   HDRS
     ../ftruncate.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -241,6 +248,8 @@ add_entrypoint_object(
   HDRS
     ../getcwd.h
   DEPENDS
+    libc.hdr.types.size_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -253,6 +262,8 @@ add_entrypoint_object(
   HDRS
     ../geteuid.h
   DEPENDS
+    libc.hdr.types.uid_t
+    libc.hdr.unistd_macros
     libc.src.__support.common
 )
 
@@ -263,6 +274,8 @@ add_entrypoint_object(
   HDRS
     ../getgid.h
   DEPENDS
+    libc.hdr.types.gid_t
+    libc.hdr.unistd_macros
     libc.src.__support.common
 )
 
@@ -273,6 +286,8 @@ add_entrypoint_object(
   HDRS
     ../getpid.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.unistd_macros
     libc.src.__support.common
 )
 
@@ -283,6 +298,8 @@ add_entrypoint_object(
   HDRS
     ../getppid.h
   DEPENDS
+    libc.hdr.types.pid_t
+    libc.hdr.unistd_macros
     libc.src.__support.common
 )
 
@@ -293,6 +310,8 @@ add_entrypoint_object(
   HDRS
     ../getuid.h
   DEPENDS
+    libc.hdr.types.uid_t
+    libc.hdr.unistd_macros
     libc.src.__support.common
 )
 
@@ -303,6 +322,7 @@ add_entrypoint_object(
   HDRS
     ../isatty.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -351,6 +371,9 @@ add_entrypoint_object(
   HDRS
     ../read.h
   DEPENDS
+    libc.hdr.types.size_t
+    libc.hdr.types.ssize_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -363,6 +386,9 @@ add_entrypoint_object(
   HDRS
     ../write.h
   DEPENDS
+    libc.hdr.types.size_t
+    libc.hdr.types.ssize_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -375,6 +401,10 @@ add_entrypoint_object(
   HDRS
     ../pread.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.types.size_t
+    libc.hdr.types.ssize_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -387,6 +417,10 @@ add_entrypoint_object(
   HDRS
     ../pwrite.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.types.size_t
+    libc.hdr.types.ssize_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -399,6 +433,8 @@ add_entrypoint_object(
   HDRS
     ../lseek.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.unistd_macros
     libc.hdr.stdio_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -412,6 +448,8 @@ add_entrypoint_object(
   HDRS
     ../truncate.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.unistd_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -425,6 +463,9 @@ add_entrypoint_object(
     ../readlink.h
     readlink_utils.h
   DEPENDS
+    libc.hdr.types.size_t
+    libc.hdr.types.ssize_t
+    libc.hdr.unistd_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -439,6 +480,9 @@ add_entrypoint_object(
     ../readlinkat.h
     readlink_utils.h
   DEPENDS
+    libc.hdr.types.size_t
+    libc.hdr.types.ssize_t
+    libc.hdr.unistd_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -453,6 +497,7 @@ add_entrypoint_object(
     ../link.h
     link_utils.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -481,6 +526,7 @@ add_entrypoint_object(
     ../symlink.h
     symlink_utils.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -495,6 +541,7 @@ add_entrypoint_object(
     ../symlinkat.h
     symlink_utils.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -521,6 +568,7 @@ add_entrypoint_object(
   HDRS
     ../faccessat.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -534,6 +582,7 @@ add_entrypoint_object(
   HDRS
     ../getentropy.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -595,6 +644,7 @@ add_entrypoint_object(
     ../dup.h
     dup_utils.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
@@ -610,6 +660,7 @@ add_entrypoint_object(
     ../dup2.h
     dup_utils.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
@@ -625,6 +676,7 @@ add_entrypoint_object(
     ../dup3.h
     dup_utils.h
   DEPENDS
+    libc.hdr.unistd_macros
     libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
@@ -735,6 +787,7 @@ add_entrypoint_object(
   HDRS
     ../setsid.h
   DEPENDS
+    libc.hdr.types.pid_t
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -746,6 +799,7 @@ add_entrypoint_object(
   HDRS
     ../gethostname.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -795,6 +849,7 @@ add_entrypoint_object(
   HDRS
     ../gettid.h
   DEPENDS
+    libc.hdr.types.pid_t
     libc.src.__support.common
 )
 
@@ -805,6 +860,7 @@ add_entrypoint_object(
   HDRS
     ../getegid.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -817,6 +873,7 @@ add_entrypoint_object(
   HDRS
     ../execvpe.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -829,6 +886,7 @@ add_entrypoint_object(
   HDRS
     ../ttyname.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.unistd.isatty
     libc.src.__support.common
@@ -842,6 +900,7 @@ add_entrypoint_object(
   HDRS
     ../ttyname_r.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.unistd.isatty
     libc.src.__support.common
@@ -855,6 +914,7 @@ add_entrypoint_object(
   HDRS
     ../vfork.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -867,6 +927,7 @@ add_entrypoint_object(
   HDRS
     ../setuid.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -879,6 +940,7 @@ add_entrypoint_object(
   HDRS
     ../setgid.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -891,6 +953,7 @@ add_entrypoint_object(
   HDRS
     ../setegid.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -903,6 +966,7 @@ add_entrypoint_object(
   HDRS
     ../seteuid.h
   DEPENDS
+    libc.include.errno
     libc.include.unistd
     libc.src.__support.common
     libc.src.__support.libc_errno

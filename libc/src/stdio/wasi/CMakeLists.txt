@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     ../fdopen.h
   DEPENDS
+    libc.hdr.types.FILE
     libc.src.__support.File.wasi.file
     libc.src.__support.libc_errno
 )
@@ -16,6 +17,8 @@ add_entrypoint_object(
   HDRS
     ../pclose.h
   DEPENDS
+    libc.hdr.types.FILE
+    libc.include.errno
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -27,6 +30,8 @@ add_entrypoint_object(
   HDRS
     ../popen.h
   DEPENDS
+    libc.hdr.types.FILE
+    libc.include.errno
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -38,6 +43,7 @@ add_entrypoint_object(
   HDRS
     ../remove.h
   DEPENDS
+    libc.hdr.types.FILE
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.__support.libc_errno

@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     ../uname.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_utsname
     libc.src.__support.common
 )

@@ -167,6 +167,7 @@ add_entrypoint_object(
   HDRS
     ../pthread_barrier_destroy.h
   DEPENDS
+    libc.hdr.types.pthread_barrier_t
     libc.include.pthread
     libc.src.__support.common
 )
@@ -178,6 +179,8 @@ add_entrypoint_object(
   HDRS
     ../pthread_barrier_init.h
   DEPENDS
+    libc.hdr.types.pthread_barrier_t
+    libc.hdr.types.pthread_barrierattr_t
     libc.include.pthread
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -190,6 +193,7 @@ add_entrypoint_object(
   HDRS
     ../pthread_barrier_wait.h
   DEPENDS
+    libc.hdr.types.pthread_barrier_t
     libc.include.pthread
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -969,6 +973,7 @@ add_entrypoint_object(
   HDRS
     ../pthread_mutex_consistent.h
   DEPENDS
+    libc.include.errno
     libc.include.pthread
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -980,6 +985,7 @@ add_entrypoint_object(
   HDRS
     ../pthread_mutex_timedlock.h
   DEPENDS
+    libc.include.errno
     libc.include.pthread
     libc.include.time
     libc.src.__support.common

@@ -25,6 +25,7 @@ add_entrypoint_object(
   HDRS
     ../kill.h
   DEPENDS
+    libc.include.signal
     .signal_state
     .signal_utils
     libc.src.__support.common
@@ -39,6 +40,7 @@ add_entrypoint_object(
   HDRS
     ../raise.h
   DEPENDS
+    libc.include.signal
     .signal_state
     .signal_utils
     libc.src.__support.common
@@ -52,6 +54,7 @@ add_entrypoint_object(
   HDRS
     ../sigaction.h
   DEPENDS
+    libc.hdr.types.struct_sigaction
     .signal_state
     .signal_utils
     libc.src.__support.common
@@ -65,6 +68,7 @@ add_entrypoint_object(
   HDRS
     ../sigaddset.h
   DEPENDS
+    libc.hdr.types.sigset_t
     .signal_utils
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -77,6 +81,7 @@ add_entrypoint_object(
   HDRS
     ../sigaltstack.h
   DEPENDS
+    libc.hdr.types.stack_t
     .signal_state
     .signal_utils
     libc.src.__support.common
@@ -90,6 +95,7 @@ add_entrypoint_object(
   HDRS
     ../sigdelset.h
   DEPENDS
+    libc.hdr.types.sigset_t
     .signal_utils
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -102,6 +108,7 @@ add_entrypoint_object(
   HDRS
     ../sigemptyset.h
   DEPENDS
+    libc.hdr.types.sigset_t
     .signal_utils
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -114,6 +121,7 @@ add_entrypoint_object(
   HDRS
     ../sigfillset.h
   DEPENDS
+    libc.hdr.types.sigset_t
     .signal_utils
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -138,6 +146,7 @@ add_entrypoint_object(
   HDRS
     ../sigprocmask.h
   DEPENDS
+    libc.hdr.types.sigset_t
     .signal_state
     .signal_utils
     libc.src.__support.common
@@ -151,6 +160,7 @@ add_entrypoint_object(
   HDRS
     ../pthread_sigmask.h
   DEPENDS
+    libc.hdr.types.sigset_t
     .signal_state
     .signal_utils
     libc.src.__support.common
@@ -163,6 +173,7 @@ add_entrypoint_object(
   HDRS
     ../sigsuspend.h
   DEPENDS
+    libc.include.errno
     libc.include.signal
     libc.src.__support.common
     libc.src.__support.libc_errno

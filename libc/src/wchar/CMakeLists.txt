@@ -15,6 +15,7 @@ add_entrypoint_object(
   HDRS
     wcwidth.h
   DEPENDS
+    libc.include.wchar
     libc.src.wctype.iswprint
     libc.src.__support.common
 )

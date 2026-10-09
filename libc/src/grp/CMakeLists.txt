@@ -4,6 +4,7 @@ if(LIBC_TARGET_OS STREQUAL "wasi")
     SRCS
       wasi/group.c
     DEPENDS
+    libc.include.stdint
       libc.include.errno
       libc.include.grp
       libc.include.string

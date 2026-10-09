@@ -5,6 +5,8 @@ add_object_library(
   HDRS
     epoll_state.h
   DEPENDS
+    libc.include.stdint
+    libc.include.string
     libc.include.poll
     libc.include.sys_epoll
     libc.hdr.errno_macros
@@ -45,6 +47,7 @@ add_entrypoint_object(
   HDRS
     ../epoll_ctl.h
   DEPENDS
+    libc.hdr.types.struct_epoll_event
     libc.include.sys_epoll
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -58,6 +61,8 @@ add_entrypoint_object(
   HDRS
     ../epoll_pwait.h
   DEPENDS
+    libc.hdr.types.struct_epoll_event
+    libc.include.signal
     libc.hdr.types.sigset_t
     libc.include.sys_epoll
     libc.src.__support.common
@@ -72,6 +77,10 @@ add_entrypoint_object(
   HDRS
     ../epoll_pwait2.h
   DEPENDS
+    libc.hdr.types.struct_epoll_event
+    libc.include.limits
+    libc.include.signal
+    libc.include.time
     libc.hdr.types.sigset_t
     libc.hdr.types.struct_timespec
     libc.include.sys_epoll
@@ -87,6 +96,7 @@ add_entrypoint_object(
   HDRS
     ../epoll_wait.h
   DEPENDS
+    libc.hdr.types.struct_epoll_event
     libc.include.sys_epoll
     libc.src.__support.common
     libc.src.__support.libc_errno

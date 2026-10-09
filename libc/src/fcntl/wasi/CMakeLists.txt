@@ -36,6 +36,7 @@ add_entrypoint_object(
     ../creat.h
     open_utils.h
   DEPENDS
+    libc.hdr.types.mode_t
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -50,6 +51,7 @@ add_entrypoint_object(
     ../fcntl.h
     ../../unistd/wasi/dup_utils.h
   DEPENDS
+    libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common

@@ -31,6 +31,7 @@ add_entrypoint_object(
     regexec.h
     tre/tre.h
   DEPENDS
+    libc.include.assert
     libc.include.regex
     libc.include.wchar
     libc.include.wctype

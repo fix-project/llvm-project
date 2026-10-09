@@ -650,6 +650,8 @@ if(LIBC_TARGET_OS_IS_WASI)
     HDRS
       mkdtemp.h
     DEPENDS
+    libc.include.errno
+    libc.include.stdint
       libc.src.__support.common
       libc.src.__support.libc_errno
       libc.src.sys.stat.mkdir

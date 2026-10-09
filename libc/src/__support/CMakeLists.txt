@@ -74,6 +74,7 @@ add_object_library(
     .freelist
     .freestore
     .freetrie
+    libc.include.stdint
     libc.src.__support.CPP.cstddef
     libc.src.__support.CPP.array
     libc.src.__support.CPP.optional

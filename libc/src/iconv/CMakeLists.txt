@@ -5,6 +5,9 @@ add_entrypoint_object(
   HDRS
     iconv.h
   DEPENDS
+    libc.include.errno
+    libc.include.stdint
+    libc.include.stdlib
     libc.include.iconv
     libc.src.__support.common
     libc.src.__support.libc_errno

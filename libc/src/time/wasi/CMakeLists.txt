@@ -38,6 +38,7 @@ add_entrypoint_object(
   HDRS
     ../clock_getres.h
   DEPENDS
+    libc.hdr.time_macros
     libc.hdr.types.clockid_t
     libc.hdr.types.struct_timespec
     libc.src.__support.OSUtil.wasi.wasi_util
@@ -52,6 +53,7 @@ add_entrypoint_object(
   HDRS
     ../clock_settime.h
   DEPENDS
+    libc.hdr.time_macros
     libc.hdr.types.clockid_t
     libc.hdr.types.struct_timespec
     libc.src.__support.common
@@ -78,6 +80,7 @@ add_entrypoint_object(
   HDRS
     ../gettimeofday.h
   DEPENDS
+    libc.hdr.types.struct_timeval
     libc.hdr.time_macros
     libc.hdr.types.suseconds_t
     libc.src.__support.time.clock_gettime
@@ -104,6 +107,7 @@ add_entrypoint_object(
   HDRS
     ../strptime.h
   DEPENDS
+    libc.include.errno
     libc.include.time
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -116,6 +120,7 @@ add_entrypoint_object(
   HDRS
     ../tzset.h
   DEPENDS
+    libc.include.errno
     libc.include.time
     libc.src.__support.common
     libc.src.__support.libc_errno

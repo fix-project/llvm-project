@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     ../cfgetispeed.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -15,6 +16,7 @@ add_entrypoint_object(
   HDRS
     ../cfgetospeed.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -26,6 +28,7 @@ add_entrypoint_object(
   HDRS
     ../cfsetispeed.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -37,6 +40,7 @@ add_entrypoint_object(
   HDRS
     ../cfsetospeed.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -48,6 +52,7 @@ add_entrypoint_object(
   HDRS
     ../tcdrain.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -59,6 +64,7 @@ add_entrypoint_object(
   HDRS
     ../tcflow.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -70,6 +76,7 @@ add_entrypoint_object(
   HDRS
     ../tcflush.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -81,6 +88,7 @@ add_entrypoint_object(
   HDRS
     ../tcgetattr.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -92,6 +100,7 @@ add_entrypoint_object(
   HDRS
     ../tcgetsid.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -103,6 +112,7 @@ add_entrypoint_object(
   HDRS
     ../tcsendbreak.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -114,6 +124,7 @@ add_entrypoint_object(
   HDRS
     ../tcsetattr.h
   DEPENDS
+    libc.include.termios
     libc.src.__support.common
     libc.src.__support.libc_errno
 )

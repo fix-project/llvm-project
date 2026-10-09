@@ -6,6 +6,7 @@ add_entrypoint_object(
     ../fstat.h
     filestat_utils.h
   DEPENDS
+    libc.hdr.types.struct_stat
     libc.include.sys_stat
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -20,6 +21,7 @@ add_entrypoint_object(
     ../fstatat.h
     filestat_utils.h
   DEPENDS
+    libc.hdr.types.struct_stat
     libc.include.sys_stat
     libc.hdr.fcntl_macros
     libc.src.__support.OSUtil.wasi.wasi_util
@@ -59,6 +61,7 @@ add_entrypoint_object(
     ../lstat.h
     filestat_utils.h
   DEPENDS
+    libc.hdr.types.struct_stat
     libc.include.sys_stat
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -72,6 +75,7 @@ add_entrypoint_object(
   HDRS
     ../mkdir.h
   DEPENDS
+    libc.hdr.types.mode_t
     libc.include.sys_stat
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -86,6 +90,7 @@ add_entrypoint_object(
     ../stat.h
     filestat_utils.h
   DEPENDS
+    libc.hdr.types.struct_stat
     libc.include.sys_stat
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -112,6 +117,7 @@ add_entrypoint_object(
   HDRS
     ../utimensat.h
   DEPENDS
+    libc.hdr.types.struct_timespec
     libc.include.sys_stat
     libc.hdr.fcntl_macros
     libc.hdr.sys_stat_macros
@@ -163,6 +169,7 @@ add_entrypoint_object(
   HDRS
     ../mkfifo.h
   DEPENDS
+    libc.include.errno
     libc.include.sys_stat
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -175,6 +182,7 @@ add_entrypoint_object(
   HDRS
     ../mknodat.h
   DEPENDS
+    libc.include.errno
     libc.include.sys_stat
     libc.src.__support.common
     libc.src.__support.libc_errno

@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     ../madvise.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
 )
@@ -28,6 +29,7 @@ add_entrypoint_object(
   HDRS
     ../mincore.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -40,6 +42,7 @@ add_entrypoint_object(
   HDRS
     ../mlock.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -52,6 +55,8 @@ add_entrypoint_object(
   HDRS
     ../mlock2.h
   DEPENDS
+    libc.hdr.types.size_t
+    libc.include.sys_syscall
     libc.include.sys_mman
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -77,6 +82,9 @@ add_entrypoint_object(
     ../mmap.h
     mman_emulation.h
   DEPENDS
+    libc.hdr.fcntl_macros
+    libc.hdr.types.off_t
+    libc.hdr.types.size_t
     libc.include.stdlib
     libc.include.string
     libc.include.sys_mman
@@ -92,6 +100,7 @@ add_entrypoint_object(
   HDRS
     ../mprotect.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
 )
@@ -104,6 +113,9 @@ add_entrypoint_object(
     ../mremap.h
     mman_emulation.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.types.size_t
+    libc.include.stdint
     libc.include.sys_mman
     libc.include.stdlib
     libc.include.string
@@ -119,6 +131,9 @@ add_entrypoint_object(
     ../msync.h
     mman_emulation.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.types.size_t
+    libc.include.stdint
     libc.include.sys_mman
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -132,6 +147,7 @@ add_entrypoint_object(
   HDRS
     ../munlock.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -157,6 +173,9 @@ add_entrypoint_object(
     ../munmap.h
     mman_emulation.h
   DEPENDS
+    libc.hdr.types.off_t
+    libc.hdr.types.size_t
+    libc.include.stdlib
     libc.include.sys_mman
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
@@ -206,6 +225,7 @@ add_entrypoint_object(
   HDRS
     ../pkey_mprotect.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -230,6 +250,7 @@ add_entrypoint_object(
   HDRS
     ../posix_madvise.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.include.sys_mman
     libc.src.__support.common
 )
@@ -253,6 +274,7 @@ add_entrypoint_object(
   HDRS
     ../shm_open.h
   DEPENDS
+    libc.hdr.types.mode_t
     libc.include.sys_mman
     libc.src.__support.common
     libc.src.__support.libc_errno

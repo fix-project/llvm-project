@@ -5,6 +5,10 @@ add_entrypoint_object(
   HDRS
     mntent.h
   DEPENDS
+    libc.include.errno
+    libc.include.stdio
+    libc.include.stdlib
+    libc.include.string
     libc.include.mntent
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common

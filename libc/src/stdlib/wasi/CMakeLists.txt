@@ -23,6 +23,7 @@ add_entrypoint_object(
   HDRS
     ../malloc.h
   DEPENDS
+    libc.hdr.types.size_t
     libc.src.__support.freelist_heap
 )
 
@@ -73,6 +74,7 @@ add_entrypoint_object(
   HDRS
     ../posix_memalign.h
   DEPENDS
+    libc.include.stdint
     libc.src.__support.freelist_heap
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -86,6 +88,7 @@ add_entrypoint_object(
     ../mkstemp.h
     ../../fcntl/wasi/open_utils.h
   DEPENDS
+    libc.hdr.types.mode_t
     libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.src.__support.CPP.string_view
@@ -150,6 +153,7 @@ add_entrypoint_object(
   HDRS
     ../system.h
   DEPENDS
+    libc.include.errno
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -161,6 +165,7 @@ add_entrypoint_object(
   HDRS
     ../random.h
   DEPENDS
+    libc.include.errno
     libc.include.stdlib
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -173,6 +178,7 @@ add_entrypoint_object(
   HDRS
     ../srandom.h
   DEPENDS
+    libc.include.errno
     libc.include.stdlib
     libc.src.__support.common
     libc.src.__support.libc_errno

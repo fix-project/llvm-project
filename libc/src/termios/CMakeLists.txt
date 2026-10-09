@@ -20,6 +20,7 @@ if(LIBC_TARGET_OS STREQUAL "wasi")
     HDRS
       cfsetspeed.h
     DEPENDS
+    libc.include.termios
       .cfsetispeed
       .cfsetospeed
   )

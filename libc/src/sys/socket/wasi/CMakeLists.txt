@@ -5,6 +5,9 @@ add_entrypoint_object(
   HDRS
     ../accept.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -18,6 +21,9 @@ add_entrypoint_object(
   HDRS
     ../accept4.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -31,6 +37,9 @@ add_entrypoint_object(
   HDRS
     ../bind.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -44,6 +53,9 @@ add_entrypoint_object(
   HDRS
     ../connect.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -57,6 +69,9 @@ add_entrypoint_object(
   HDRS
     ../getpeername.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -70,6 +85,9 @@ add_entrypoint_object(
   HDRS
     ../getsockname.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -83,6 +101,8 @@ add_entrypoint_object(
   HDRS
     ../getsockopt.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -96,6 +116,7 @@ add_entrypoint_object(
   HDRS
     ../listen.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -109,6 +130,7 @@ add_entrypoint_object(
   HDRS
     ../recv.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -122,6 +144,10 @@ add_entrypoint_object(
   HDRS
     ../recvfrom.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.ssize_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -135,6 +161,9 @@ add_entrypoint_object(
   HDRS
     ../recvmmsg.h
   DEPENDS
+    libc.hdr.types.struct_mmsghdr
+    libc.hdr.types.struct_timespec
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -148,6 +177,9 @@ add_entrypoint_object(
   HDRS
     ../recvmsg.h
   DEPENDS
+    libc.hdr.types.ssize_t
+    libc.hdr.types.struct_msghdr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -161,6 +193,7 @@ add_entrypoint_object(
   HDRS
     ../send.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -174,6 +207,8 @@ add_entrypoint_object(
   HDRS
     ../sendmmsg.h
   DEPENDS
+    libc.hdr.types.struct_mmsghdr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -187,6 +222,9 @@ add_entrypoint_object(
   HDRS
     ../sendmsg.h
   DEPENDS
+    libc.hdr.types.ssize_t
+    libc.hdr.types.struct_msghdr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -200,6 +238,10 @@ add_entrypoint_object(
   HDRS
     ../sendto.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.hdr.types.ssize_t
+    libc.hdr.types.struct_sockaddr
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -213,6 +255,8 @@ add_entrypoint_object(
   HDRS
     ../setsockopt.h
   DEPENDS
+    libc.hdr.types.socklen_t
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -226,6 +270,7 @@ add_entrypoint_object(
   HDRS
     ../shutdown.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -239,6 +284,7 @@ add_entrypoint_object(
   HDRS
     ../sockatmark.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -252,6 +298,7 @@ add_entrypoint_object(
   HDRS
     ../socket.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno
@@ -265,6 +312,7 @@ add_entrypoint_object(
   HDRS
     ../socketpair.h
   DEPENDS
+    libc.include.sys_types
     libc.include.sys_socket
     libc.src.__support.common
     libc.src.__support.libc_errno

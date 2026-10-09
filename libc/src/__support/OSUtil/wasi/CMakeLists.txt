@@ -9,6 +9,7 @@ add_object_library(
     path.h
     wasi.h
   DEPENDS
+    libc.include.stdint
     libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.hdr.limits_macros

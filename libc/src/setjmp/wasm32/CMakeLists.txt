@@ -11,6 +11,7 @@ if(LIBC_WASM_ENABLE_SJLJ)
       ../setjmp_impl.h
       wasm_sjlj.h
     DEPENDS
+    libc.include.stdint
       libc.hdr.types.jmp_buf
       libc.src.__support.common
   )
@@ -23,6 +24,7 @@ if(LIBC_WASM_ENABLE_SJLJ)
       ../longjmp.h
       wasm_sjlj.h
     DEPENDS
+    libc.include.stdint
       libc.hdr.types.jmp_buf
       libc.src.__support.common
   )

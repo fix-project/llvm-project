@@ -6,6 +6,7 @@ add_entrypoint_object(
     ../utimes.h
     timeval_utils.h
   DEPENDS
+    libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.hdr.types.struct_timeval
     libc.hdr.types.struct_timespec
@@ -21,6 +22,7 @@ add_entrypoint_object(
     ../lutimes.h
     timeval_utils.h
   DEPENDS
+    libc.hdr.errno_macros
     libc.hdr.fcntl_macros
     libc.hdr.types.struct_timeval
     libc.hdr.types.struct_timespec
@@ -36,6 +38,7 @@ add_entrypoint_object(
     ../futimes.h
     timeval_utils.h
   DEPENDS
+    libc.hdr.errno_macros
     libc.hdr.types.struct_timeval
     libc.hdr.types.struct_timespec
     libc.src.fcntl.futimens
@@ -73,6 +76,7 @@ add_entrypoint_object(
   HDRS
     ../settimeofday.h
   DEPENDS
+    libc.include.errno
     libc.include.sys_time
     libc.src.__support.common
     libc.src.__support.libc_errno

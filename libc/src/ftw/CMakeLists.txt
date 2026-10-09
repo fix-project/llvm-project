@@ -6,6 +6,12 @@ add_entrypoint_object(
     ftw.h
     walk.h
   DEPENDS
+    libc.include.errno
+    libc.include.limits
+    libc.include.stdlib
+    libc.include.string
+    libc.include.sys_stat
+    libc.include.unistd
     libc.include.ftw
     libc.include.dirent
     libc.src.__support.common
@@ -19,6 +25,12 @@ add_entrypoint_object(
     nftw.h
     walk.h
   DEPENDS
+    libc.include.errno
+    libc.include.limits
+    libc.include.stdlib
+    libc.include.string
+    libc.include.sys_stat
+    libc.include.unistd
     libc.include.ftw
     libc.include.dirent
     libc.src.__support.common

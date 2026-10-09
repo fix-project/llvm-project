@@ -5,6 +5,8 @@ add_entrypoint_object(
   HDRS
     ../poll.h
   DEPENDS
+    libc.hdr.types.nfds_t
+    libc.hdr.types.struct_pollfd
     libc.include.poll
     libc.hdr.func.malloc
     libc.hdr.func.free

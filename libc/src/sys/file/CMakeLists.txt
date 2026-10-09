@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     flock.h
   DEPENDS
+    libc.include.errno
     libc.src.__support.common
     libc.src.__support.libc_errno
 )

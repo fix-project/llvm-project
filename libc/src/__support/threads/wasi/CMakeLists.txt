@@ -14,6 +14,7 @@ add_object_library(
   HDRS
     ../thread.h
   DEPENDS
+    libc.hdr.stdint_proxy
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.hdr.errno_macros

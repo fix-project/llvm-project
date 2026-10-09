@@ -240,6 +240,7 @@ add_entrypoint_object(
   HDRS
     vdprintf.h
   DEPENDS
+    libc.include.errno
     .vasprintf
     libc.src.stdlib.free
     libc.src.unistd.write
@@ -355,7 +356,11 @@ if(LIBC_TARGET_OS_IS_WASI)
         ${name}.h
         generic/temp_path.h
       DEPENDS
+        libc.include.errno
         libc.include.stdio
+        libc.include.stdlib
+        libc.include.string
+        libc.include.unistd
         libc.src.stdlib.mkstemp
         libc.src.stdlib.getenv
         libc.src.unistd.close

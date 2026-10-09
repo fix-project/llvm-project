@@ -5,6 +5,7 @@ add_object_library(
   HDRS
     file.h
   DEPENDS
+    libc.hdr.types.off_t
     libc.src.__support.File.file
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.CPP.new

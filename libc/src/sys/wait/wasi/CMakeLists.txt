@@ -5,6 +5,7 @@ add_entrypoint_object(
   HDRS
     ../wait.h
   DEPENDS
+    libc.include.sys_wait
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -16,6 +17,7 @@ add_entrypoint_object(
   HDRS
     ../waitpid.h
   DEPENDS
+    libc.include.sys_wait
     libc.src.__support.common
     libc.src.__support.libc_errno
 )
@@ -27,6 +29,7 @@ add_entrypoint_object(
   HDRS
     ../wait4.h
   DEPENDS
+    libc.include.sys_wait
     libc.src.__support.common
     libc.src.__support.libc_errno
 )

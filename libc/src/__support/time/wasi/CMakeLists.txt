@@ -5,6 +5,7 @@ add_object_library(
   SRCS
     clock_gettime.cpp
   DEPENDS
+    libc.hdr.time_macros
     libc.hdr.types.clockid_t
     libc.hdr.types.struct_timespec
     libc.src.__support.OSUtil.wasi.wasi_util

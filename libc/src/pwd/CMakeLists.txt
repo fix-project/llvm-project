@@ -4,6 +4,7 @@ if(LIBC_TARGET_OS STREQUAL "wasi")
     SRCS
       wasi/passwd.c
     DEPENDS
+    libc.include.errno
       libc.include.pwd
       libc.include.string
   )
