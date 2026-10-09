@@ -56,8 +56,6 @@ char **start_argv;
 int __main_void();
 
 [[gnu::visibility("default")]] [[gnu::used]] void _start() {
-  __wasm_call_ctors();
-
   __wasi_size_t argc = 0;
   __wasi_size_t argv_buf_size = 0;
   if (__wasi_args_sizes_get(&argc, &argv_buf_size) != __WASI_ERRNO_SUCCESS ||
@@ -98,6 +96,7 @@ int __main_void();
   start_argc = static_cast<int>(argc);
   start_argv = argv_ptrs;
 
+  __wasm_call_ctors();
   int status = __main_void();
   exit(status);
 }
