@@ -62,7 +62,10 @@ def _overlay_directories(repository_ctx):
                 repository_ctx.symlink(src_path, dst_path)
 
         # Symlink source dirs (if not themselves overlaid) and files.
-        for src_entry in src_root.get_child(rel_dir).readdir():
+        src_dir = src_root.get_child(rel_dir)
+        if not src_dir.exists:
+            continue
+        for src_entry in src_dir.readdir():
             name = src_entry.basename
             if name in overlay_dirs.keys():
                 # Skip: overlay has a directory with this name
@@ -183,6 +186,12 @@ def _llvm_configure_impl(repository_ctx):
 
     # Create a starlark file with the requested LLVM targets.
     llvm_targets = repository_ctx.attr.targets
+    targets_override = repository_ctx.os.environ.get("LLVM_TARGETS_TO_BUILD", "")
+    if targets_override:
+        llvm_targets = [target.strip() for target in targets_override.split(";") if target.strip()]
+        for target in llvm_targets:
+            if target not in DEFAULT_TARGETS:
+                fail("Unknown LLVM target in LLVM_TARGETS_TO_BUILD: " + target)
     repository_ctx.file(
         "llvm/targets.bzl",
         content = "llvm_targets = " + str(llvm_targets),
@@ -203,6 +212,7 @@ def _llvm_configure_impl(repository_ctx):
 
 llvm_configure = repository_rule(
     implementation = _llvm_configure_impl,
+    environ = ["LLVM_TARGETS_TO_BUILD"],
     attrs = {
         "targets": attr.string_list(default = DEFAULT_TARGETS),
     },

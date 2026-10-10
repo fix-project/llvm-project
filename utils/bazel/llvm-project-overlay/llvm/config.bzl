@@ -48,6 +48,7 @@ posix_defines = [
 
 backtrace_defines = select({
     "@platforms//os:windows": [],
+    "@platforms//os:wasi": [],
     "@llvm//platforms/config:musl": [],
     "//conditions:default": [
         "HAVE_BACKTRACE=1",
@@ -75,6 +76,18 @@ macos_defines = posix_defines + [
     "HAVE_UNW_ADD_DYNAMIC_FDE=1",
 ]
 
+# Match the WASI-hosted LLVM configuration in wasi-toolchain.yml. Preview 1
+# has no process spawning, dynamic plugins, or LLVM threading support.
+wasi_defines = [
+    "LLVM_ON_UNIX=1",
+    "LLVM_ENABLE_LLVM_EXPORT_ANNOTATIONS=1",
+    "LLVM_VERSION_MAJOR=" + LLVM_VERSION_MAJOR,
+    "HAVE_UNISTD_H=1",
+    "HAVE_SBRK=1",
+    "HAVE_STRERROR_R=1",
+    "HAVE_SYSEXITS_H=1",
+]
+
 win32_defines = [
     # Windows system library specific defines.
     "_CRT_SECURE_NO_DEPRECATE",
@@ -96,6 +109,7 @@ win32_defines = [
 os_defines = select({
     "@platforms//os:freebsd": posix_defines,
     "@platforms//os:macos": macos_defines,
+    "@platforms//os:wasi": wasi_defines,
     "@platforms//os:windows": win32_defines,
     "//conditions:default": linux_defines,
 }) + backtrace_defines + mallinfo_defines
@@ -117,6 +131,7 @@ llvm_config_defines = os_defines + builtin_thread_pointer + select({
     Label("//llvm:linux_ppc64le"): native_arch_defines("PowerPC", "powerpc64le-unknown-linux-gnu"),
     Label("//llvm:linux_riscv64"): native_arch_defines("RISCV", "riscv64-unknown-linux-gnu"),
     Label("//llvm:linux_s390x"): native_arch_defines("SystemZ", "systemz-unknown-linux_gnu"),
+    Label("//llvm:wasi_wasm32"): native_arch_defines("WebAssembly", "wasm32-unknown-wasip1"),
     "@platforms//os:windows": native_arch_defines("X86", "x86_64-pc-win32"),
     "//conditions:default": native_arch_defines("X86", "x86_64-unknown-linux-gnu"),
 }) + [

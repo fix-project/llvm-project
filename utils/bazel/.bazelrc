@@ -259,6 +259,22 @@ build:ci --test_summary=terse
 build:ci --remote_default_exec_properties=cache-silo-key=CleverPeafowl
 
 ###############################################################################
+# WASIp1 cross-builds using a host Clang and a separate sysroot.
+###############################################################################
+
+build:wasi --platforms=@llvm-project//wasi:wasm32_wasip1
+build:wasi --extra_toolchains=@llvm-project//wasi:cc_toolchain
+build:wasi --repo_env=LLVM_TARGETS_TO_BUILD=WebAssembly
+build:wasi --cxxopt=-std=c++17
+build:wasi --copt=-fPIC
+build:wasi --copt=-fwasm-exceptions
+build:wasi --linkopt=-fwasm-exceptions
+build:wasi --linkopt=-Wl,-z,stack-size=8388608
+build:wasi --@llvm-project//llvm:pfm=disable
+build:wasi --@llvm-project//third-party:llvm_enable_zlib=false
+build:wasi --@llvm-project//third-party:llvm_enable_zstd=false
+
+###############################################################################
 
 # The user.bazelrc file is not checked in but available for local mods.
 # Always keep this at the end of the file so that user flags override.

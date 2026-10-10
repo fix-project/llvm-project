@@ -110,6 +110,15 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "wasi_wasm32",
+    constraint_values = [
+        "@platforms//os:wasi",
+        "@platforms//cpu:wasm32",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 # It may be tempting to add compiler flags here, but that should be avoided.
 # The necessary warnings and other compile flags should be provided by the
 # toolchain or the `.bazelrc` file. This is just a workaround until we have a
@@ -453,6 +462,10 @@ cc_library(
         "@platforms//os:macos": [
             "-pthread",
             "-ldl",
+        ],
+        "@platforms//os:wasi": [
+            "-lm",
+            "-lunwind",
         ],
         "//conditions:default": [
             "-pthread",

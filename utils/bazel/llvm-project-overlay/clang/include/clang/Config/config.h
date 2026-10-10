@@ -50,17 +50,29 @@
 #define CLANG_INSTALL_LIBDIR_BASENAME "lib"
 
 /* Relative directory for resource files */
+#ifdef __wasi__
+#define CLANG_BAZEL_STRINGIFY_IMPL(x) #x
+#define CLANG_BAZEL_STRINGIFY(x) CLANG_BAZEL_STRINGIFY_IMPL(x)
+#define CLANG_RESOURCE_DIR "/usr/lib/clang/" CLANG_BAZEL_STRINGIFY(LLVM_VERSION_MAJOR)
+#else
 #define CLANG_RESOURCE_DIR ""
+#endif
 
 /* Directories clang will search for headers */
 #define C_INCLUDE_DIRS ""
 
 /* Directories clang will search for configuration files */
-/* #undef CLANG_CONFIG_FILE_SYSTEM_DIR */
+#ifdef __wasi__
+#define CLANG_CONFIG_FILE_SYSTEM_DIR "/usr/bin"
+#endif
 /* #undef CLANG_CONFIG_FILE_USER_DIR */
 
 /* Default <path> to all compiler invocations for --sysroot=<path>. */
+#ifdef __wasi__
+#define DEFAULT_SYSROOT "/usr"
+#else
 #define DEFAULT_SYSROOT ""
+#endif
 
 /* Directory where gcc is installed. */
 #define GCC_INSTALL_PREFIX ""

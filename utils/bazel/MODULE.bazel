@@ -43,3 +43,6 @@ use_repo(
 llvm_configure = use_repo_rule("@llvm-raw//utils/bazel:configure.bzl", "llvm_configure")
 
 llvm_configure(name = "llvm-project")
+
+wasi_toolchain_repository = use_repo_rule("@llvm-raw//utils/bazel:wasi_toolchain_repository.bzl", "wasi_toolchain_repository")
+wasi_toolchain_repository(name = "wasi_toolchain")

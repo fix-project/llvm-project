@@ -61,6 +61,62 @@ for adding this configuration.
 
 # Configuration
 
+## WASIp1
+
+This fork has a WASIp1 target configuration for the LLVM, Clang, and LLD
+Bazel overlay. Bazel selects the native compiler through its execution
+toolchain and the WASIp1 compiler through its registered target toolchain.
+Supply the WASIp1 compiler and sysroot separately. The sysroot may
+come from this project's CMake release workflow or from another provider such
+as wasi-libc; the latter may lack libraries needed to link the complete tools.
+
+Build the native x86-64 compiler with the existing Bazel targets:
+
+```sh
+cd utils/bazel
+bazel build --config=generic_clang @llvm-project//clang:clang @llvm-project//lld:lld
+```
+
+Build the WASIp1 compiler separately with the cross configuration:
+
+```sh
+cd utils/bazel
+bazel build --config=wasi -c opt \
+  --repo_env=TARGET_CC=/absolute/path/to/clang \
+  --repo_env=TARGET_CXX=/absolute/path/to/clang++ \
+  --repo_env=TARGET_LD=/absolute/path/to/wasm-ld \
+  --@llvm-project//wasi:sysroot=/absolute/path/to/wasi-sysroot \
+  @llvm-project//clang:clang @llvm-project//lld:lld
+```
+
+`TARGET_LD` names the linker invoked by Clang; Clang still drives the final
+C++ link. Other LLVM utilities are found next to `TARGET_CC` or on `PATH`.
+Set `TARGET_AR`, `TARGET_NM`, `TARGET_OBJCOPY`, `TARGET_OBJDUMP`, or
+`TARGET_STRIP` with `--repo_env` to select them explicitly.
+The `sysroot` build flag supplies the same path to compilation, linking, and
+Bazel's builtin header validation.
+Use Bazel's usual `-c opt`, `-c dbg`, or `-c fastbuild` selection for release,
+debug, or quick development builds.
+When running the WASI-hosted tools under Wasmtime, preopen a writable working
+directory (for example, run from it with `wasmtime run --dir .`) so Clang can
+create temporary files. Make the sysroot and Clang
+resource directory visible at guest paths, then pass those paths to Clang with
+`--sysroot` and `-resource-dir`. C++ links also need
+`-lunwind` with the current sysroot.
+Use an immutable sysroot path: Bazel does not track changes made in place to
+headers and libraries outside its workspace.
+
+The WASI platform selects the WASI host triple, disables LLVM threads and
+plugins, builds the WebAssembly backend, and links Clang with LLD so it can
+invoke the linker in process.
+Bazel builds TableGen tools for the native execution platform. The `wasi`
+configuration sets the target compiler flags and uses the supplied sysroot's
+libc and C++ runtimes. The Bazel libc overlay does not build the complete
+WASIp1 sysroot; produce that separately.
+
+`--config=wasi` is intended for the WASI-hosted tools above. It is not an
+alternative to the native `--config=generic_clang` build of the full overlay.
+
 The repository `.bazelrc` will import user-specific settings from a
 `user.bazelrc` file (in addition to the standard locations). Adding your typical
 config setting is recommended.

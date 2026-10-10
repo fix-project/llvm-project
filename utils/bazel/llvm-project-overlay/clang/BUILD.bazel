@@ -1660,7 +1660,10 @@ cc_library(
     hdrs = glob([
         "include/clang/Driver/*.h",
     ]),
-    copts = ["$(STACK_FRAME_UNLIMITED)"],
+    copts = ["$(STACK_FRAME_UNLIMITED)"] + select({
+        "//llvm:wasi_wasm32": ["-DCLANG_FEATURE_INPROCESS_LLD"],
+        "//conditions:default": [],
+    }),
     includes = [
         "include",
         # TODO: This is likely a layering issue, but files in Arch are currently
@@ -1704,7 +1707,17 @@ cc_library(
         "//llvm:TargetParser",
         "//llvm:WindowsDriver",
         "//llvm:config",
-    ],
+    ] + select({
+        "//llvm:wasi_wasm32": [
+            "//lld:Common",
+            "//lld:COFF",
+            "//lld:ELF",
+            "//lld:MachO",
+            "//lld:MinGW",
+            "//lld:Wasm",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 gentbl_cc_library(

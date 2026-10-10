@@ -67,7 +67,9 @@
 #define HAVE_DECL_STRERROR_S 0
 
 /* Define if dlopen() is available on this platform. */
+#ifndef __wasi__
 #define HAVE_DLOPEN 1
+#endif
 
 /* Define to 1 if we can register EH frames on this platform. */
 /* HAVE_REGISTER_FRAME defined in Bazel*/
@@ -115,13 +117,19 @@
 /* #undef HAVE_LIBPSAPI */
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
+#ifndef __wasi__
 #define HAVE_LIBPTHREAD 1
+#endif
 
 /* Define to 1 if you have the `pthread_getname_np' function. */
+#ifndef __wasi__
 #define HAVE_PTHREAD_GETNAME_NP 1
+#endif
 
 /* Define to 1 if you have the `pthread_setname_np' function. */
+#ifndef __wasi__
 #define HAVE_PTHREAD_SETNAME_NP 1
+#endif
 
 /* Define to 1 if you have the <mach/mach.h> header file. */
 /* HAVE_MACH_MACH_H defined in Bazel */
@@ -139,7 +147,9 @@
 /* HAVE_MALLOC_ZONE_STATISTICS defined in Bazel */
 
 /* Define to 1 if you have the `posix_spawn' function. */
+#ifndef __wasi__
 #define HAVE_POSIX_SPAWN 1
+#endif
 
 /* Define to 1 if you have the `pread' function. */
 #define HAVE_PREAD 1
@@ -148,10 +158,14 @@
 /* HAVE_PTHREAD_H defined in Bazel */
 
 /* Have pthread_mutex_lock */
+#ifndef __wasi__
 #define HAVE_PTHREAD_MUTEX_LOCK 1
+#endif
 
 /* Have pthread_rwlock_init */
+#ifndef __wasi__
 #define HAVE_PTHREAD_RWLOCK_INIT 1
+#endif
 
 /* Define to 1 if you have the `sbrk' function. */
 /* HAVE_SBRK defined in Bazel */
@@ -193,7 +207,9 @@
 /* #undef HAVE__CHSIZE_S */
 
 /* Define to 1 if you have the `_Unwind_Backtrace' function. */
+#ifndef __wasi__
 #define HAVE__UNWIND_BACKTRACE 1
+#endif
 
 /* Have host's __alloca */
 /* #undef HAVE___ALLOCA */

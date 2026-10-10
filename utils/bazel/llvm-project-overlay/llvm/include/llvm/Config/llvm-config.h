@@ -29,7 +29,11 @@
 /* LLVM_DEFAULT_TARGET_TRIPLE defined in Bazel */
 
 /* Define if threads enabled */
+#ifdef __wasi__
+#define LLVM_ENABLE_THREADS 0
+#else
 #define LLVM_ENABLE_THREADS 1
+#endif
 
 /* Has gcc/MSVC atomic intrinsics */
 #define LLVM_HAS_ATOMICS 1
