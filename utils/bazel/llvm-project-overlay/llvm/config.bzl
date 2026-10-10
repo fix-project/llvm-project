@@ -6,14 +6,22 @@
 
 load(
     "//:vars.bzl",
+    "LLVM_DEFAULT_TARGET_TRIPLE_OVERRIDE",
     "LLVM_VERSION_MAJOR",
     "LLVM_VERSION_MINOR",
     "LLVM_VERSION_PATCH",
     "PACKAGE_VERSION",
 )
+load("//llvm:targets.bzl", "llvm_targets")
 
 def native_arch_defines(arch, triple):
-    return [
+    defines = [
+        r'LLVM_HOST_TRIPLE=\"{}\"'.format(triple),
+        r'LLVM_DEFAULT_TARGET_TRIPLE=\"{}\"'.format(LLVM_DEFAULT_TARGET_TRIPLE_OVERRIDE or triple),
+    ]
+    if arch not in llvm_targets:
+        return defines
+    return defines + [
         r'LLVM_NATIVE_ARCH=\"{}\"'.format(arch),
         "LLVM_NATIVE_ASMPARSER=LLVMInitialize{}AsmParser".format(arch),
         "LLVM_NATIVE_ASMPRINTER=LLVMInitialize{}AsmPrinter".format(arch),
@@ -22,8 +30,6 @@ def native_arch_defines(arch, triple):
         "LLVM_NATIVE_TARGETINFO=LLVMInitialize{}TargetInfo".format(arch),
         "LLVM_NATIVE_TARGETMC=LLVMInitialize{}TargetMC".format(arch),
         "LLVM_NATIVE_TARGETMCA=LLVMInitialize{}TargetMCA".format(arch),
-        r'LLVM_HOST_TRIPLE=\"{}\"'.format(triple),
-        r'LLVM_DEFAULT_TARGET_TRIPLE=\"{}\"'.format(triple),
     ]
 
 posix_defines = [
@@ -123,7 +129,6 @@ builtin_thread_pointer = select({
     "//conditions:default": [],
 })
 
-# TODO: We should split out host vs. target here.
 llvm_config_defines = os_defines + builtin_thread_pointer + select({
     Label("//llvm:darwin_arm64"): native_arch_defines("AArch64", "arm64-apple-darwin"),
     Label("//llvm:darwin_x86_64"): native_arch_defines("X86", "x86_64-unknown-darwin"),

@@ -105,8 +105,12 @@
 #define ENABLE_EXPERIMENTAL_NEW_PASS_MANAGER 0
 
 /* Enable each functionality of modules */
+#ifndef CLANG_ENABLE_OBJC_REWRITER
 #define CLANG_ENABLE_OBJC_REWRITER 0
+#endif
+#ifndef CLANG_ENABLE_STATIC_ANALYZER
 #define CLANG_ENABLE_STATIC_ANALYZER 1
+#endif
 
 /* Spawn a new process clang.exe for the CC1 tool invocation, when necessary */
 #define CLANG_SPAWN_CC1 0

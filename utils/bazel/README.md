@@ -106,8 +106,56 @@ resource directory visible at guest paths, then pass those paths to Clang with
 Use an immutable sysroot path: Bazel does not track changes made in place to
 headers and libraries outside its workspace.
 
+For a source-built compiler and sysroot, declare a toolchain in a BUILD file
+in the consuming workspace:
+
+```starlark
+load("@llvm-project//wasi:toolchain.bzl", "wasi_cc_toolchain_from_targets")
+
+wasi_cc_toolchain_from_targets(
+    name = "wasi_from_targets",
+    clang = "@llvm-project//clang:clang",
+    clangxx = "@llvm-project//clang:clang++",
+    ld = "@llvm-project//lld:wasm-ld",
+    ar = "@llvm-project//llvm:llvm-ar",
+    nm = "@llvm-project//llvm:llvm-nm",
+    objcopy = "@llvm-project//llvm:llvm-objcopy",
+    objdump = "@llvm-project//llvm:llvm-objdump",
+    strip = "@llvm-project//llvm:llvm-strip",
+    resource_dir = "@llvm-project//clang:builtin_headers_gen",
+    sysroot = "//sysroot:files",
+)
+```
+
+`sysroot` may be a CMake-produced directory artifact or a file group covering
+the sysroot's headers and libraries. Bazel includes every file in the compiler
+and linker actions, so changing them invalidates the relevant actions. The
+resource target likewise may be a directory artifact or a group of files under
+`include/`. The label-based toolchain currently requires a Linux execution
+platform because its tool paths use `/proc/self/cwd` to address Bazel's action
+working directory. Build with:
+
+```sh
+bazel build --config=wasi_from_targets -c opt \
+  --extra_toolchains=//toolchain:wasi_from_targets \
+  --repo_env=LLVM_TARGETS_TO_BUILD=X86 \
+  --repo_env=LLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-gnu \
+  --@llvm-project//clang:enable_static_analyzer=false \
+  @llvm-project//clang:clang @llvm-project//lld:lld
+```
+
+The compiler tools are built for Bazel's execution platform. The generated
+LLVM configuration keeps `LLVM_HOST_TRIPLE=wasm32-unknown-wasip1` while the
+optional `LLVM_DEFAULT_TARGET_TRIPLE` override sets Clang's default code
+generation target. Backend initialization follows `LLVM_TARGETS_TO_BUILD`, so
+an X86-only WASI-hosted compiler does not call WebAssembly backend functions.
+The analyzer and Objective-C rewriter are controlled by
+`--@llvm-project//clang:enable_static_analyzer` and
+`--@llvm-project//clang:enable_objc_rewriter`; ARC migration was removed from
+Clang and its old CMake option aliases the Objective-C rewriter option.
+
 The WASI platform selects the WASI host triple, disables LLVM threads and
-plugins, builds the WebAssembly backend, and links Clang with LLD so it can
+plugins, and links Clang with LLD so it can
 invoke the linker in process.
 Bazel builds TableGen tools for the native execution platform. The `wasi`
 configuration sets the target compiler flags and uses the supplied sysroot's

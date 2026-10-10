@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_python//python:defs.bzl", "py_binary")
@@ -25,6 +26,26 @@ package(
 )
 
 licenses(["notice"])
+
+bool_flag(
+    name = "enable_static_analyzer",
+    build_setting_default = True,
+)
+
+bool_flag(
+    name = "enable_objc_rewriter",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "static_analyzer_enabled",
+    flag_values = {":enable_static_analyzer": "true"},
+)
+
+config_setting(
+    name = "objc_rewriter_enabled",
+    flag_values = {":enable_objc_rewriter": "true"},
+)
 
 cc_binary(
     name = "clang-tblgen",
@@ -659,6 +680,13 @@ cc_library(
         "include/clang/Config/config.h",
     ],
     includes = ["include"],
+    defines = select({
+        ":static_analyzer_enabled": [],
+        "//conditions:default": ["CLANG_ENABLE_STATIC_ANALYZER=0"],
+    }) + select({
+        ":objc_rewriter_enabled": ["CLANG_ENABLE_OBJC_REWRITER=1"],
+        "//conditions:default": [],
+    }),
     deps = [
         # We rely on the LLVM config library to provide configuration defines.
         "//llvm:config",
@@ -2167,6 +2195,16 @@ cc_library(
     ]),
     hdrs = glob(["include/clang/FrontendTool/*.h"]),
     includes = ["include"],
+    # ExecuteCompilerInvocation.cpp includes these declarations even when the
+    # analyzer implementation is disabled. Keep them as compile inputs without
+    # linking the analyzer library.
+    textual_hdrs = select({
+        ":static_analyzer_enabled": [],
+        "//conditions:default": [
+            "include/clang/StaticAnalyzer/Frontend/AnalyzerHelpFlags.h",
+            "include/clang/StaticAnalyzer/Frontend/FrontendActions.h",
+        ],
+    }),
     deps = [
         ":basic",
         ":codegen",
@@ -2179,10 +2217,12 @@ cc_library(
         ":scalable_static_analysis_core",
         ":scalable_static_analysis_frontend",
         ":scalable_static_analysis_source_transformation",
-        ":static_analyzer_frontend",
         "//llvm:Option",
         "//llvm:Support",
-    ],
+    ] + select({
+        ":static_analyzer_enabled": [":static_analyzer_frontend"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -2366,7 +2406,6 @@ cc_library(
         ":parse",
         ":sema",
         ":serialization",
-        ":static_analyzer_frontend",
         "//llvm:AllTargetsAsmParsers",
         "//llvm:AllTargetsCodeGens",
         "//llvm:BitReader",
@@ -2382,7 +2421,10 @@ cc_library(
         "//llvm:TargetParser",
         "//llvm:TransformUtils",
         "//llvm:config",
-    ],
+    ] + select({
+        ":static_analyzer_enabled": [":static_analyzer_frontend"],
+        "//conditions:default": [],
+    }),
 )
 
 llvm_driver_cc_binary(

@@ -22,14 +22,15 @@ platform(
 
 wasi_cc_toolchain_config(
     name = "config",
-    clang = "@wasi_toolchain//:tools/cc",
-    clangxx = "@wasi_toolchain//:tools/cxx",
-    ld = "@wasi_toolchain//:tools/ld",
+    clang = "@wasi_toolchain//:tools/clang",
+    clangxx = "@wasi_toolchain//:tools/clang++",
+    ld = "@wasi_toolchain//:tools/wasm-ld",
     ar = "@wasi_toolchain//:tools/ar",
     nm = "@wasi_toolchain//:tools/nm",
     objcopy = "@wasi_toolchain//:tools/objcopy",
     objdump = "@wasi_toolchain//:tools/objdump",
     strip = "@wasi_toolchain//:tools/strip",
+    resource_dir = "@wasi_toolchain//:resource_files",
 )
 
 cc_toolchain(

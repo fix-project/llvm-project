@@ -262,17 +262,19 @@ build:ci --remote_default_exec_properties=cache-silo-key=CleverPeafowl
 # WASIp1 cross-builds using a host Clang and a separate sysroot.
 ###############################################################################
 
-build:wasi --platforms=@llvm-project//wasi:wasm32_wasip1
+build:wasi --config=wasi_common
 build:wasi --extra_toolchains=@llvm-project//wasi:cc_toolchain
 build:wasi --repo_env=LLVM_TARGETS_TO_BUILD=WebAssembly
-build:wasi --cxxopt=-std=c++17
-build:wasi --copt=-fPIC
-build:wasi --copt=-fwasm-exceptions
-build:wasi --linkopt=-fwasm-exceptions
-build:wasi --linkopt=-Wl,-z,stack-size=8388608
-build:wasi --@llvm-project//llvm:pfm=disable
-build:wasi --@llvm-project//third-party:llvm_enable_zlib=false
-build:wasi --@llvm-project//third-party:llvm_enable_zstd=false
+build:wasi_from_targets --config=wasi_common
+build:wasi_common --platforms=@llvm-project//wasi:wasm32_wasip1
+build:wasi_common --cxxopt=-std=c++17
+build:wasi_common --copt=-fPIC
+build:wasi_common --copt=-fwasm-exceptions
+build:wasi_common --linkopt=-fwasm-exceptions
+build:wasi_common --linkopt=-Wl,-z,stack-size=8388608
+build:wasi_common --@llvm-project//llvm:pfm=disable
+build:wasi_common --@llvm-project//third-party:llvm_enable_zlib=false
+build:wasi_common --@llvm-project//third-party:llvm_enable_zstd=false
 
 ###############################################################################
 

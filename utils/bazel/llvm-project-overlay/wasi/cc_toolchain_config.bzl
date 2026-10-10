@@ -9,7 +9,6 @@ load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("@rules_cc//cc:cc_toolchain_config_lib.bzl", "action_config", "feature", "flag_group", "flag_set", "make_variable", "tool", "tool_path")
 load("@rules_cc//cc:defs.bzl", "CcToolchainConfigInfo")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("@wasi_toolchain//:paths.bzl", "AR_PATH", "CC_PATH", "CXX_PATH", "LD_PATH", "NM_PATH", "OBJCOPY_PATH", "OBJDUMP_PATH", "RESOURCE_DIR", "STRIP_PATH")
 
 _COMPILE_ACTIONS = [
     ACTION_NAMES.c_compile,
@@ -34,10 +33,59 @@ sysroot_flag = rule(
     build_setting = config.string(flag = True),
 )
 
+def _common_directory(files):
+    if not files:
+        fail("toolchain input target must provide files")
+    if len(files) == 1 and files[0].is_directory:
+        return files[0].path
+    parts = files[0].path.split("/")[:-1]
+    for file in files[1:]:
+        other = file.path.split("/")[:-1]
+        count = 0
+        for index in range(min(len(parts), len(other))):
+            if parts[index] != other[index]:
+                break
+            count += 1
+        parts = parts[:count]
+    if not parts:
+        fail("toolchain input files have no common directory")
+    return "/".join(parts)
+
 def _impl(ctx):
-    sysroot = ctx.attr._sysroot[BuildSettingInfo].value
-    if not sysroot.startswith("/"):
-        fail("Set --@llvm-project//wasi:sysroot=/absolute/path/to/wasi-sysroot")
+    paths = {
+        "cc": ctx.file.clang.path,
+        "cxx": ctx.file.clangxx.path,
+        "ld": ctx.file.ld.path,
+        "ar": ctx.file.ar.path,
+        "nm": ctx.file.nm.path,
+        "objcopy": ctx.file.objcopy.path,
+        "objdump": ctx.file.objdump.path,
+        "strip": ctx.file.strip.path,
+    }
+    # cc_common resolves relative tool paths from the toolchain package, not
+    # the action execroot. /proc/self/cwd is the execroot of each Linux spawn.
+    # Every referenced file is also declared through cc_toolchain.*_files.
+    tool_paths = {name: "/proc/self/cwd/" + path for name, path in paths.items()}
+    resource_files = ctx.files.resource_dir
+    resource_dir = _common_directory(resource_files)
+    if not (len(resource_files) == 1 and resource_files[0].is_directory):
+        # Header-only targets (such as Clang's builtin_headers_gen) share an
+        # include directory. Full resource directories can also contain lib/.
+        if resource_dir.endswith("/include"):
+            resource_dir = resource_dir[:-len("/include")]
+        if not [file for file in resource_files if file.path.startswith(resource_dir + "/include/")]:
+            fail("resource_dir files must contain an include directory")
+    if ctx.attr.source_built:
+        sysroot_files = ctx.files.sysroot
+        sysroot = _common_directory(sysroot_files)
+        if not (len(sysroot_files) == 1 and sysroot_files[0].is_directory):
+            for directory in ["include", "lib"]:
+                if not [file for file in sysroot_files if file.path.startswith(sysroot + "/" + directory + "/")]:
+                    fail("sysroot files must contain an " + directory + " directory")
+    else:
+        sysroot = ctx.attr._sysroot[BuildSettingInfo].value
+        if not sysroot.startswith("/"):
+            fail("Set --@llvm-project//wasi:sysroot=/absolute/path/to/wasi-sysroot")
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
@@ -53,28 +101,28 @@ def _impl(ctx):
             sysroot + "/include",
             sysroot + "/include/wasm32-wasip1",
             sysroot + "/include/c++/v1",
-            RESOURCE_DIR + "/include",
+            resource_dir + "/include",
         ],
         builtin_sysroot = sysroot,
         action_configs = [
             action_config(
                 action_name = action,
                 enabled = True,
-                tools = [tool(path = CXX_PATH)],
+                tools = [tool(path = tool_paths["cxx"])],
             )
             for action in _LINK_ACTIONS
         ],
         tool_paths = [
-            tool_path(name = "gcc", path = CC_PATH),
-            tool_path(name = "cpp", path = CXX_PATH),
+            tool_path(name = "gcc", path = tool_paths["cc"]),
+            tool_path(name = "cpp", path = tool_paths["cxx"]),
             # CXX drives links so it can supply C++ runtimes and startup files.
-            tool_path(name = "ld", path = CXX_PATH),
-            tool_path(name = "ar", path = AR_PATH),
-            tool_path(name = "nm", path = NM_PATH),
-            tool_path(name = "objcopy", path = OBJCOPY_PATH),
-            tool_path(name = "objdump", path = OBJDUMP_PATH),
-            tool_path(name = "strip", path = STRIP_PATH),
-            tool_path(name = "gcov", path = CC_PATH),
+            tool_path(name = "ld", path = tool_paths["cxx"]),
+            tool_path(name = "ar", path = tool_paths["ar"]),
+            tool_path(name = "nm", path = tool_paths["nm"]),
+            tool_path(name = "objcopy", path = tool_paths["objcopy"]),
+            tool_path(name = "objdump", path = tool_paths["objdump"]),
+            tool_path(name = "strip", path = tool_paths["strip"]),
+            tool_path(name = "gcov", path = tool_paths["cc"]),
         ],
         features = [
             feature(
@@ -121,11 +169,12 @@ def _impl(ctx):
                         flag_groups = [flag_group(flags = [
                             "--target=wasm32-unknown-wasip1",
                             "--sysroot=" + sysroot,
+                            "-resource-dir=" + resource_dir,
                         ])],
                     ),
                     flag_set(
                         actions = _LINK_ACTIONS,
-                        flag_groups = [flag_group(flags = ["-fuse-ld=" + LD_PATH])],
+                        flag_groups = [flag_group(flags = ["-fuse-ld=" + tool_paths["ld"]])],
                     ),
                 ],
             ),
@@ -141,14 +190,17 @@ wasi_cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
         "_sysroot": attr.label(default = Label("//wasi:sysroot")),
-        "clang": attr.label(allow_single_file = True, mandatory = True),
-        "clangxx": attr.label(allow_single_file = True, mandatory = True),
-        "ld": attr.label(allow_single_file = True, mandatory = True),
-        "ar": attr.label(allow_single_file = True, mandatory = True),
-        "nm": attr.label(allow_single_file = True, mandatory = True),
-        "objcopy": attr.label(allow_single_file = True, mandatory = True),
-        "objdump": attr.label(allow_single_file = True, mandatory = True),
-        "strip": attr.label(allow_single_file = True, mandatory = True),
+        "source_built": attr.bool(default = False),
+        "sysroot": attr.label(allow_files = True, cfg = "exec"),
+        "resource_dir": attr.label(allow_files = True, cfg = "exec"),
+        "clang": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "clangxx": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "ld": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "ar": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "nm": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "objcopy": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "objdump": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
+        "strip": attr.label(allow_single_file = True, mandatory = True, cfg = "exec"),
     },
     provides = [CcToolchainConfigInfo],
 )

@@ -43,6 +43,11 @@ def _wasi_toolchain_repository_impl(ctx):
 
     for name, path in tools.items():
         ctx.symlink(path, "tools/" + name)
+    # Clang and LLD select driver modes from argv[0]. Preserve the conventional
+    # executable names when Bazel invokes the symlinks from its execroot.
+    ctx.symlink(cc, "tools/clang")
+    ctx.symlink(tools["cxx"], "tools/clang++")
+    ctx.symlink(tools["ld"], "tools/wasm-ld")
     ctx.symlink(resource_dir, "resource")
     paths = [name.upper() + "_PATH = " + repr(str(path)) for name, path in tools.items()]
     paths += [
@@ -52,13 +57,19 @@ def _wasi_toolchain_repository_impl(ctx):
     ctx.file("BUILD.bazel", """
 package(default_visibility = ["//visibility:public"])
 
-TOOL_BINARIES = ["tools/cc", "tools/cxx", "tools/ld", "tools/ar",
+TOOL_BINARIES = ["tools/cc", "tools/cxx", "tools/ld", "tools/clang",
+                 "tools/clang++", "tools/wasm-ld", "tools/ar",
                  "tools/nm", "tools/objcopy", "tools/objdump", "tools/strip"]
 exports_files(TOOL_BINARIES)
 
 filegroup(
     name = "files",
     srcs = TOOL_BINARIES + glob(["resource/**"]),
+)
+
+filegroup(
+    name = "resource_files",
+    srcs = glob(["resource/**"]),
 )
 
 filegroup(

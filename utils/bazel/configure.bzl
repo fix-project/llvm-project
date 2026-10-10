@@ -132,6 +132,12 @@ def _extract_cmake_settings(repository_ctx, llvm_cmake):
         v = kv[i:].strip().partition(")")[0].partition(" ")[0]
         c[k] = v
 
+    # LLVMVersion.cmake uses set(LLVM_VERSION_SUFFIX) for an empty suffix.
+    # The parser above skips settings without a value, so restore CMake's
+    # empty-string value before constructing the package version.
+    if c["LLVM_VERSION_SUFFIX"] == None:
+        c["LLVM_VERSION_SUFFIX"] = ""
+
     # Synthesize `LLVM_VERSION` for convenience.
     c["LLVM_VERSION"] = "{}.{}.{}".format(
         c["LLVM_VERSION_MAJOR"],
@@ -176,6 +182,7 @@ def _llvm_configure_impl(repository_ctx):
     )
     version = {k: v for k, v in version.items() if v != None}
     vars.update(version)
+    vars["LLVM_DEFAULT_TARGET_TRIPLE_OVERRIDE"] = repository_ctx.os.environ.get("LLVM_DEFAULT_TARGET_TRIPLE", "")
 
     _write_dict_to_file(
         repository_ctx,
@@ -212,7 +219,7 @@ def _llvm_configure_impl(repository_ctx):
 
 llvm_configure = repository_rule(
     implementation = _llvm_configure_impl,
-    environ = ["LLVM_TARGETS_TO_BUILD"],
+    environ = ["LLVM_TARGETS_TO_BUILD", "LLVM_DEFAULT_TARGET_TRIPLE"],
     attrs = {
         "targets": attr.string_list(default = DEFAULT_TARGETS),
     },
