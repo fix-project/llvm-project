@@ -11,6 +11,7 @@
 #include "src/__support/OSUtil/wasi/wasi.h"
 #include "src/__support/macros/config.h"
 #include "src/stdlib/exit.h"
+#include "src/stdlib/malloc.h"
 #include "src/unistd/environ.h"
 
 namespace LIBC_NAMESPACE_DECL {
@@ -21,25 +22,21 @@ namespace {
 
 using namespace wasi;
 
-// Static storage for the command line arguments and the environment. The
-// sizes are generous but bounded; WASI hosts typically provide small
-// environments and short command lines.
-constexpr size_t MAX_ARGS = 256;
-constexpr size_t MAX_ENV_VARS = 256;
-constexpr size_t ARGV_BUF_SIZE = 16384;
-constexpr size_t ENVP_BUF_SIZE = 32768;
+[[noreturn]] void startup_error() {
+  __wasi_proc_exit(1);
+  __builtin_unreachable();
+}
 
-alignas(16) char argv_buf[ARGV_BUF_SIZE];
-char *argv_ptrs[MAX_ARGS + 1];
-alignas(16) char envp_buf[ENVP_BUF_SIZE];
-char *envp_ptrs[MAX_ENV_VARS + 1];
-
-// Storage backing the flexible argv array of Args.
-struct ArgsBlock {
-  Args args;
-  uintptr_t extra[MAX_ARGS];
-};
-ArgsBlock args_block;
+// The host supplies the counts and byte sizes before writing the values.
+// Keep the resulting storage alive for constructors and main.
+char **allocate_pointers(__wasi_size_t count) {
+  if (count > __SIZE_MAX__ / sizeof(char *) - 1)
+    startup_error();
+  char **pointers = static_cast<char **>(malloc((count + 1) * sizeof(char *)));
+  if (pointers == nullptr)
+    startup_error();
+  return pointers;
+}
 
 } // namespace
 
@@ -59,37 +56,44 @@ int __main_void();
   __wasi_size_t argc = 0;
   __wasi_size_t argv_buf_size = 0;
   if (__wasi_args_sizes_get(&argc, &argv_buf_size) != __WASI_ERRNO_SUCCESS ||
-      argc > MAX_ARGS || argv_buf_size > ARGV_BUF_SIZE) {
-    argc = 0;
-  }
+      argc > __INT_MAX__ ||
+      argc > (__SIZE_MAX__ - sizeof(Args)) / sizeof(uintptr_t))
+    startup_error();
 
   __wasi_size_t envc = 0;
   __wasi_size_t envp_buf_size = 0;
-  if (__wasi_environ_sizes_get(&envc, &envp_buf_size) !=
-          __WASI_ERRNO_SUCCESS ||
-      envc > MAX_ENV_VARS || envp_buf_size > ENVP_BUF_SIZE) {
-    envc = 0;
-  }
+  if (__wasi_environ_sizes_get(&envc, &envp_buf_size) != __WASI_ERRNO_SUCCESS)
+    startup_error();
 
-  if (argc > 0 &&
-      __wasi_args_get(reinterpret_cast<char ***>(argv_ptrs), argv_buf) !=
-          __WASI_ERRNO_SUCCESS) {
-    argc = 0;
+  char **argv_ptrs = allocate_pointers(argc);
+  char *argv_buf = nullptr;
+  if (argc > 0) {
+    argv_buf = static_cast<char *>(malloc(argv_buf_size));
+    if (argv_buf == nullptr ||
+        __wasi_args_get(argv_ptrs, argv_buf) != __WASI_ERRNO_SUCCESS)
+      startup_error();
   }
   argv_ptrs[argc] = nullptr;
 
-  if (envc > 0 &&
-      __wasi_environ_get(reinterpret_cast<char ***>(envp_ptrs), envp_buf) !=
-          __WASI_ERRNO_SUCCESS) {
-    envc = 0;
+  char **envp_ptrs = allocate_pointers(envc);
+  char *envp_buf = nullptr;
+  if (envc > 0) {
+    envp_buf = static_cast<char *>(malloc(envp_buf_size));
+    if (envp_buf == nullptr ||
+        __wasi_environ_get(envp_ptrs, envp_buf) != __WASI_ERRNO_SUCCESS)
+      startup_error();
   }
   envp_ptrs[envc] = nullptr;
 
-  app.args = &args_block.args;
+  app.args =
+      static_cast<Args *>(malloc(sizeof(Args) + argc * sizeof(uintptr_t)));
+  if (app.args == nullptr)
+    startup_error();
   app.args->argc = argc;
   uintptr_t *argv_field = app.args->argv;
   for (__wasi_size_t i = 0; i < argc; ++i)
     argv_field[i] = reinterpret_cast<uintptr_t>(argv_ptrs[i]);
+  argv_field[argc] = 0;
   app.env_ptr = reinterpret_cast<uintptr_t *>(envp_ptrs);
   environ = reinterpret_cast<char **>(envp_ptrs);
 

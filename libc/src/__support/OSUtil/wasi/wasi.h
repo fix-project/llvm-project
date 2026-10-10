@@ -617,14 +617,14 @@ __wasi_errno_t __wasi_args_sizes_get(__wasi_size_t *argc,
                                      __wasi_size_t *argv_buf_size);
 
 WASI_IMPORT("args_get")
-__wasi_errno_t __wasi_args_get(char ***argv, char *argv_buf);
+__wasi_errno_t __wasi_args_get(char **argv, char *argv_buf);
 
 WASI_IMPORT("environ_sizes_get")
 __wasi_errno_t __wasi_environ_sizes_get(__wasi_size_t *environ_count,
                                         __wasi_size_t *environ_buf_size);
 
 WASI_IMPORT("environ_get")
-__wasi_errno_t __wasi_environ_get(char ***environ, char *environ_buf);
+__wasi_errno_t __wasi_environ_get(char **environ, char *environ_buf);
 
 WASI_IMPORT("fd_pread")
 __wasi_errno_t __wasi_fd_pread(__wasi_fd_t fd, const __wasi_iovec_t *iovs,

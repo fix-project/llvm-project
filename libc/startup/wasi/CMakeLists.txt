@@ -39,6 +39,7 @@ add_startup_object(
     libc.src.__support.OSUtil.wasi.wasi_util
     libc.src.__support.common
     libc.src.stdlib.exit
+    libc.src.stdlib.malloc
     libc.src.unistd.environ
 )
 
