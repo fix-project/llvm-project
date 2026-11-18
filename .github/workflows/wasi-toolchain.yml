@@ -416,7 +416,7 @@ jobs:
             -DLLVM_HOST_TRIPLE=wasm32-unknown-wasip1 \
             -DLLVM_ENABLE_PROJECTS="clang;lld" \
             -DLLVM_ENABLE_LIBCXX=ON \
-            -DLLVM_TARGETS_TO_BUILD=all \
+            -DLLVM_TARGETS_TO_BUILD="X86;WebAssembly" \
             -DLLVM_ENABLE_THREADS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_EXAMPLES=OFF \
@@ -667,7 +667,7 @@ jobs:
        (github.ref_name == github.event.repository.default_branch ||
         (startsWith(github.ref, 'refs/tags/fixorg-') &&
          !endsWith(github.ref, '-current'))))
-    needs: [prepare, build-wasi-llvm, smoke-test-toolchain, smoke-test-wasi-llvm]
+    needs: [prepare, build-wasi-llvm, test-wasi-libc, smoke-test-toolchain, smoke-test-wasi-llvm]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -678,6 +678,31 @@ jobs:
           pattern: '*-${{ needs.prepare.outputs.version }}'
           path: release-assets
           merge-multiple: true
+
+      - name: Publish commit prerelease
+        if: github.ref_type == 'branch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          TARGET_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          version="${VERSION%-current}-${TARGET_SHA:0:12}"
+          tag="fixorg-$version"
+          if gh release view "$tag" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            echo "Prerelease $tag already exists"
+            exit 0
+          fi
+
+          directory=$(mktemp -d)
+          trap 'rm -rf "$directory"' EXIT
+          for asset in release-assets/*.tar.zst; do
+            name=${asset##*/}
+            cp "$asset" "$directory/${name%"-$VERSION.tar.zst"}-$version.tar.zst"
+          done
+          gh release create "$tag" "$directory"/*.tar.zst --repo "$REPOSITORY" \
+            --target "$TARGET_SHA" --title "$version" --prerelease --latest=false \
+            --notes "WASI sysroot and toolchains for LLVM $version (commit $TARGET_SHA)."
 
       - name: Publish GitHub release
         env:
